@@ -513,23 +513,20 @@ window.selectForOrder = function(productId) {
 // n8n Webhook Integration for "Voltedge Order Processing Automation"
 const N8N_ORDER_CONFIG = {
   workflowName: 'Voltedge Order Processing Automation',
-  testWebhookUrl: 'https://ucy00zep.rpcld.net/webhook-test/voltedge-order',
-  prodWebhookUrl: 'https://ucy00zep.rpcld.net/webhook/voltedge-order'
+  webhookUrl: 'https://ucy00zep.rpcld.net/webhook/voltedge-order',
+  testWebhookUrl: 'https://ucy00zep.rpcld.net/webhook-test/voltedge-order'
 };
 
 /**
- * Sends order details to n8n webhook ("Voltedge Order Processing Automation")
- * Tries the test webhook URL first, with automatic fallback to production webhook if test is not listening (404).
+ * Sends order details to n8n production webhook ("Voltedge Order Processing Automation")
  */
 async function sendOrderToN8n(orderDetails) {
-  const testUrl = N8N_ORDER_CONFIG.testWebhookUrl;
-  const prodUrl = N8N_ORDER_CONFIG.prodWebhookUrl;
+  const webhookUrl = N8N_ORDER_CONFIG.webhookUrl;
 
-  console.log(`[VoltEdge Automation] Sending order ${orderDetails.orderId} to workflow "${N8N_ORDER_CONFIG.workflowName}" at ${testUrl}...`, orderDetails);
+  console.log(`[VoltEdge Automation] Sending order ${orderDetails.orderId} to production webhook at ${webhookUrl}...`, orderDetails);
 
   try {
-    let targetUrl = testUrl;
-    let response = await fetch(testUrl, {
+    const response = await fetch(webhookUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -537,27 +534,6 @@ async function sendOrderToN8n(orderDetails) {
       },
       body: JSON.stringify(orderDetails)
     });
-
-    // If test webhook returns 404 (test listening session expired or workflow activated in prod), try production URL
-    if (response.status === 404) {
-      console.warn(`[VoltEdge Automation] Test webhook returned 404. Attempting production webhook at ${prodUrl}...`);
-      try {
-        const prodResponse = await fetch(prodUrl, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json, text/plain, */*'
-          },
-          body: JSON.stringify(orderDetails)
-        });
-        if (prodResponse.ok) {
-          response = prodResponse;
-          targetUrl = prodUrl;
-        }
-      } catch (prodErr) {
-        console.warn(`[VoltEdge Automation] Production webhook attempt fallback error:`, prodErr);
-      }
-    }
 
     let responseData = null;
     try {
@@ -567,11 +543,11 @@ async function sendOrderToN8n(orderDetails) {
     }
 
     if (response.ok) {
-      console.log(`[VoltEdge Automation] Order ${orderDetails.orderId} successfully delivered to n8n (${targetUrl}):`, responseData);
-      return { success: true, url: targetUrl, data: responseData };
+      console.log(`[VoltEdge Automation] Order ${orderDetails.orderId} successfully delivered to n8n (${webhookUrl}):`, responseData);
+      return { success: true, url: webhookUrl, data: responseData };
     } else {
       console.warn(`[VoltEdge Automation] Webhook response ${response.status} (${response.statusText}):`, responseData);
-      return { success: false, url: targetUrl, status: response.status, data: responseData };
+      return { success: false, url: webhookUrl, status: response.status, data: responseData };
     }
   } catch (error) {
     console.error(`[VoltEdge Automation] Network error sending order to n8n webhook:`, error);
