@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>404 - Page Not Found | VoltEdge Tech & Accessories</title>
+  
+  <!-- SEO & Social Meta Tags -->
+  <meta name="description" content="The page you are looking for on VoltEdge Tech & Accessories could not be found. Explore our 30,000mAh laptop power banks, Wi-Fi router UPS backups, and workspace gear.">
+  <meta name="robots" content="noindex, follow">
+  <meta name="theme-color" content="#064e3b">
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="VoltEdge Tech & Accessories">
+  <meta property="og:title" content="404 - Page Disconnected | VoltEdge Tech & Accessories">
+  <meta property="og:description" content="The page you are looking for could not be found. Explore VoltEdge high-capacity laptop power banks, Wi-Fi UPS, and ergonomic gear.">
+  <meta property="og:image" content="assets/images/pb-black.jpg">
+
+  <!-- Favicon -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220%22 width=%2232%22 height=%2232%22><rect width=%2232%22 height=%2232%22 rx=%228%22 fill=%22%2300e599%22/><path d=%22M18 4L10 17h5l-2 11 10-14h-6l3-10z%22 fill=%22%23090d16%22/></svg>">
+
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="css/style.css">
+
+  <!-- Phosphor Icons -->
+  <script src="https://unpkg.com/@phosphor-icons/web" async></script>
+
+  <style>
+    .page-404-wrap {
+      min-height: calc(100vh - 4.5rem);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 4rem 1.5rem;
+      background: radial-gradient(circle at 50% 20%, rgba(6, 78, 59, 0.05) 0%, rgba(248, 250, 252, 0) 70%);
+    }
+
+    .card-404 {
+      max-width: 680px;
+      width: 100%;
+      background-color: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xl);
+      padding: 3.5rem 2.5rem;
+      text-align: center;
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.06);
+      position: relative;
+    }
+
+    .badge-404 {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.35rem 0.95rem;
+      background-color: rgba(220, 38, 38, 0.1);
+      color: #dc2626;
+      border: 1px solid rgba(220, 38, 38, 0.2);
+      border-radius: var(--radius-full);
+      font-size: 0.78rem;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      margin-bottom: 1.5rem;
+    }
+
+    .icon-404-wrap {
+      width: 5rem;
+      height: 5rem;
+      margin: 0 auto 1.5rem;
+      background: rgba(6, 78, 59, 0.08);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.5rem;
+      color: var(--primary);
+      position: relative;
+    }
+
+    .icon-404-wrap i {
+      animation: voltPulse 2s infinite ease-in-out;
+    }
+
+    @keyframes voltPulse {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.08); opacity: 0.85; }
+    }
+
+    .number-404 {
+      font-size: clamp(3.5rem, 10vw, 5.5rem);
+      font-weight: 900;
+      line-height: 1;
+      letter-spacing: -0.04em;
+      color: var(--primary);
+      margin-bottom: 0.75rem;
+    }
+
+    .title-404 {
+      font-size: clamp(1.4rem, 4vw, 1.85rem);
+      font-weight: 800;
+      color: var(--text-main);
+      margin-bottom: 0.85rem;
+      letter-spacing: -0.02em;
+    }
+
+    .desc-404 {
+      font-size: 0.98rem;
+      color: var(--text-muted);
+      max-width: 490px;
+      margin: 0 auto 2.25rem;
+      line-height: 1.6;
+    }
+
+    .actions-404 {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.85rem;
+      flex-wrap: wrap;
+      margin-bottom: 2.5rem;
+    }
+
+    .actions-404 .btn {
+      padding: 0.85rem 1.45rem;
+      font-size: 0.92rem;
+    }
+
+    .shortcuts-404 {
+      border-top: 1px solid var(--border);
+      padding-top: 2rem;
+      text-align: left;
+    }
+
+    .shortcuts-title {
+      font-size: 0.82rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-dim);
+      margin-bottom: 1rem;
+      text-align: center;
+    }
+
+    .shortcuts-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 0.75rem;
+    }
+
+    .shortcut-chip {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      padding: 0.75rem 1rem;
+      background: var(--bg-subtle);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      transition: all var(--transition-fast);
+      text-decoration: none;
+    }
+
+    .shortcut-chip:hover {
+      border-color: var(--primary);
+      background-color: #ffffff;
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .shortcut-chip i {
+      font-size: 1.25rem;
+      color: var(--primary);
+      flex-shrink: 0;
+    }
+
+    .shortcut-chip strong {
+      font-size: 0.86rem;
+      color: var(--text-main);
+      display: block;
+      line-height: 1.25;
+    }
+
+    .shortcut-chip span {
+      font-size: 0.74rem;
+      color: var(--primary);
+      font-weight: 700;
+    }
+
+    @media (max-width: 640px) {
+      .card-404 {
+        padding: 2.5rem 1.25rem;
+      }
+      .actions-404 {
+        flex-direction: column;
+        width: 100%;
+      }
+      .actions-404 .btn {
+        width: 100%;
+        justify-content: center;
+      }
+      .shortcuts-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Announcement Bar -->
+  <aside class="top-bar" aria-label="Announcement">
+    <div class="container top-bar-content">
+      <span class="top-bar-text">Same-Day Dispatch for Orders Placed Before 2:00 PM | 1-Year Warranty on All Gear</span>
+    </div>
+  </aside>
+
+  <!-- Sticky Navigation Header -->
+  <header class="site-header" id="site-header">
+    <div class="container nav-wrap">
+      <a href="index.html" class="brand-logo" aria-label="VoltEdge Home">
+        <div class="logo-icon">
+          <i class="ph-fill ph-lightning"></i>
+        </div>
+        <div class="logo-text">
+          VoltEdge
+          <span class="logo-subtitle">TECH & ACCESSORIES</span>
+        </div>
+      </a>
+
+      <!-- Desktop Nav Links -->
+      <nav aria-label="Primary Navigation">
+        <ul class="nav-links">
+          <li><a href="index.html#catalogue" class="nav-link">Products</a></li>
+          <li><a href="index.html#creator-gear" class="nav-link">Creator Accessories</a></li>
+          <li><a href="index.html#how-it-works" class="nav-link">How Fulfillment Works</a></li>
+          <li><a href="index.html#order-form-section" class="nav-link">Order Form</a></li>
+          <li><a href="index.html#feedback" class="nav-link">Feedback</a></li>
+        </ul>
+      </nav>
+
+      <!-- Nav Actions -->
+      <div class="nav-actions">
+        <a href="index.html#order-form-section" class="btn btn-primary" id="nav-order-btn">
+          Order Now
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main 404 Content -->
+  <main class="page-404-wrap">
+    <div class="card-404">
+      <div class="badge-404">
+        <i class="ph-bold ph-warning-circle"></i> Error 404 &bull; Page Not Found
+      </div>
+
+      <div class="icon-404-wrap">
+        <i class="ph-bold ph-plugs"></i>
+      </div>
+
+      <div class="number-404">404</div>
+      <h1 class="title-404">Power Connection Lost</h1>
+      <p class="desc-404">
+        The workspace link or gear you were looking for doesn't exist, has been moved, or is temporarily disconnected. Don't worry—our power banks and router UPS backups are fully stocked.
+      </p>
+
+      <div class="actions-404">
+        <a href="index.html#catalogue" class="btn btn-primary">
+          <i class="ph-bold ph-squares-four"></i> View All Products
+        </a>
+        <a href="index.html#order-form-section" class="btn btn-ghost">
+          <i class="ph-bold ph-clipboard-text"></i> Go to Order Desk
+        </a>
+        <a href="https://wa.me/2347047922403?text=Hello%20VoltEdge%20Team%2C%20I%20hit%20a%20404%20page%20and%20need%20assistance%20finding%20a%20product." target="_blank" rel="noopener noreferrer" class="btn btn-whatsapp">
+          <i class="ph-fill ph-whatsapp-logo"></i> WhatsApp Concierge
+        </a>
+      </div>
+
+      <!-- Quick Shortcuts to Popular Gear -->
+      <div class="shortcuts-404">
+        <div class="shortcuts-title">Popular Workspace Solutions</div>
+        <div class="shortcuts-grid">
+          <a href="index.html#order-form-section" class="shortcut-chip">
+            <i class="ph-bold ph-battery-charging"></i>
+            <div>
+              <strong>Titan 30K Power Bank (100W PD)</strong>
+              <span>₦128,000</span>
+            </div>
+          </a>
+
+          <a href="index.html#order-form-section" class="shortcut-chip">
+            <i class="ph-bold ph-wifi-high"></i>
+            <div>
+              <strong>VoltEdge Wi-Fi Router UPS (12V)</strong>
+              <span>₦48,000</span>
+            </div>
+          </a>
+
+          <a href="index.html#order-form-section" class="shortcut-chip">
+            <i class="ph-bold ph-mouse"></i>
+            <div>
+              <strong>Ergonomic Wireless Silent Mouse</strong>
+              <span>₦87,000</span>
+            </div>
+          </a>
+
+          <a href="index.html#order-form-section" class="shortcut-chip">
+            <i class="ph-bold ph-laptop"></i>
+            <div>
+              <strong>Ergonomic Aluminum Laptop Stand</strong>
+              <span>₦38,000</span>
+            </div>
+          </a>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-top">
+        <!-- Brand Col -->
+        <div>
+          <a href="index.html" class="brand-logo footer-brand-logo">
+            <div class="logo-icon" style="background: rgba(255, 255, 255, 0.18); border: 1px solid rgba(255, 255, 255, 0.3);">
+              <i class="ph-fill ph-lightning" style="color: #ffffff;"></i>
+            </div>
+            <div class="logo-text" style="color: #ffffff; font-weight: 800;">
+              VoltEdge<span style="color: #34d399;">Tech</span>
+              <span class="logo-subtitle" style="color: #ffffff; font-weight: 800;">& Accessories</span>
+            </div>
+          </a>
+          <p class="footer-brand-desc" style="color: rgba(255, 255, 255, 0.88); font-weight: 500;">
+            Powering productive workspaces with reliable technology accessories. Laptop power banks, router UPS backups, and ergonomic gear built for modern Nigerian professionals.
+          </p>
+        </div>
+
+        <!-- Quick Links -->
+        <div>
+          <h4 class="footer-col-title">Quick Links</h4>
+          <ul class="footer-links">
+            <li><a href="index.html#catalogue" class="footer-link">Products</a></li>
+            <li><a href="index.html#creator-gear" class="footer-link">Creator Accessories</a></li>
+            <li><a href="index.html#how-it-works" class="footer-link">How Fulfillment Works</a></li>
+            <li><a href="index.html#order-form-section" class="footer-link">Order Form</a></li>
+            <li><a href="index.html#feedback" class="footer-link">Give Feedback</a></li>
+          </ul>
+        </div>
+
+        <!-- Customer Support -->
+        <div>
+          <h4 class="footer-col-title">Customer Support</h4>
+          <div class="footer-contact-item">
+            <i class="ph-fill ph-whatsapp-logo" style="color: #25D366; font-size: 1.25rem;"></i>
+            <a href="https://wa.me/2347047922403?text=Hello%20VoltEdge%20Tech%20%26%20Accessories%2C%20I%20need%20help%20with%20my%20order." target="_blank" rel="noopener noreferrer" class="footer-link" style="color: #ffffff; font-weight: 700;">
+              Chat with us on WhatsApp
+            </a>
+          </div>
+          <div class="footer-contact-item">
+            <i class="ph-bold ph-phone" style="color: #ffffff; font-size: 1.15rem;"></i>
+            <span style="color: #ffffff; font-weight: 700;">+234 704 792 2403</span>
+          </div>
+          <div class="footer-contact-item">
+            <i class="ph-bold ph-shield-check" style="color: #ffffff; font-size: 1.15rem;"></i>
+            <span style="color: #ffffff; font-weight: 700;">1-Year Warranty Included</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <div style="color: rgba(255, 255, 255, 0.85); font-weight: 600;">&copy; 2026 VoltEdge Tech & Accessories. All rights reserved.</div>
+        <div style="display: flex; gap: 1.5rem;">
+          <a href="index.html" class="footer-link" style="color: #ffffff; font-weight: 700;">Return to Home &uarr;</a>
+          <a href="index.html#catalogue" class="footer-link" style="color: #ffffff; font-weight: 700;">Priced in ₦ Naira</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>
