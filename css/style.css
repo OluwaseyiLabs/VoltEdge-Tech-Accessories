@@ -427,7 +427,7 @@ h1, h2, h3, h4, h5, h6 {
 
 .hero-card-img-wrap {
   width: 100%;
-  aspect-ratio: 1/1;
+  aspect-ratio: 16 / 10;
   background-color: #ffffff;
   border-radius: var(--radius-lg);
   overflow: hidden;
@@ -435,12 +435,13 @@ h1, h2, h3, h4, h5, h6 {
   display: flex;
   align-items: center;
   justify-content: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
 .hero-card-img {
-  width: 85%;
-  height: 85%;
-  object-fit: contain;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
   transition: transform var(--transition-normal);
 }
 
@@ -547,6 +548,191 @@ h1, h2, h3, h4, h5, h6 {
 .section-subtitle {
   font-size: 1rem;
   color: var(--text-muted);
+}
+
+/* Dynamic Real-Time Product Catalog Search Bar */
+.catalog-search-wrap {
+  max-width: 620px;
+  margin: 0 auto 1.75rem auto;
+  width: 100%;
+  position: relative;
+}
+
+.catalog-search-bar {
+  display: flex;
+  align-items: center;
+  background-color: #FFFFFF;
+  border: 1.5px solid #064E3B;
+  border-radius: var(--radius-full);
+  padding: 0.65rem 1.15rem;
+  box-shadow: 0 4px 16px rgba(6, 78, 59, 0.06);
+  transition: border-color var(--transition-fast), outline var(--transition-fast), box-shadow var(--transition-fast);
+  position: relative;
+  width: 100%;
+}
+
+/* Focused State: Thicker Rich Emerald (#047857) outline and border */
+.catalog-search-bar:focus-within,
+.catalog-search-bar.is-focused {
+  border-color: #047857;
+  outline: 3px solid #047857;
+  outline-offset: 1px;
+  box-shadow: 0 6px 20px rgba(4, 120, 87, 0.16);
+}
+
+.catalog-search-bar .search-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #0F172A; /* Deep Slate Charcoal */
+  font-size: 1.25rem;
+  margin-right: 0.75rem;
+  flex-shrink: 0;
+  pointer-events: none;
+}
+
+.catalog-search-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #0F172A; /* Deep Slate Charcoal */
+  padding: 0;
+  font-family: inherit;
+  width: 100%;
+  line-height: 1.4;
+}
+
+.catalog-search-input::placeholder {
+  color: #0F172A; /* Deep Slate Charcoal */
+  opacity: 1; /* High contrast */
+  font-weight: 500;
+}
+
+.catalog-search-input::-webkit-input-placeholder {
+  color: #0F172A;
+  opacity: 1;
+  font-weight: 500;
+}
+
+.catalog-search-input::-moz-placeholder {
+  color: #0F172A;
+  opacity: 1;
+  font-weight: 500;
+}
+
+.catalog-search-input:-ms-input-placeholder {
+  color: #0F172A;
+  opacity: 1;
+  font-weight: 500;
+}
+
+/* Clear Button ('X') inside the right side of the search bar */
+.catalog-search-clear {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.65rem;
+  height: 1.65rem;
+  border-radius: 50%;
+  background-color: #f1f5f9;
+  color: #0F172A;
+  border: none;
+  cursor: pointer;
+  margin-left: 0.5rem;
+  flex-shrink: 0;
+  font-size: 0.85rem;
+  transition: all var(--transition-fast);
+  padding: 0;
+}
+
+.catalog-search-clear:hover {
+  background-color: #064E3B;
+  color: #FFFFFF;
+  transform: scale(1.08);
+}
+
+.catalog-search-clear:focus-visible {
+  outline: 2px solid #047857;
+  outline-offset: 2px;
+}
+
+/* Catalog Empty State (No Results) */
+.catalog-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 3.5rem 1.5rem;
+  background-color: #FFFFFF;
+  border: 1px dashed #cbd5e1;
+  border-radius: var(--radius-lg);
+  max-width: 520px;
+  margin: 1.5rem auto 3rem;
+  box-shadow: var(--shadow-sm);
+  animation: fadeInEmpty 0.25s ease-out;
+}
+
+@keyframes fadeInEmpty {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.catalog-empty-state .empty-state-icon {
+  width: 3.25rem;
+  height: 3.25rem;
+  border-radius: 50%;
+  background-color: #ecfdf5;
+  color: #064E3B;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.65rem;
+  margin-bottom: 1rem;
+}
+
+.catalog-empty-state .empty-state-message {
+  font-size: 1.08rem;
+  font-weight: 600;
+  color: #0F172A;
+  margin-bottom: 1.25rem;
+  line-height: 1.5;
+}
+
+.btn-clear-search {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  background-color: #064E3B;
+  color: #FFFFFF;
+  padding: 0.55rem 1.25rem;
+  border-radius: var(--radius-full);
+  font-size: 0.88rem;
+  font-weight: 600;
+  border: 1.5px solid #064E3B;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.btn-clear-search:hover {
+  background-color: #047857;
+  border-color: #047857;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(4, 120, 87, 0.2);
+}
+
+.btn-clear-search:active {
+  transform: translateY(0);
 }
 
 /* Category Filter Tabs */
@@ -2249,6 +2435,24 @@ textarea.form-control {
   .trust-num {
     font-size: 1.25rem;
     min-width: 65px;
+  }
+
+  /* Catalog Search Bar - Mobile Layout */
+  .catalog-search-wrap {
+    margin-bottom: 1.25rem;
+    padding: 0 0.25rem;
+  }
+
+  .catalog-search-bar {
+    padding: 0.55rem 0.95rem;
+  }
+
+  .catalog-search-input {
+    font-size: 0.88rem;
+  }
+
+  .catalog-search-input::placeholder {
+    font-size: 0.84rem;
   }
 
   /* Filter Tabs - Horizontal Touch Swiper */

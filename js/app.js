@@ -3,6 +3,7 @@
 document.addEventListener('DOMContentLoaded', () => {
   // 1. Initializations
   initAnnouncementCountdown();
+  initCatalogSearch();
   renderProducts('all');
   renderAccessories();
   renderReviews();
@@ -47,16 +48,120 @@ function initAnnouncementCountdown() {
   setInterval(updateTimer, 1000);
 }
 
-// 3. Render Product Catalog with Category Filtering
-function renderProducts(filter = 'all') {
+// Global Catalog Filter & Search State
+let currentCatalogCategory = 'all';
+let currentCatalogSearchQuery = '';
+
+// Helper to normalize strings for search (removes commas, dashes, slashes, spaces)
+function normalizeSearchText(str) {
+  return String(str || '').toLowerCase().replace(/[,.\-_\/\s]/g, '');
+}
+
+// Multi-Attribute Search Matching (Product Name, Specs / Features, Product SKU)
+function matchesProduct(product, query) {
+  if (!query) return true;
+  const q = query.toLowerCase().trim();
+  if (!q) return true;
+
+  // 1. Check Product Name
+  const nameFields = [product.name, product.shortName].filter(Boolean);
+  
+  // 2. Check Product SKU & ID
+  const skuFields = [product.sku, product.id].filter(Boolean);
+
+  // 3. Check Specs / Features
+  const specFields = [];
+  if (product.specsHighlight) specFields.push(product.specsHighlight);
+  if (product.finish) specFields.push(product.finish);
+  if (product.tagline) specFields.push(product.tagline);
+  if (product.categoryLabel) specFields.push(product.categoryLabel);
+  if (Array.isArray(product.bullets)) specFields.push(...product.bullets);
+  if (product.technicalSpecs && typeof product.technicalSpecs === 'object') {
+    for (const [k, v] of Object.entries(product.technicalSpecs)) {
+      specFields.push(k, String(v));
+    }
+  }
+
+  const nameText = nameFields.join(' ').toLowerCase();
+  const skuText = skuFields.join(' ').toLowerCase();
+  const specsText = specFields.join(' ').toLowerCase();
+
+  const qNorm = normalizeSearchText(q);
+  const nameNorm = normalizeSearchText(nameText);
+  const skuNorm = normalizeSearchText(skuText);
+  const specsNorm = normalizeSearchText(specsText);
+
+  // Substring or normalized comparison (e.g. "30000mAh" matching "30,000mAh", "12V", "Black", "VE-PB-30K-BLK")
+  if (nameText.includes(q) || (qNorm.length >= 2 && nameNorm.includes(qNorm))) return true;
+  if (skuText.includes(q) || (qNorm.length >= 2 && skuNorm.includes(qNorm))) return true;
+  if (specsText.includes(q) || (qNorm.length >= 2 && specsNorm.includes(qNorm))) return true;
+
+  // Multi-word token check (each word must match across Name, Specs, or SKU)
+  const tokens = q.split(/\s+/).filter(Boolean);
+  if (tokens.length > 1) {
+    const combined = `${nameText} ${skuText} ${specsText}`;
+    const combinedNorm = `${nameNorm} ${skuNorm} ${specsNorm}`;
+    const allMatch = tokens.every(tok => {
+      const tokNorm = normalizeSearchText(tok);
+      return combined.includes(tok) || (tokNorm.length >= 2 && combinedNorm.includes(tokNorm));
+    });
+    if (allMatch) return true;
+  }
+
+  return false;
+}
+
+// 3. Render Product Catalog with Category Filtering & Real-Time Search
+function renderProducts(filter = currentCatalogCategory, searchQuery = currentCatalogSearchQuery) {
+  currentCatalogCategory = filter;
+  currentCatalogSearchQuery = searchQuery;
+
   const grid = document.getElementById('products-grid');
+  const filterTabs = document.querySelector('.filter-tabs');
+  const emptyState = document.getElementById('catalog-empty-state');
   if (!grid) return;
 
-  const filtered = filter === 'all' 
-    ? PRODUCTS_DATA 
-    : PRODUCTS_DATA.filter(p => p.category === filter);
+  const trimmedQuery = (searchQuery || '').trim();
 
-  grid.innerHTML = filtered.map(product => {
+  // If search query is present, search across all products (or within category if desired)
+  let products = PRODUCTS_DATA;
+  if (trimmedQuery) {
+    products = products.filter(p => matchesProduct(p, trimmedQuery));
+    
+    // Sort so exact/substring name & SKU matches appear at top
+    products.sort((a, b) => {
+      const aName = (a.name || '').toLowerCase();
+      const bName = (b.name || '').toLowerCase();
+      const aSku = (a.sku || '').toLowerCase();
+      const bSku = (b.sku || '').toLowerCase();
+      const qLower = trimmedQuery.toLowerCase();
+      
+      const aDirect = aName.includes(qLower) || aSku.includes(qLower);
+      const bDirect = bName.includes(qLower) || bSku.includes(qLower);
+      
+      if (aDirect && !bDirect) return -1;
+      if (!aDirect && bDirect) return 1;
+      return 0;
+    });
+  } else if (filter !== 'all') {
+    products = products.filter(p => p.category === filter);
+  }
+
+  // EMPTY STATE: If zero products match, hide catalog entirely and show clean empty state message
+  if (products.length === 0) {
+    grid.style.display = 'none';
+    if (filterTabs) filterTabs.style.display = 'none';
+    if (emptyState) emptyState.style.display = 'flex';
+    grid.innerHTML = '';
+    return;
+  }
+
+  // Products matched: show catalog grid and tabs, hide empty state
+  grid.style.display = 'grid';
+  if (filterTabs) filterTabs.style.display = 'flex';
+  if (emptyState) emptyState.style.display = 'none';
+
+  grid.innerHTML = products.map(product => {
     return `
       <article class="product-card" data-id="${product.id}">
         <div class="product-card-top">
@@ -109,10 +214,93 @@ function renderProducts(filter = 'all') {
 
 // Handle Category Tab Switches
 window.filterCategory = function(cat, buttonEl) {
+  const searchInput = document.getElementById('catalog-search-input');
+  const clearBtn = document.getElementById('catalog-search-clear');
+  
+  // When switching category tabs, clear the search bar to reveal that category cleanly
+  if (searchInput && searchInput.value) {
+    searchInput.value = '';
+    if (clearBtn) clearBtn.style.display = 'none';
+    currentCatalogSearchQuery = '';
+  }
+
   document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-  if (buttonEl) buttonEl.classList.add('active');
-  renderProducts(cat);
+  if (buttonEl) {
+    buttonEl.classList.add('active');
+  } else {
+    const targetTab = document.querySelector(`.tab-btn[onclick*="'${cat}'"]`);
+    if (targetTab) targetTab.classList.add('active');
+  }
+  renderProducts(cat, '');
 };
+
+// Initialize Real-Time Dynamic Search Component
+function initCatalogSearch() {
+  const searchInput = document.getElementById('catalog-search-input');
+  const clearBtn = document.getElementById('catalog-search-clear');
+  const searchBar = document.getElementById('catalog-search-bar');
+  if (!searchInput) return;
+
+  // Instant Search from the First Letter: updates product grid on every keystroke
+  searchInput.addEventListener('input', (e) => {
+    const query = e.target.value;
+
+    // Show or hide small "X" clear button inside right of search bar
+    if (clearBtn) {
+      clearBtn.style.display = query.length > 0 ? 'inline-flex' : 'none';
+    }
+
+    // Set "All Products" tab as active when searching across catalog
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      const onclickAttr = btn.getAttribute('onclick') || '';
+      if (onclickAttr.includes("'all'")) {
+        btn.classList.add('active');
+      } else {
+        btn.classList.remove('active');
+      }
+    });
+
+    renderProducts('all', query);
+  });
+
+  // Focus and Blur state classes to guarantee visual feedback
+  searchInput.addEventListener('focus', () => {
+    if (searchBar) searchBar.classList.add('is-focused');
+  });
+
+  searchInput.addEventListener('blur', () => {
+    if (searchBar) searchBar.classList.remove('is-focused');
+  });
+
+  // Clear Button inside right side of search bar
+  if (clearBtn) {
+    clearBtn.addEventListener('click', () => {
+      clearProductSearch();
+      searchInput.focus();
+    });
+  }
+}
+
+// Reset and Clear Search: clears query and displays all products again
+function clearProductSearch() {
+  const searchInput = document.getElementById('catalog-search-input');
+  const clearBtn = document.getElementById('catalog-search-clear');
+  if (searchInput) searchInput.value = '';
+  if (clearBtn) clearBtn.style.display = 'none';
+
+  // Restore 'All Products' tab
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    const onclickAttr = btn.getAttribute('onclick') || '';
+    if (onclickAttr.includes("'all'")) {
+      btn.classList.add('active');
+    } else {
+      btn.classList.remove('active');
+    }
+  });
+
+  renderProducts('all', '');
+}
+window.clearProductSearch = clearProductSearch;
 
 // 4. Render Creator Accessories
 function renderAccessories() {
