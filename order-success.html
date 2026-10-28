@@ -54,6 +54,7 @@
       box-shadow: 0 10px 40px rgba(0, 0, 0, 0.05);
       max-width: 920px;
       margin: 0 auto;
+      position: relative;
     }
 
     .success-hero-header {
@@ -83,6 +84,14 @@
       100% { transform: scale(1); opacity: 1; }
     }
 
+    .spin-anim {
+      animation: voltSpin 1s linear infinite;
+    }
+
+    @keyframes voltSpin {
+      100% { transform: rotate(360deg); }
+    }
+
     .success-status-pill {
       display: inline-flex;
       align-items: center;
@@ -97,6 +106,24 @@
       letter-spacing: 0.06em;
       text-transform: uppercase;
       margin-bottom: 0.85rem;
+    }
+
+    .success-status-pill.status-dispatched {
+      background: #dbeafe;
+      color: #1d4ed8;
+      border-color: #bfdbfe;
+    }
+
+    .success-status-pill.status-delivered {
+      background: #dcfce7;
+      color: #15803d;
+      border-color: #86efac;
+    }
+
+    .success-status-pill.status-pending {
+      background: #fef3c7;
+      color: #b45309;
+      border-color: #fde68a;
     }
 
     .success-main-title {
@@ -215,6 +242,7 @@
       color: #64748b;
       position: relative;
       z-index: 2;
+      transition: all var(--transition-fast);
     }
 
     .timeline-step.completed .step-marker {
@@ -283,6 +311,7 @@
       border-radius: var(--radius-md);
       border: 1px solid var(--border);
       flex-shrink: 0;
+      background: var(--bg-subtle);
     }
 
     .item-meta {
@@ -418,6 +447,7 @@
       gap: 0.5rem;
       transition: all var(--transition-fast);
       box-shadow: 0 4px 12px rgba(37, 211, 102, 0.25);
+      text-decoration: none;
     }
 
     .btn-wa-action:hover {
@@ -457,6 +487,7 @@
       align-items: center;
       gap: 0.5rem;
       transition: all var(--transition-fast);
+      text-decoration: none;
     }
 
     .btn-shop-action:hover {
@@ -464,9 +495,67 @@
       transform: translateY(-2px);
     }
 
+    /* Loading, Error & Not Found States */
+    .state-view {
+      text-align: center;
+      padding: 3rem 1.5rem;
+    }
+
+    .state-icon-wrap {
+      width: 4.8rem;
+      height: 4.8rem;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.3rem;
+      margin: 0 auto 1.25rem;
+    }
+
+    .state-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.35rem 0.95rem;
+      border-radius: var(--radius-full);
+      font-size: 0.78rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.85rem;
+    }
+
+    .state-title {
+      font-size: 1.65rem;
+      font-weight: 800;
+      color: var(--text-main);
+      margin-bottom: 0.5rem;
+    }
+
+    .state-desc {
+      color: var(--text-muted);
+      font-size: 0.98rem;
+      max-width: 520px;
+      margin: 0 auto 1.75rem;
+      line-height: 1.55;
+    }
+
+    .state-lookup-form {
+      max-width: 440px;
+      margin: 0 auto 1.75rem;
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .state-lookup-input {
+      flex: 1;
+      min-width: 200px;
+    }
+
     /* Print Stylesheet */
     @media print {
-      .top-bar, .site-header, .site-footer, .success-breadcrumb, .success-actions, .fulfillment-timeline {
+      .top-bar, .site-header, .site-footer, .success-breadcrumb, .success-actions, .fulfillment-timeline, .state-view {
         display: none !important;
       }
       .success-page-wrap {
@@ -554,178 +643,253 @@
         <span>/</span>
         <a href="checkout.html">Checkout</a>
         <span>/</span>
-        <span>Order Confirmed</span>
+        <span id="breadcrumb-current">Order Status</span>
       </nav>
 
       <div class="success-card">
-        
-        <!-- Hero Confirmation Header -->
-        <div class="success-hero-header">
-          <div class="success-anim-icon">
-            <i class="ph-bold ph-check"></i>
-          </div>
 
-          <div class="success-status-pill">
-            <i class="ph-bold ph-sparkle"></i> Order Logged & Queued for Processing
+        <!-- 1. LOADING STATE -->
+        <div class="state-view" id="state-loading">
+          <div class="state-icon-wrap" style="background: rgba(6, 78, 59, 0.08); color: var(--primary);">
+            <i class="ph-bold ph-spinner spin-anim"></i>
           </div>
+          <div class="state-badge" style="background: var(--accent); color: var(--accent-foreground);">
+            <i class="ph-bold ph-shield-check"></i> Verifying Order Details
+          </div>
+          <h2 class="state-title">Retrieving Order Record...</h2>
+          <p class="state-desc">
+            Securely querying VoltEdge Order Details API to verify your order and fulfillment status.
+          </p>
+        </div>
 
-          <h1 class="success-main-title">Thank You for Your Order!</h1>
-          
-          <p class="success-main-desc">
-            We have registered your order in our fulfillment wave. Our dispatch logistics team is now packing your hardware and verifying logistics.
+        <!-- 2. ORDER NOT FOUND / MISSING PARAMETERS STATE -->
+        <div class="state-view" id="state-not-found" style="display: none;">
+          <div class="state-icon-wrap" style="background: #fef2f2; color: #dc2626;">
+            <i class="ph-bold ph-magnifying-glass"></i>
+          </div>
+          <div class="state-badge" style="background: #fee2e2; color: #991b1b;">
+            Order Record Not Found
+          </div>
+          <h2 class="state-title">No Matching Order Located</h2>
+          <p class="state-desc" id="not-found-msg">
+            We could not locate an active order matching the provided reference ID or security token. Please verify your link or enter your tracking code below.
           </p>
 
-          <!-- Tracking Code Banner -->
-          <div class="tracking-code-banner">
-            <div class="tracking-label-wrap">
-              <span class="tracking-sub">Reference Tracking Code</span>
-              <div class="tracking-code-value" id="disp-tracking-code">VE-20261028-4821</div>
-            </div>
-            <button type="button" class="btn-copy-code" id="btn-copy-tracking">
-              <i class="ph-bold ph-copy"></i>
-              <span id="copy-btn-text">Copy Code</span>
+          <form class="state-lookup-form" id="manual-lookup-form">
+            <input type="text" id="manual-order-id" class="form-control state-lookup-input" placeholder="e.g. VE-20261028-1234" required>
+            <button type="submit" class="btn btn-primary" style="padding: 0.75rem 1.4rem;">
+              <i class="ph-bold ph-magnifying-glass"></i> Track
             </button>
+          </form>
+
+          <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+            <a href="https://wa.me/2347047922403?text=Hello%20VoltEdge%20Team%2C%20I%20need%20help%20locating%20my%20order." target="_blank" rel="noopener noreferrer" class="btn-wa-action">
+              <i class="ph-fill ph-whatsapp-logo"></i> Help on WhatsApp
+            </a>
+            <a href="index.html" class="btn-shop-action">
+              <i class="ph-bold ph-arrow-left"></i> Return to Store
+            </a>
           </div>
         </div>
 
-        <!-- Fulfillment Progress Pipeline -->
-        <section class="fulfillment-timeline" aria-label="Order Progress">
-          <div class="timeline-title">Fulfillment Progress Wave</div>
-          <div class="timeline-steps">
-            
-            <div class="timeline-step completed">
-              <div class="step-marker"><i class="ph-bold ph-check"></i></div>
-              <span class="step-name">Order Placed</span>
-              <span class="step-status-tag">Logged & Cached</span>
-            </div>
-
-            <div class="timeline-step active">
-              <div class="step-marker"><i class="ph-bold ph-package"></i></div>
-              <span class="step-name">Warehouse Wave</span>
-              <span class="step-status-tag">Quality Check & Pack</span>
-            </div>
-
-            <div class="timeline-step">
-              <div class="step-marker"><i class="ph-bold ph-phone-call"></i></div>
-              <span class="step-name">Dispatch Call</span>
-              <span class="step-status-tag">Delivery Scheduling</span>
-            </div>
-
-            <div class="timeline-step">
-              <div class="step-marker"><i class="ph-bold ph-house-line"></i></div>
-              <span class="step-name">Handover & 1Yr Warranty</span>
-              <span class="step-status-tag">Doorstep Delivery</span>
-            </div>
-
+        <!-- 3. ERROR / SERVICE UNAVAILABLE STATE -->
+        <div class="state-view" id="state-error" style="display: none;">
+          <div class="state-icon-wrap" style="background: #fffbeb; color: #d97706;">
+            <i class="ph-bold ph-warning-circle"></i>
           </div>
-        </section>
+          <div class="state-badge" style="background: #fef3c7; color: #92400e;">
+            Verification Temporarily Unavailable
+          </div>
+          <h2 class="state-title">Could Not Verify Order</h2>
+          <p class="state-desc" id="error-msg-text">
+            There was a connection issue communicating with our fulfillment service. Never worry—your order data is safe.
+          </p>
+          <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+            <button type="button" class="btn btn-primary" id="btn-retry-fetch" style="padding: 0.85rem 1.6rem; border-radius: var(--radius-full);">
+              <i class="ph-bold ph-arrows-clockwise"></i> Retry Verification
+            </button>
+            <a href="https://wa.me/2347047922403" id="error-wa-link" target="_blank" rel="noopener noreferrer" class="btn-wa-action">
+              <i class="ph-fill ph-whatsapp-logo"></i> WhatsApp Concierge
+            </a>
+          </div>
+        </div>
 
-        <!-- Order Summary & Shipping Details -->
-        <div class="order-details-grid">
+        <!-- 4. VERIFIED ORDER DETAILS VIEW (Rendered dynamically) -->
+        <div id="state-success-content" style="display: none;">
           
-          <!-- Item & Invoice Details -->
-          <div class="detail-card-panel">
-            <h3 class="detail-card-title">
-              <i class="ph-bold ph-receipt"></i> Purchased Equipment
-            </h3>
-
-            <div class="item-row">
-              <img src="assets/images/pb-black.jpg" alt="Hardware Ordered" id="disp-item-img">
-              <div class="item-meta">
-                <div class="item-title" id="disp-item-name">30,000mAh Laptop Power Bank (Black)</div>
-                <div class="item-sku-qty" id="disp-item-sku-qty">SKU: VE-PB-30K-BLK &bull; Qty: 1 unit</div>
-                <div class="item-price" id="disp-item-price">₦65,000</div>
-              </div>
+          <!-- Hero Confirmation Header -->
+          <div class="success-hero-header">
+            <div class="success-anim-icon">
+              <i class="ph-bold ph-check"></i>
             </div>
 
-            <div class="receipt-lines">
-              <div class="line">
-                <span>Subtotal Value:</span>
-                <strong id="disp-subtotal">₦65,000</strong>
-              </div>
-              <div class="line">
-                <span>Logistics Delivery Charge:</span>
-                <span style="color: var(--primary); font-weight: 700;">Confirmed upon dispatch</span>
-              </div>
-              <div class="line">
-                <span>Hardware Warranty:</span>
-                <span style="color: var(--brand-emerald); font-weight: 700;">1-Year Official Warranty Active</span>
-              </div>
-              <div class="line total">
-                <span>Total Amount:</span>
-                <strong id="disp-total-amount">₦65,000</strong>
-              </div>
+            <div class="success-status-pill" id="disp-status-pill">
+              <i class="ph-bold ph-sparkle"></i> <span id="disp-status-text">Order Logged & Queued for Processing</span>
             </div>
-          </div>
 
-          <!-- Customer & Delivery Destination -->
-          <div class="detail-card-panel">
-            <h3 class="detail-card-title">
-              <i class="ph-bold ph-truck"></i> Delivery Information
-            </h3>
-
-            <div class="info-list">
-              <div class="info-item">
-                <span class="info-label">Customer Name</span>
-                <span class="info-val" id="disp-customer-name">Babatunde Adeleke</span>
-              </div>
-
-              <div class="info-item">
-                <span class="info-label">Contact Phone / WhatsApp</span>
-                <span class="info-val" id="disp-customer-phone">+234 803 123 4567</span>
-              </div>
-
-              <div class="info-item">
-                <span class="info-label">Email Address</span>
-                <span class="info-val" id="disp-customer-email">babatunde@company.com</span>
-              </div>
-
-              <div class="info-item">
-                <span class="info-label">Delivery Address</span>
-                <span class="info-val" id="disp-customer-address">Victoria Island, Lagos</span>
-              </div>
-
-              <div class="info-item">
-                <span class="info-label">Special Delivery Notes</span>
-                <span class="info-val" id="disp-customer-notes" style="font-style: italic;">None provided</span>
-              </div>
-
-              <div class="info-item">
-                <span class="info-label">Order Submitted At</span>
-                <span class="info-val" id="disp-order-date">Just now</span>
-              </div>
-            </div>
-          </div>
-
-        </div>
-
-        <!-- Next Steps Callout -->
-        <div class="dispatch-notice-box">
-          <i class="ph-fill ph-info"></i>
-          <div>
-            <strong>What Happens Next?</strong>
-            <p>
-              Our dispatch officer will contact you via WhatsApp / phone call to confirm your delivery address and schedule the delivery window. Orders placed before 2:00 PM are dispatched same-day in Lagos!
+            <h1 class="success-main-title" id="disp-hero-title">Thank You for Your Order!</h1>
+            
+            <p class="success-main-desc" id="disp-hero-desc">
+              We have registered your order in our fulfillment wave. Our dispatch logistics team is now packing your hardware and verifying logistics.
             </p>
+
+            <!-- Tracking Code Banner -->
+            <div class="tracking-code-banner">
+              <div class="tracking-label-wrap">
+                <span class="tracking-sub">Reference Tracking Code</span>
+                <div class="tracking-code-value" id="disp-tracking-code">—</div>
+              </div>
+              <button type="button" class="btn-copy-code" id="btn-copy-tracking">
+                <i class="ph-bold ph-copy"></i>
+                <span id="copy-btn-text">Copy Code</span>
+              </button>
+            </div>
           </div>
-        </div>
 
-        <!-- Action Buttons -->
-        <div class="success-actions">
-          <a href="#" id="btn-wa-followup" target="_blank" rel="noopener noreferrer" class="btn-wa-action">
-            <i class="ph-fill ph-whatsapp-logo" style="font-size: 1.25rem;"></i>
-            <span>Chat Dispatch Team on WhatsApp</span>
-          </a>
+          <!-- Fulfillment Progress Pipeline -->
+          <section class="fulfillment-timeline" aria-label="Order Progress">
+            <div class="timeline-title">Fulfillment Progress Wave</div>
+            <div class="timeline-steps">
+              
+              <div class="timeline-step" id="step-placed">
+                <div class="step-marker"><i class="ph-bold ph-check"></i></div>
+                <span class="step-name">Order Placed</span>
+                <span class="step-status-tag" id="step-placed-tag">Logged</span>
+              </div>
 
-          <button type="button" class="btn-print-action" onclick="window.print();">
-            <i class="ph-bold ph-printer"></i>
-            <span>Print Receipt</span>
-          </button>
+              <div class="timeline-step" id="step-warehouse">
+                <div class="step-marker"><i class="ph-bold ph-package"></i></div>
+                <span class="step-name">Warehouse Wave</span>
+                <span class="step-status-tag" id="step-warehouse-tag">Packaging</span>
+              </div>
 
-          <a href="index.html" class="btn-shop-action">
-            <i class="ph-bold ph-arrow-left"></i>
-            <span>Continue Shopping</span>
-          </a>
+              <div class="timeline-step" id="step-dispatch">
+                <div class="step-marker"><i class="ph-bold ph-phone-call"></i></div>
+                <span class="step-name">Dispatch Call</span>
+                <span class="step-status-tag" id="step-dispatch-tag">Scheduling</span>
+              </div>
+
+              <div class="timeline-step" id="step-delivery">
+                <div class="step-marker"><i class="ph-bold ph-house-line"></i></div>
+                <span class="step-name">Handover & 1Yr Warranty</span>
+                <span class="step-status-tag" id="step-delivery-tag">Doorstep Delivery</span>
+              </div>
+
+            </div>
+          </section>
+
+          <!-- Order Summary & Shipping Details -->
+          <div class="order-details-grid">
+            
+            <!-- Item & Invoice Details -->
+            <div class="detail-card-panel">
+              <h3 class="detail-card-title">
+                <i class="ph-bold ph-receipt"></i> Purchased Equipment
+              </h3>
+
+              <div class="item-row">
+                <img src="assets/images/pb-black.jpg" alt="Hardware Ordered" id="disp-item-img">
+                <div class="item-meta">
+                  <div class="item-title" id="disp-item-name">—</div>
+                  <div class="item-sku-qty" id="disp-item-sku-qty">—</div>
+                  <div class="item-price" id="disp-item-price">—</div>
+                </div>
+              </div>
+
+              <div class="receipt-lines">
+                <div class="line">
+                  <span>Subtotal Value:</span>
+                  <strong id="disp-subtotal">—</strong>
+                </div>
+                <div class="line">
+                  <span>Logistics Delivery Charge:</span>
+                  <span id="disp-delivery-fee" style="color: var(--primary); font-weight: 700;">Confirmed upon dispatch</span>
+                </div>
+                <div class="line">
+                  <span>Payment Verification:</span>
+                  <span id="disp-payment-status" style="color: var(--text-main); font-weight: 700;">Verification upon dispatch</span>
+                </div>
+                <div class="line">
+                  <span>Hardware Warranty:</span>
+                  <span style="color: var(--brand-emerald); font-weight: 700;">1-Year Official Warranty Active</span>
+                </div>
+                <div class="line total">
+                  <span>Total Amount:</span>
+                  <strong id="disp-total-amount">—</strong>
+                </div>
+              </div>
+            </div>
+
+            <!-- Customer & Delivery Destination -->
+            <div class="detail-card-panel">
+              <h3 class="detail-card-title">
+                <i class="ph-bold ph-truck"></i> Delivery Information
+              </h3>
+
+              <div class="info-list">
+                <div class="info-item">
+                  <span class="info-label">Customer Name</span>
+                  <span class="info-val" id="disp-customer-name">—</span>
+                </div>
+
+                <div class="info-item">
+                  <span class="info-label">Contact Phone / WhatsApp</span>
+                  <span class="info-val" id="disp-customer-phone">—</span>
+                </div>
+
+                <div class="info-item">
+                  <span class="info-label">Email Address</span>
+                  <span class="info-val" id="disp-customer-email">—</span>
+                </div>
+
+                <div class="info-item">
+                  <span class="info-label">Delivery Address</span>
+                  <span class="info-val" id="disp-customer-address">—</span>
+                </div>
+
+                <div class="info-item">
+                  <span class="info-label">Special Delivery Notes</span>
+                  <span class="info-val" id="disp-customer-notes" style="font-style: italic;">None provided</span>
+                </div>
+
+                <div class="info-item">
+                  <span class="info-label">Order Submitted At</span>
+                  <span class="info-val" id="disp-order-date">—</span>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Next Steps Callout -->
+          <div class="dispatch-notice-box" id="disp-notice-box">
+            <i class="ph-fill ph-info"></i>
+            <div>
+              <strong id="disp-notice-title">What Happens Next?</strong>
+              <p id="disp-notice-desc">
+                Our dispatch officer will contact you via WhatsApp / phone call to confirm your delivery address and schedule the delivery window. Orders placed before 2:00 PM are dispatched same-day in Lagos!
+              </p>
+            </div>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="success-actions">
+            <a href="#" id="btn-wa-followup" target="_blank" rel="noopener noreferrer" class="btn-wa-action">
+              <i class="ph-fill ph-whatsapp-logo" style="font-size: 1.25rem;"></i>
+              <span>Chat Dispatch Team on WhatsApp</span>
+            </a>
+
+            <button type="button" class="btn-print-action" onclick="window.print();">
+              <i class="ph-bold ph-printer"></i>
+              <span>Print Receipt</span>
+            </button>
+
+            <a href="index.html" class="btn-shop-action">
+              <i class="ph-bold ph-arrow-left"></i>
+              <span>Continue Shopping</span>
+            </a>
+          </div>
+
         </div>
 
       </div>
@@ -790,148 +954,370 @@
     </div>
   </footer>
 
-  <!-- Script to load and display order details -->
+  <!-- Products Catalog Data -->
+  <script src="js/products.js"></script>
+
+  <!-- Real-Time Order Verification & Details Fetch Script -->
   <script>
     (function() {
+      // Configuration for n8n Order Details Webhook API
+      const N8N_DETAILS_ENDPOINT = 'https://ucy00zep.rpcld.net/webhook-test/voltedge-order-details';
+
+      // UI State Elements
+      const stateLoading = document.getElementById('state-loading');
+      const stateNotFound = document.getElementById('state-not-found');
+      const stateError = document.getElementById('state-error');
+      const stateSuccess = document.getElementById('state-success-content');
+
+      const notFoundMsg = document.getElementById('not-found-msg');
+      const errorMsgText = document.getElementById('error-msg-text');
+      const errorWaLink = document.getElementById('error-wa-link');
+      const btnRetry = document.getElementById('btn-retry-fetch');
+      const manualForm = document.getElementById('manual-lookup-form');
+      const manualInput = document.getElementById('manual-order-id');
+
+      function showView(viewName) {
+        if (stateLoading) stateLoading.style.display = viewName === 'loading' ? 'block' : 'none';
+        if (stateNotFound) stateNotFound.style.display = viewName === 'not-found' ? 'block' : 'none';
+        if (stateError) stateError.style.display = viewName === 'error' ? 'block' : 'none';
+        if (stateSuccess) stateSuccess.style.display = viewName === 'success' ? 'block' : 'none';
+      }
+
       function formatNaira(amount) {
+        if (amount === undefined || amount === null || isNaN(amount)) return '₦0';
         return '₦' + Number(amount).toLocaleString('en-NG');
       }
 
-      // Retrieve order from URL param or localStorage
-      const params = new URLSearchParams(window.location.search);
-      const urlOrderId = params.get('orderId') || params.get('order_id') || params.get('id');
-
-      let order = null;
-
-      // Check last order in localStorage
-      try {
-        const lastOrderStr = localStorage.getItem('voltedge_last_order');
-        if (lastOrderStr) {
-          const parsed = JSON.parse(lastOrderStr);
-          if (!urlOrderId || parsed.orderId === urlOrderId || parsed.trackingCode === urlOrderId) {
-            order = parsed;
-          }
-        }
-
-        // If not matched, search history list
-        if (!order && urlOrderId) {
-          const list = JSON.parse(localStorage.getItem('voltedge_orders') || '[]');
-          order = list.find(o => o.orderId === urlOrderId || o.trackingCode === urlOrderId);
-        }
-      } catch (e) {
-        console.warn('Error reading order from localStorage:', e);
+      // Read query parameters
+      function getQueryParams() {
+        const params = new URLSearchParams(window.location.search);
+        const orderId = params.get('orderId') || params.get('order_id') || params.get('id') || '';
+        const token = params.get('token') || params.get('t') || '';
+        return { orderId: orderId.trim(), token: token.trim() };
       }
 
-      // Fallback default sample order if none found
-      if (!order) {
-        const now = new Date();
-        const year = now.getFullYear();
-        const month = String(now.getMonth() + 1).padStart(2, '0');
-        const day = String(now.getDate()).padStart(2, '0');
-        const code = urlOrderId || `VE-${year}${month}${day}-7421`;
+      // Fetch verified order from n8n endpoint
+      async function fetchOrderDetails(orderId, token) {
+        const queryUrl = new URL(N8N_DETAILS_ENDPOINT);
+        queryUrl.searchParams.set('orderId', orderId);
+        if (token) queryUrl.searchParams.set('token', token);
 
-        order = {
-          orderId: code,
-          trackingCode: code,
-          createdAt: now.toISOString(),
-          customer: {
-            fullName: 'Valued Customer',
-            email: 'customer@voltedge.ng',
-            phone: '+234 800 000 0000',
-            address: 'Lagos, Nigeria',
-            state: 'Lagos',
-            notes: 'Awaiting dispatch confirmation call'
-          },
-          product: {
-            name: '30,000mAh Laptop Power Bank (Black)',
-            sku: 'VE-PB-30K-BLK',
-            unitPrice: 65000,
-            quantity: 1,
-            totalAmount: 65000,
-            image: 'assets/images/pb-black.jpg'
-          }
+        const securityHeaders = {
+          'Accept': 'application/json, text/plain, */*'
         };
-      }
+        if (token) {
+          securityHeaders['X-Order-Token'] = token;
+          securityHeaders['Authorization'] = `Bearer ${token}`;
+        }
 
-      // Populate Elements
-      const code = order.orderId || order.trackingCode;
-      document.getElementById('disp-tracking-code').textContent = code;
-
-      // Copy Tracking Code handler
-      const copyBtn = document.getElementById('btn-copy-tracking');
-      const copyBtnText = document.getElementById('copy-btn-text');
-      copyBtn.addEventListener('click', function() {
-        navigator.clipboard.writeText(code).then(() => {
-          copyBtnText.textContent = 'Copied!';
-          copyBtn.style.color = '#15803d';
-          copyBtn.style.borderColor = '#15803d';
-          setTimeout(() => {
-            copyBtnText.textContent = 'Copy Code';
-            copyBtn.style.color = '';
-            copyBtn.style.borderColor = '';
-          }, 2500);
-        }).catch(() => {
-          prompt('Copy your order code:', code);
-        });
-      });
-
-      // Product item info
-      const prod = order.product || (order.items && order.items[0]) || {};
-      const prodName = prod.name || order.productName || 'VoltEdge Hardware';
-      const prodSku = prod.sku || order.sku || 'VE-HARDWARE';
-      const prodPrice = prod.unitPrice || order.unitPrice || 65000;
-      const prodQty = prod.quantity || order.quantity || 1;
-      const total = order.totalAmount || (prodPrice * prodQty);
-      const prodImg = prod.image || order.image || 'assets/images/pb-black.jpg';
-
-      document.getElementById('disp-item-name').textContent = prodName;
-      document.getElementById('disp-item-sku-qty').textContent = `SKU: ${prodSku} • Qty: ${prodQty} ${prodQty > 1 ? 'units' : 'unit'}`;
-      document.getElementById('disp-item-price').textContent = formatNaira(prodPrice);
-      document.getElementById('disp-subtotal').textContent = formatNaira(total);
-      document.getElementById('disp-total-amount').textContent = formatNaira(total);
-
-      const itemImgEl = document.getElementById('disp-item-img');
-      if (itemImgEl && prodImg) {
-        itemImgEl.src = prodImg;
-      }
-
-      // Customer info
-      const cust = order.customer || {};
-      const cName = cust.fullName || cust.name || order.fullName || 'Customer';
-      const cPhone = cust.fullPhone || cust.phone || order.phone || '-';
-      const cEmail = cust.email || order.email || '-';
-      const cAddr = (cust.address || order.address || '') + (cust.state ? `, ${cust.state}` : '');
-      const cNotes = cust.notes || order.notes || order.orderNotes;
-
-      document.getElementById('disp-customer-name').textContent = cName;
-      document.getElementById('disp-customer-phone').textContent = cPhone;
-      document.getElementById('disp-customer-email').textContent = cEmail;
-      document.getElementById('disp-customer-address').textContent = cAddr || 'Delivery address registered';
-      document.getElementById('disp-customer-notes').textContent = cNotes ? cNotes : 'None provided';
-
-      // Date formatting
-      if (order.createdAt) {
+        // 1. Try GET request
         try {
-          const d = new Date(order.createdAt);
-          document.getElementById('disp-order-date').textContent = d.toLocaleString('en-US', {
-            dateStyle: 'medium',
-            timeStyle: 'short'
+          console.log(`[VoltEdge API] Requesting order details for "${orderId}" via GET...`);
+          const getRes = await fetch(queryUrl.toString(), {
+            method: 'GET',
+            headers: securityHeaders
           });
-        } catch {
-          document.getElementById('disp-order-date').textContent = 'Just now';
+
+          if (getRes.ok) {
+            const rawData = await getRes.json();
+            return extractOrder(rawData);
+          }
+
+          // If n8n node is configured as POST or returned 404/405
+          if (getRes.status === 404 || getRes.status === 405) {
+            console.log(`[VoltEdge API] GET returned ${getRes.status}, falling back to POST...`);
+            const postRes = await fetch(N8N_DETAILS_ENDPOINT, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                ...securityHeaders
+              },
+              body: JSON.stringify({ orderId, token })
+            });
+
+            if (postRes.ok) {
+              const postData = await postRes.json();
+              return extractOrder(postData);
+            }
+
+            if (postRes.status === 404) {
+              return { notFound: true };
+            }
+
+            return { error: true, status: postRes.status };
+          }
+
+          return { error: true, status: getRes.status };
+        } catch (getErr) {
+          console.warn('[VoltEdge API] GET request failed, attempting POST:', getErr);
+          // Try POST fallback
+          try {
+            const postRes = await fetch(N8N_DETAILS_ENDPOINT, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                ...securityHeaders
+              },
+              body: JSON.stringify({ orderId, token })
+            });
+
+            if (postRes.ok) {
+              const postData = await postRes.json();
+              return extractOrder(postData);
+            }
+
+            if (postRes.status === 404) {
+              return { notFound: true };
+            }
+
+            return { error: true, status: postRes.status };
+          } catch (postErr) {
+            console.error('[VoltEdge API] Network error on both GET and POST:', postErr);
+            throw postErr;
+          }
         }
       }
 
-      // WhatsApp Follow-up button
-      const waBtn = document.getElementById('btn-wa-followup');
-      if (waBtn) {
-        const text = encodeURIComponent(
-          `Hello VoltEdge Team, I just placed order ${code} (${prodQty}x ${prodName}) and would like to confirm my delivery status.`
-        );
-        waBtn.href = `https://wa.me/2347047922403?text=${text}`;
+      function extractOrder(data) {
+        if (!data) return null;
+        if (Array.isArray(data)) {
+          data = data[0] || {};
+        }
+        const order = data.order || data.data || data;
+        if (!order || (!order.orderId && !order.order_id && !order.trackingCode && !order.customer && !order.product && !order.fullName)) {
+          return null;
+        }
+        return order;
       }
+
+      // Render verified order into existing UI
+      function renderOrder(order) {
+        const orderCode = order.orderId || order.order_id || order.trackingCode || '—';
+        document.getElementById('disp-tracking-code').textContent = orderCode;
+
+        // Copy button setup
+        const copyBtn = document.getElementById('btn-copy-tracking');
+        const copyBtnText = document.getElementById('copy-btn-text');
+        copyBtn.onclick = function() {
+          navigator.clipboard.writeText(orderCode).then(() => {
+            copyBtnText.textContent = 'Copied!';
+            copyBtn.style.color = '#15803d';
+            copyBtn.style.borderColor = '#15803d';
+            setTimeout(() => {
+              copyBtnText.textContent = 'Copy Code';
+              copyBtn.style.color = '';
+              copyBtn.style.borderColor = '';
+            }, 2500);
+          }).catch(() => {
+            prompt('Copy order tracking reference:', orderCode);
+          });
+        };
+
+        // Extract Customer info
+        const cust = order.customer || {};
+        const cName = cust.fullName || cust.name || order.fullName || order.customerName || 'Customer';
+        const cPhone = cust.fullPhone || cust.phone || order.phone || order.customerPhone || '—';
+        const cEmail = cust.email || order.email || order.customerEmail || '—';
+        
+        let cAddr = cust.address || order.deliveryAddress || order.address || '—';
+        const cState = cust.state || cust.deliveryState || order.deliveryState || order.state || '';
+        if (cState && cAddr !== '—' && !cAddr.toLowerCase().includes(cState.toLowerCase())) {
+          cAddr += `, ${cState}`;
+        }
+        const cNotes = cust.notes || order.notes || order.orderNotes || '';
+
+        document.getElementById('disp-customer-name').textContent = cName;
+        document.getElementById('disp-customer-phone').textContent = cPhone;
+        document.getElementById('disp-customer-email').textContent = cEmail;
+        document.getElementById('disp-customer-address').textContent = cAddr;
+        document.getElementById('disp-customer-notes').textContent = cNotes ? cNotes : 'None provided';
+
+        // Extract Product & Price info
+        const prod = order.product || (order.items && order.items[0]) || {};
+        const prodName = prod.name || prod.shortName || order.productName || 'VoltEdge Hardware';
+        const prodSku = prod.sku || order.sku || 'VE-EQUIPMENT';
+        const prodQty = prod.quantity || order.quantity || 1;
+        const unitPrice = prod.unitPrice || order.unitPrice || 0;
+        const total = order.totalAmount || order.totalPrice || (unitPrice * prodQty);
+
+        document.getElementById('disp-item-name').textContent = prodName;
+        document.getElementById('disp-item-sku-qty').textContent = `SKU: ${prodSku} • Qty: ${prodQty} ${prodQty > 1 ? 'units' : 'unit'}`;
+        document.getElementById('disp-item-price').textContent = formatNaira(unitPrice);
+        document.getElementById('disp-subtotal').textContent = formatNaira(total);
+        document.getElementById('disp-total-amount').textContent = formatNaira(total);
+
+        // Product image resolution
+        let prodImg = prod.image || order.image || '';
+        if (!prodImg && window.PRODUCTS_DATA) {
+          const match = window.PRODUCTS_DATA.find(p => p.id === order.productId || p.sku === prodSku);
+          if (match) prodImg = match.image;
+        }
+        if (!prodImg) prodImg = 'assets/images/pb-black.jpg';
+        const imgEl = document.getElementById('disp-item-img');
+        if (imgEl) {
+          imgEl.src = prodImg;
+          imgEl.alt = prodName;
+        }
+
+        // Date formatting
+        const rawDate = order.createdAt || order.timestamp || order.date;
+        if (rawDate) {
+          try {
+            const d = new Date(rawDate);
+            document.getElementById('disp-order-date').textContent = d.toLocaleString('en-US', {
+              dateStyle: 'medium',
+              timeStyle: 'short'
+            });
+          } catch {
+            document.getElementById('disp-order-date').textContent = 'Date logged';
+          }
+        } else {
+          document.getElementById('disp-order-date').textContent = 'Recent order';
+        }
+
+        // Order Status & Fulfillment Pipeline mapping
+        const status = String(order.status || order.orderStatus || 'order_submitted').toLowerCase();
+        const paymentStatus = String(order.paymentStatus || order.payment_status || '').toLowerCase();
+
+        const statusPill = document.getElementById('disp-status-pill');
+        const statusText = document.getElementById('disp-status-text');
+        const heroTitle = document.getElementById('disp-hero-title');
+        const heroDesc = document.getElementById('disp-hero-desc');
+        const payStatusEl = document.getElementById('disp-payment-status');
+
+        const stepPlaced = document.getElementById('step-placed');
+        const stepWarehouse = document.getElementById('step-warehouse');
+        const stepDispatch = document.getElementById('step-dispatch');
+        const stepDelivery = document.getElementById('step-delivery');
+
+        // Reset step classes
+        [stepPlaced, stepWarehouse, stepDispatch, stepDelivery].forEach(step => {
+          if (step) {
+            step.classList.remove('completed', 'active');
+          }
+        });
+
+        // Map status pipeline
+        if (status.includes('deliver') || status.includes('complete')) {
+          statusPill.className = 'success-status-pill status-delivered';
+          statusText.textContent = 'Delivered & Completed';
+          heroTitle.textContent = 'Order Delivered Successfully!';
+          heroDesc.textContent = 'Your hardware has been delivered and your 1-Year Official Warranty is now fully activated.';
+          [stepPlaced, stepWarehouse, stepDispatch, stepDelivery].forEach(s => s && s.classList.add('completed'));
+        } else if (status.includes('dispatch') || status.includes('transit')) {
+          statusPill.className = 'success-status-pill status-dispatched';
+          statusText.textContent = 'Out for Delivery';
+          heroTitle.textContent = 'Your Gear is on the Way!';
+          heroDesc.textContent = 'Our dispatch rider has picked up your package and is in transit. Expect a call shortly upon arrival.';
+          stepPlaced.classList.add('completed');
+          stepWarehouse.classList.add('completed');
+          stepDispatch.classList.add('active');
+        } else {
+          // Standard / Queued / In Fulfillment Wave
+          statusPill.className = 'success-status-pill';
+          statusText.textContent = 'Order Logged & In Fulfillment Wave';
+          heroTitle.textContent = 'Thank You for Your Order!';
+          heroDesc.textContent = 'We have registered your order in our fulfillment wave. Our dispatch logistics team is now packing your hardware and verifying logistics.';
+          stepPlaced.classList.add('completed');
+          stepWarehouse.classList.add('active');
+        }
+
+        // Payment status verification
+        if (paymentStatus === 'paid' || paymentStatus === 'verified') {
+          payStatusEl.textContent = 'Payment Verified & Confirmed';
+          payStatusEl.style.color = '#15803d';
+        } else if (paymentStatus.includes('email')) {
+          payStatusEl.textContent = 'Instructions sent to email';
+          payStatusEl.style.color = 'var(--text-main)';
+        } else {
+          payStatusEl.textContent = 'Verification upon dispatch';
+          payStatusEl.style.color = 'var(--text-main)';
+        }
+
+        // WhatsApp follow-up button
+        const waBtn = document.getElementById('btn-wa-followup');
+        if (waBtn) {
+          const waMsg = encodeURIComponent(
+            `Hello VoltEdge Team, I am following up on my verified order ${orderCode} (${prodQty}x ${prodName}) for ${cName}.`
+          );
+          waBtn.href = `https://wa.me/2347047922403?text=${waMsg}`;
+        }
+
+        showView('success');
+      }
+
+      // Main controller
+      async function initializePage() {
+        showView('loading');
+
+        const { orderId, token } = getQueryParams();
+
+        if (!orderId) {
+          // No order ID passed in URL
+          if (notFoundMsg) {
+            notFoundMsg.textContent = 'No order reference ID was provided in the URL. Please verify your tracking link or search your order code below.';
+          }
+          showView('not-found');
+          return;
+        }
+
+        try {
+          const result = await fetchOrderDetails(orderId, token);
+
+          if (!result || result.notFound) {
+            if (notFoundMsg) {
+              notFoundMsg.textContent = `No order record was found for reference ID "${orderId}". Please check that the code is correct or contact our team.`;
+            }
+            showView('not-found');
+            return;
+          }
+
+          if (result.error) {
+            if (errorMsgText) {
+              errorMsgText.textContent = `Unable to verify order "${orderId}" with the fulfillment API (Status: ${result.status || 'unknown'}). Please retry or reach out on WhatsApp.`;
+            }
+            if (errorWaLink) {
+              errorWaLink.href = `https://wa.me/2347047922403?text=${encodeURIComponent(`Hello VoltEdge Support, I could not verify my order reference: ${orderId}`)}`;
+            }
+            showView('error');
+            return;
+          }
+
+          // Successfully received valid order
+          renderOrder(result);
+
+        } catch (networkError) {
+          console.error('[VoltEdge API] Connection error:', networkError);
+          if (errorMsgText) {
+            errorMsgText.textContent = `Could not establish a connection to the order details service. Please verify your internet connection and retry.`;
+          }
+          if (errorWaLink) {
+            errorWaLink.href = `https://wa.me/2347047922403?text=${encodeURIComponent(`Hello VoltEdge Support, network error verifying order: ${orderId}`)}`;
+          }
+          showView('error');
+        }
+      }
+
+      // Event handlers
+      if (btnRetry) {
+        btnRetry.addEventListener('click', initializePage);
+      }
+
+      if (manualForm && manualInput) {
+        manualForm.addEventListener('submit', function(e) {
+          e.preventDefault();
+          const enteredId = manualInput.value.trim();
+          if (enteredId) {
+            const newUrl = new URL(window.location.href);
+            newUrl.searchParams.set('orderId', enteredId);
+            window.location.href = newUrl.toString();
+          }
+        });
+      }
+
+      // Run on DOM ready
+      document.addEventListener('DOMContentLoaded', initializePage);
     })();
   </script>
 </body>
 </html>
-

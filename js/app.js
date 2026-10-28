@@ -701,8 +701,8 @@ window.selectForOrder = function(productId) {
 // n8n Webhook Integration for "Voltedge Order Processing Automation"
 const N8N_ORDER_CONFIG = {
   workflowName: 'Voltedge Order Processing Automation',
-  webhookUrl: 'https://ucy00zep.rpcld.net/webhook/voltedge-order',
-  testWebhookUrl: 'https://ucy00zep.rpcld.net/webhook/voltedge-order'
+  webhookUrl: 'https://ucy00zep.rpcld.net/webhook-test/voltedge-order',
+  testWebhookUrl: 'https://ucy00zep.rpcld.net/webhook-test/voltedge-order'
 };
 
 /**
