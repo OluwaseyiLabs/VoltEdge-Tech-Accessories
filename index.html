@@ -73,14 +73,15 @@
           <li><a href="#how-it-works" class="nav-link">How Dispatch Works</a></li>
           <li><a href="#corporate" class="nav-link">Corporate Bundles</a></li>
           <li><a href="#order-form-section" class="nav-link">Order Form</a></li>
+          <li><a href="checkout.html" class="nav-link">Checkout</a></li>
           <li><a href="#feedback" class="nav-link">Feedback</a></li>
         </ul>
       </nav>
 
       <!-- Nav Actions -->
       <div class="nav-actions">
-        <a href="#order-form-section" class="btn btn-primary" id="nav-order-btn">
-          Order Now
+        <a href="checkout.html" class="btn btn-primary" id="nav-order-btn">
+          Checkout Now
         </a>
 
         <button class="menu-toggle" id="menu-toggle" aria-label="Toggle Navigation Menu">
@@ -111,6 +112,7 @@
       <li><a href="#corporate" class="drawer-link">Corporate & Team Kits</a></li>
       <li><a href="#how-it-works" class="drawer-link">How Fulfillment Works</a></li>
       <li><a href="#order-form-section" class="drawer-link">Order Form</a></li>
+      <li><a href="checkout.html" class="drawer-link">Secure Checkout</a></li>
       <li><a href="#reviews" class="drawer-link">Customer Reviews</a></li>
       <li><a href="#faq" class="drawer-link">Frequently Asked Questions</a></li>
       <li><a href="#feedback" class="drawer-link">Give Feedback</a></li>
@@ -121,8 +123,8 @@
         target="_blank" class="btn btn-whatsapp" style="width: 100%;">
         <i class="ph-fill ph-whatsapp-logo"></i> WhatsApp Concierge
       </a>
-      <a href="#order-form-section" class="btn btn-volt" style="width: 100%;">
-        <i class="ph ph-shopping-cart-simple"></i> Submit Order
+      <a href="checkout.html" class="btn btn-volt" style="width: 100%;">
+        <i class="ph ph-shopping-bag-open"></i> Proceed to Checkout
       </a>
     </div>
   </div>
@@ -901,10 +903,14 @@
           </p>
         </div>
 
-        <!-- Close Button Only -->
-        <div style="width: 100%;">
+        <!-- Actions: View Full Order Confirmation Page & Close -->
+        <div style="width: 100%; display: flex; flex-direction: column; gap: 0.65rem;">
+          <a href="order-success.html" id="modal-view-order-link" class="btn btn-volt"
+            style="width: 100%; padding: 0.95rem 1.5rem; font-size: 1rem; font-weight: 700; border-radius: var(--radius-full); text-align: center; justify-content: center;">
+            <i class="ph-bold ph-arrow-square-out"></i> View Full Order Status Page
+          </a>
           <button type="button" class="btn btn-primary"
-            style="width: 100%; padding: 0.95rem 1.5rem; font-size: 1rem; font-weight: 700; border-radius: var(--radius-full);"
+            style="width: 100%; padding: 0.85rem 1.5rem; font-size: 0.95rem; font-weight: 700; border-radius: var(--radius-full);"
             onclick="document.getElementById('order-success-modal').classList.remove('active')">
             Close
           </button>

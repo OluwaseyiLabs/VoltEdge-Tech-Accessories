@@ -1,0 +1,937 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Order Confirmed | VoltEdge Tech & Accessories</title>
+  
+  <meta name="description" content="Your VoltEdge order has been logged successfully and queued for fulfillment. Track your order status and warranty details.">
+  <meta name="theme-color" content="#064e3b">
+
+  <!-- Favicon -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220%200%2032%2032%22><rect width=%2232%22 height=%2232%22 rx=%228%22 fill=%22%2300e599%22/><path d=%22M18 4L10 17h5l-2 11 10-14h-6l3-10z%22 fill=%22%23090d16%22/></svg>">
+
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="css/style.css">
+
+  <!-- Phosphor Icons -->
+  <script src="https://unpkg.com/@phosphor-icons/web" async></script>
+
+  <style>
+    .success-page-wrap {
+      min-height: calc(100vh - 4.5rem);
+      padding: 3rem 0 5rem;
+      background: radial-gradient(circle at 50% 0%, rgba(6, 78, 59, 0.05) 0%, rgba(248, 250, 249, 1) 100%);
+    }
+
+    .success-breadcrumb {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-bottom: 1.5rem;
+    }
+
+    .success-breadcrumb a {
+      color: var(--primary);
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
+    .success-breadcrumb a:hover {
+      text-decoration: underline;
+    }
+
+    /* Main Container Card */
+    .success-card {
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xl);
+      padding: 3rem;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.05);
+      max-width: 920px;
+      margin: 0 auto;
+    }
+
+    .success-hero-header {
+      text-align: center;
+      padding-bottom: 2.25rem;
+      border-bottom: 1px solid var(--border-subtle);
+      margin-bottom: 2.25rem;
+    }
+
+    .success-anim-icon {
+      width: 5rem;
+      height: 5rem;
+      background: #d1fae5;
+      color: var(--brand-emerald);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.6rem;
+      margin: 0 auto 1.25rem;
+      box-shadow: 0 0 0 10px rgba(209, 250, 229, 0.45);
+      animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    @keyframes popIn {
+      0% { transform: scale(0.5); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    .success-status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      padding: 0.35rem 1rem;
+      background: #dcfce7;
+      color: #15803d;
+      border: 1px solid #bbf7d0;
+      border-radius: var(--radius-full);
+      font-size: 0.8rem;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      margin-bottom: 0.85rem;
+    }
+
+    .success-main-title {
+      font-size: clamp(1.8rem, 4vw, 2.4rem);
+      font-weight: 800;
+      color: var(--text-main);
+      line-height: 1.2;
+      margin-bottom: 0.75rem;
+    }
+
+    .success-main-desc {
+      color: var(--text-muted);
+      font-size: 1.05rem;
+      max-width: 600px;
+      margin: 0 auto 1.5rem;
+      line-height: 1.5;
+    }
+
+    /* Tracking Box */
+    .tracking-code-banner {
+      background: var(--bg-subtle);
+      border: 1.5px dashed var(--primary);
+      border-radius: var(--radius-lg);
+      padding: 1.25rem 1.75rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+    }
+
+    .tracking-label-wrap {
+      text-align: left;
+    }
+
+    .tracking-sub {
+      font-size: 0.76rem;
+      font-weight: 700;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .tracking-code-value {
+      font-size: 1.5rem;
+      font-weight: 900;
+      color: var(--primary);
+      letter-spacing: 0.02em;
+      font-family: monospace, var(--font-sans);
+    }
+
+    .btn-copy-code {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      padding: 0.55rem 1rem;
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-full);
+      color: var(--text-main);
+      font-size: 0.84rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all var(--transition-fast);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .btn-copy-code:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+      transform: translateY(-1px);
+    }
+
+    /* Timeline Stepper */
+    .fulfillment-timeline {
+      margin-bottom: 2.5rem;
+      padding: 1.5rem;
+      background: var(--bg-subtle);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border);
+    }
+
+    .timeline-title {
+      font-size: 0.82rem;
+      font-weight: 800;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 1.25rem;
+      text-align: center;
+    }
+
+    .timeline-steps {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0.75rem;
+      position: relative;
+    }
+
+    .timeline-step {
+      text-align: center;
+      position: relative;
+    }
+
+    .step-marker {
+      width: 2.25rem;
+      height: 2.25rem;
+      margin: 0 auto 0.6rem;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      font-weight: 800;
+      background: #e2e8f0;
+      color: #64748b;
+      position: relative;
+      z-index: 2;
+    }
+
+    .timeline-step.completed .step-marker {
+      background: var(--brand-emerald);
+      color: #ffffff;
+    }
+
+    .timeline-step.active .step-marker {
+      background: var(--primary);
+      color: #ffffff;
+      box-shadow: 0 0 0 5px rgba(6, 78, 59, 0.2);
+    }
+
+    .step-name {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--text-main);
+      line-height: 1.25;
+      display: block;
+      margin-bottom: 0.2rem;
+    }
+
+    .step-status-tag {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+    }
+
+    /* Order Details Grid */
+    .order-details-grid {
+      display: grid;
+      grid-template-columns: 1.15fr 1fr;
+      gap: 1.75rem;
+      margin-bottom: 2.25rem;
+    }
+
+    .detail-card-panel {
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 1.5rem;
+      background: #ffffff;
+    }
+
+    .detail-card-title {
+      font-size: 1rem;
+      font-weight: 800;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 1.25rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .item-row {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .item-row img {
+      width: 68px;
+      height: 68px;
+      object-fit: cover;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+
+    .item-meta {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .item-title {
+      font-weight: 700;
+      font-size: 0.95rem;
+      color: var(--text-main);
+      margin-bottom: 0.2rem;
+    }
+
+    .item-sku-qty {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .item-price {
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: var(--primary);
+    }
+
+    .receipt-lines {
+      display: flex;
+      flex-direction: column;
+      gap: 0.65rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--border-subtle);
+      font-size: 0.88rem;
+      color: var(--text-muted);
+    }
+
+    .receipt-lines .line {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .receipt-lines .line.total {
+      margin-top: 0.5rem;
+      padding-top: 0.75rem;
+      border-top: 2px dashed var(--border);
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: var(--text-main);
+    }
+
+    .receipt-lines .line.total strong {
+      color: var(--primary);
+      font-size: 1.35rem;
+    }
+
+    .info-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.85rem;
+      font-size: 0.9rem;
+    }
+
+    .info-item {
+      display: flex;
+      flex-direction: column;
+      gap: 0.15rem;
+    }
+
+    .info-label {
+      font-size: 0.74rem;
+      font-weight: 700;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .info-val {
+      font-weight: 600;
+      color: var(--text-main);
+      word-break: break-word;
+    }
+
+    /* Notice Box */
+    .dispatch-notice-box {
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      border-radius: var(--radius-lg);
+      padding: 1.25rem 1.5rem;
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 2.25rem;
+    }
+
+    .dispatch-notice-box i {
+      font-size: 1.45rem;
+      color: #2563eb;
+      flex-shrink: 0;
+      margin-top: 0.15rem;
+    }
+
+    .dispatch-notice-box strong {
+      display: block;
+      color: #1e3a8a;
+      font-size: 0.95rem;
+      margin-bottom: 0.35rem;
+    }
+
+    .dispatch-notice-box p {
+      color: #3b82f6;
+      font-size: 0.86rem;
+      margin: 0;
+      line-height: 1.5;
+    }
+
+    /* Action Buttons */
+    .success-actions {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .btn-wa-action {
+      background: var(--whatsapp);
+      color: #ffffff;
+      padding: 0.95rem 1.6rem;
+      border-radius: var(--radius-full);
+      font-weight: 800;
+      font-size: 0.95rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all var(--transition-fast);
+      box-shadow: 0 4px 12px rgba(37, 211, 102, 0.25);
+    }
+
+    .btn-wa-action:hover {
+      background: var(--whatsapp-hover);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 18px rgba(37, 211, 102, 0.35);
+    }
+
+    .btn-print-action {
+      background: #ffffff;
+      border: 1.5px solid var(--border);
+      color: var(--text-main);
+      padding: 0.95rem 1.5rem;
+      border-radius: var(--radius-full);
+      font-weight: 700;
+      font-size: 0.95rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      cursor: pointer;
+      transition: all var(--transition-fast);
+    }
+
+    .btn-print-action:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+
+    .btn-shop-action {
+      background: var(--primary);
+      color: #ffffff;
+      padding: 0.95rem 1.6rem;
+      border-radius: var(--radius-full);
+      font-weight: 800;
+      font-size: 0.95rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all var(--transition-fast);
+    }
+
+    .btn-shop-action:hover {
+      background: var(--primary-hover);
+      transform: translateY(-2px);
+    }
+
+    /* Print Stylesheet */
+    @media print {
+      .top-bar, .site-header, .site-footer, .success-breadcrumb, .success-actions, .fulfillment-timeline {
+        display: none !important;
+      }
+      .success-page-wrap {
+        padding: 0;
+        background: none;
+      }
+      .success-card {
+        border: none;
+        box-shadow: none;
+        padding: 0;
+      }
+      body {
+        background: #ffffff;
+        color: #000000;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .success-card {
+        padding: 2rem 1.25rem;
+      }
+      .order-details-grid {
+        grid-template-columns: 1fr;
+      }
+      .timeline-steps {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1.25rem 0.5rem;
+      }
+      .tracking-code-banner {
+        flex-direction: column;
+        gap: 0.85rem;
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Announcement Bar -->
+  <aside class="top-bar" aria-label="Announcement">
+    <div class="container top-bar-content">
+      <span class="top-bar-text">Same-Day Dispatch for Orders Placed Before 2:00 PM | 1-Year Full Warranty on All Gear</span>
+    </div>
+  </aside>
+
+  <!-- Sticky Header -->
+  <header class="site-header" id="site-header">
+    <div class="container nav-wrap">
+      <a href="index.html" class="brand-logo" aria-label="VoltEdge Home">
+        <div class="logo-icon">
+          <i class="ph-fill ph-lightning"></i>
+        </div>
+        <div class="logo-text">
+          VoltEdge
+          <span class="logo-subtitle">TECH & ACCESSORIES</span>
+        </div>
+      </a>
+
+      <!-- Desktop Nav Links -->
+      <nav aria-label="Primary Navigation">
+        <ul class="nav-links">
+          <li><a href="index.html#catalogue" class="nav-link">Products</a></li>
+          <li><a href="index.html#creator-gear" class="nav-link">Creator Accessories</a></li>
+          <li><a href="index.html#how-it-works" class="nav-link">How Fulfillment Works</a></li>
+          <li><a href="index.html#feedback" class="nav-link">Feedback</a></li>
+        </ul>
+      </nav>
+
+      <!-- Nav Actions -->
+      <div class="nav-actions">
+        <a href="checkout.html" class="btn btn-primary" style="padding: 0.65rem 1.25rem; font-size: 0.88rem;">
+          <i class="ph ph-shopping-cart-simple"></i> New Order
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Order Success Section -->
+  <main class="success-page-wrap">
+    <div class="container">
+      
+      <!-- Breadcrumb -->
+      <nav class="success-breadcrumb" aria-label="Breadcrumb">
+        <a href="index.html"><i class="ph-bold ph-house"></i> Home</a>
+        <span>/</span>
+        <a href="checkout.html">Checkout</a>
+        <span>/</span>
+        <span>Order Confirmed</span>
+      </nav>
+
+      <div class="success-card">
+        
+        <!-- Hero Confirmation Header -->
+        <div class="success-hero-header">
+          <div class="success-anim-icon">
+            <i class="ph-bold ph-check"></i>
+          </div>
+
+          <div class="success-status-pill">
+            <i class="ph-bold ph-sparkle"></i> Order Logged & Queued for Processing
+          </div>
+
+          <h1 class="success-main-title">Thank You for Your Order!</h1>
+          
+          <p class="success-main-desc">
+            We have registered your order in our fulfillment wave. Our dispatch logistics team is now packing your hardware and verifying logistics.
+          </p>
+
+          <!-- Tracking Code Banner -->
+          <div class="tracking-code-banner">
+            <div class="tracking-label-wrap">
+              <span class="tracking-sub">Reference Tracking Code</span>
+              <div class="tracking-code-value" id="disp-tracking-code">VE-20261028-4821</div>
+            </div>
+            <button type="button" class="btn-copy-code" id="btn-copy-tracking">
+              <i class="ph-bold ph-copy"></i>
+              <span id="copy-btn-text">Copy Code</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Fulfillment Progress Pipeline -->
+        <section class="fulfillment-timeline" aria-label="Order Progress">
+          <div class="timeline-title">Fulfillment Progress Wave</div>
+          <div class="timeline-steps">
+            
+            <div class="timeline-step completed">
+              <div class="step-marker"><i class="ph-bold ph-check"></i></div>
+              <span class="step-name">Order Placed</span>
+              <span class="step-status-tag">Logged & Cached</span>
+            </div>
+
+            <div class="timeline-step active">
+              <div class="step-marker"><i class="ph-bold ph-package"></i></div>
+              <span class="step-name">Warehouse Wave</span>
+              <span class="step-status-tag">Quality Check & Pack</span>
+            </div>
+
+            <div class="timeline-step">
+              <div class="step-marker"><i class="ph-bold ph-phone-call"></i></div>
+              <span class="step-name">Dispatch Call</span>
+              <span class="step-status-tag">Delivery Scheduling</span>
+            </div>
+
+            <div class="timeline-step">
+              <div class="step-marker"><i class="ph-bold ph-house-line"></i></div>
+              <span class="step-name">Handover & 1Yr Warranty</span>
+              <span class="step-status-tag">Doorstep Delivery</span>
+            </div>
+
+          </div>
+        </section>
+
+        <!-- Order Summary & Shipping Details -->
+        <div class="order-details-grid">
+          
+          <!-- Item & Invoice Details -->
+          <div class="detail-card-panel">
+            <h3 class="detail-card-title">
+              <i class="ph-bold ph-receipt"></i> Purchased Equipment
+            </h3>
+
+            <div class="item-row">
+              <img src="assets/images/pb-black.jpg" alt="Hardware Ordered" id="disp-item-img">
+              <div class="item-meta">
+                <div class="item-title" id="disp-item-name">30,000mAh Laptop Power Bank (Black)</div>
+                <div class="item-sku-qty" id="disp-item-sku-qty">SKU: VE-PB-30K-BLK &bull; Qty: 1 unit</div>
+                <div class="item-price" id="disp-item-price">₦65,000</div>
+              </div>
+            </div>
+
+            <div class="receipt-lines">
+              <div class="line">
+                <span>Subtotal Value:</span>
+                <strong id="disp-subtotal">₦65,000</strong>
+              </div>
+              <div class="line">
+                <span>Logistics Delivery Charge:</span>
+                <span style="color: var(--primary); font-weight: 700;">Confirmed upon dispatch</span>
+              </div>
+              <div class="line">
+                <span>Hardware Warranty:</span>
+                <span style="color: var(--brand-emerald); font-weight: 700;">1-Year Official Warranty Active</span>
+              </div>
+              <div class="line total">
+                <span>Total Amount:</span>
+                <strong id="disp-total-amount">₦65,000</strong>
+              </div>
+            </div>
+          </div>
+
+          <!-- Customer & Delivery Destination -->
+          <div class="detail-card-panel">
+            <h3 class="detail-card-title">
+              <i class="ph-bold ph-truck"></i> Delivery Information
+            </h3>
+
+            <div class="info-list">
+              <div class="info-item">
+                <span class="info-label">Customer Name</span>
+                <span class="info-val" id="disp-customer-name">Babatunde Adeleke</span>
+              </div>
+
+              <div class="info-item">
+                <span class="info-label">Contact Phone / WhatsApp</span>
+                <span class="info-val" id="disp-customer-phone">+234 803 123 4567</span>
+              </div>
+
+              <div class="info-item">
+                <span class="info-label">Email Address</span>
+                <span class="info-val" id="disp-customer-email">babatunde@company.com</span>
+              </div>
+
+              <div class="info-item">
+                <span class="info-label">Delivery Address</span>
+                <span class="info-val" id="disp-customer-address">Victoria Island, Lagos</span>
+              </div>
+
+              <div class="info-item">
+                <span class="info-label">Special Delivery Notes</span>
+                <span class="info-val" id="disp-customer-notes" style="font-style: italic;">None provided</span>
+              </div>
+
+              <div class="info-item">
+                <span class="info-label">Order Submitted At</span>
+                <span class="info-val" id="disp-order-date">Just now</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Next Steps Callout -->
+        <div class="dispatch-notice-box">
+          <i class="ph-fill ph-info"></i>
+          <div>
+            <strong>What Happens Next?</strong>
+            <p>
+              Our dispatch officer will contact you via WhatsApp / phone call to confirm your delivery address and schedule the delivery window. Orders placed before 2:00 PM are dispatched same-day in Lagos!
+            </p>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="success-actions">
+          <a href="#" id="btn-wa-followup" target="_blank" rel="noopener noreferrer" class="btn-wa-action">
+            <i class="ph-fill ph-whatsapp-logo" style="font-size: 1.25rem;"></i>
+            <span>Chat Dispatch Team on WhatsApp</span>
+          </a>
+
+          <button type="button" class="btn-print-action" onclick="window.print();">
+            <i class="ph-bold ph-printer"></i>
+            <span>Print Receipt</span>
+          </button>
+
+          <a href="index.html" class="btn-shop-action">
+            <i class="ph-bold ph-arrow-left"></i>
+            <span>Continue Shopping</span>
+          </a>
+        </div>
+
+      </div>
+    </div>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-top">
+        <div>
+          <a href="index.html" class="brand-logo footer-brand-logo">
+            <div class="logo-icon" style="background: rgba(255, 255, 255, 0.18); border: 1px solid rgba(255, 255, 255, 0.3);">
+              <i class="ph-fill ph-lightning" style="color: #ffffff;"></i>
+            </div>
+            <div class="logo-text" style="color: #ffffff; font-weight: 800;">
+              VoltEdge<span style="color: #34d399;">Tech</span>
+              <span class="logo-subtitle" style="color: #ffffff; font-weight: 800;">& Accessories</span>
+            </div>
+          </a>
+          <p class="footer-brand-desc" style="color: rgba(255, 255, 255, 0.88); font-weight: 500;">
+            Powering productive workspaces with reliable technology accessories. Laptop power banks, router UPS backups, and ergonomic gear built for modern Nigerian professionals.
+          </p>
+        </div>
+
+        <div>
+          <h4 class="footer-col-title">Quick Links</h4>
+          <ul class="footer-links">
+            <li><a href="index.html#catalogue" class="footer-link">Products</a></li>
+            <li><a href="index.html#creator-gear" class="footer-link">Creator Accessories</a></li>
+            <li><a href="index.html#how-it-works" class="footer-link">How Fulfillment Works</a></li>
+            <li><a href="index.html#feedback" class="footer-link">Give Feedback</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <h4 class="footer-col-title">Customer Support</h4>
+          <div class="footer-contact-item">
+            <i class="ph-fill ph-whatsapp-logo" style="color: #25D366; font-size: 1.25rem;"></i>
+            <a href="https://wa.me/2347047922403" target="_blank" rel="noopener noreferrer" class="footer-link" style="color: #ffffff; font-weight: 700;">
+              Chat with us on WhatsApp
+            </a>
+          </div>
+          <div class="footer-contact-item">
+            <i class="ph-bold ph-phone" style="color: #ffffff; font-size: 1.15rem;"></i>
+            <span style="color: #ffffff; font-weight: 700;">+234 704 792 2403</span>
+          </div>
+          <div class="footer-contact-item">
+            <i class="ph-bold ph-shield-check" style="color: #ffffff; font-size: 1.15rem;"></i>
+            <span style="color: #ffffff; font-weight: 700;">1-Year Warranty Included</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <div style="color: rgba(255, 255, 255, 0.85); font-weight: 600;">&copy; 2026 VoltEdge Tech & Accessories. All rights reserved.</div>
+        <div style="display: flex; gap: 1.5rem;">
+          <a href="index.html" class="footer-link" style="color: #ffffff; font-weight: 700;">Return to Home &uarr;</a>
+          <a href="index.html#catalogue" class="footer-link" style="color: #ffffff; font-weight: 700;">Priced in ₦ Naira</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Script to load and display order details -->
+  <script>
+    (function() {
+      function formatNaira(amount) {
+        return '₦' + Number(amount).toLocaleString('en-NG');
+      }
+
+      // Retrieve order from URL param or localStorage
+      const params = new URLSearchParams(window.location.search);
+      const urlOrderId = params.get('orderId') || params.get('order_id') || params.get('id');
+
+      let order = null;
+
+      // Check last order in localStorage
+      try {
+        const lastOrderStr = localStorage.getItem('voltedge_last_order');
+        if (lastOrderStr) {
+          const parsed = JSON.parse(lastOrderStr);
+          if (!urlOrderId || parsed.orderId === urlOrderId || parsed.trackingCode === urlOrderId) {
+            order = parsed;
+          }
+        }
+
+        // If not matched, search history list
+        if (!order && urlOrderId) {
+          const list = JSON.parse(localStorage.getItem('voltedge_orders') || '[]');
+          order = list.find(o => o.orderId === urlOrderId || o.trackingCode === urlOrderId);
+        }
+      } catch (e) {
+        console.warn('Error reading order from localStorage:', e);
+      }
+
+      // Fallback default sample order if none found
+      if (!order) {
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+        const code = urlOrderId || `VE-${year}${month}${day}-7421`;
+
+        order = {
+          orderId: code,
+          trackingCode: code,
+          createdAt: now.toISOString(),
+          customer: {
+            fullName: 'Valued Customer',
+            email: 'customer@voltedge.ng',
+            phone: '+234 800 000 0000',
+            address: 'Lagos, Nigeria',
+            state: 'Lagos',
+            notes: 'Awaiting dispatch confirmation call'
+          },
+          product: {
+            name: '30,000mAh Laptop Power Bank (Black)',
+            sku: 'VE-PB-30K-BLK',
+            unitPrice: 65000,
+            quantity: 1,
+            totalAmount: 65000,
+            image: 'assets/images/pb-black.jpg'
+          }
+        };
+      }
+
+      // Populate Elements
+      const code = order.orderId || order.trackingCode;
+      document.getElementById('disp-tracking-code').textContent = code;
+
+      // Copy Tracking Code handler
+      const copyBtn = document.getElementById('btn-copy-tracking');
+      const copyBtnText = document.getElementById('copy-btn-text');
+      copyBtn.addEventListener('click', function() {
+        navigator.clipboard.writeText(code).then(() => {
+          copyBtnText.textContent = 'Copied!';
+          copyBtn.style.color = '#15803d';
+          copyBtn.style.borderColor = '#15803d';
+          setTimeout(() => {
+            copyBtnText.textContent = 'Copy Code';
+            copyBtn.style.color = '';
+            copyBtn.style.borderColor = '';
+          }, 2500);
+        }).catch(() => {
+          prompt('Copy your order code:', code);
+        });
+      });
+
+      // Product item info
+      const prod = order.product || (order.items && order.items[0]) || {};
+      const prodName = prod.name || order.productName || 'VoltEdge Hardware';
+      const prodSku = prod.sku || order.sku || 'VE-HARDWARE';
+      const prodPrice = prod.unitPrice || order.unitPrice || 65000;
+      const prodQty = prod.quantity || order.quantity || 1;
+      const total = order.totalAmount || (prodPrice * prodQty);
+      const prodImg = prod.image || order.image || 'assets/images/pb-black.jpg';
+
+      document.getElementById('disp-item-name').textContent = prodName;
+      document.getElementById('disp-item-sku-qty').textContent = `SKU: ${prodSku} • Qty: ${prodQty} ${prodQty > 1 ? 'units' : 'unit'}`;
+      document.getElementById('disp-item-price').textContent = formatNaira(prodPrice);
+      document.getElementById('disp-subtotal').textContent = formatNaira(total);
+      document.getElementById('disp-total-amount').textContent = formatNaira(total);
+
+      const itemImgEl = document.getElementById('disp-item-img');
+      if (itemImgEl && prodImg) {
+        itemImgEl.src = prodImg;
+      }
+
+      // Customer info
+      const cust = order.customer || {};
+      const cName = cust.fullName || cust.name || order.fullName || 'Customer';
+      const cPhone = cust.fullPhone || cust.phone || order.phone || '-';
+      const cEmail = cust.email || order.email || '-';
+      const cAddr = (cust.address || order.address || '') + (cust.state ? `, ${cust.state}` : '');
+      const cNotes = cust.notes || order.notes || order.orderNotes;
+
+      document.getElementById('disp-customer-name').textContent = cName;
+      document.getElementById('disp-customer-phone').textContent = cPhone;
+      document.getElementById('disp-customer-email').textContent = cEmail;
+      document.getElementById('disp-customer-address').textContent = cAddr || 'Delivery address registered';
+      document.getElementById('disp-customer-notes').textContent = cNotes ? cNotes : 'None provided';
+
+      // Date formatting
+      if (order.createdAt) {
+        try {
+          const d = new Date(order.createdAt);
+          document.getElementById('disp-order-date').textContent = d.toLocaleString('en-US', {
+            dateStyle: 'medium',
+            timeStyle: 'short'
+          });
+        } catch {
+          document.getElementById('disp-order-date').textContent = 'Just now';
+        }
+      }
+
+      // WhatsApp Follow-up button
+      const waBtn = document.getElementById('btn-wa-followup');
+      if (waBtn) {
+        const text = encodeURIComponent(
+          `Hello VoltEdge Team, I just placed order ${code} (${prodQty}x ${prodName}) and would like to confirm my delivery status.`
+        );
+        waBtn.href = `https://wa.me/2347047922403?text=${text}`;
+      }
+    })();
+  </script>
+</body>
+</html>
+

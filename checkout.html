@@ -1,0 +1,1125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Checkout | VoltEdge Tech & Accessories</title>
+  
+  <meta name="description" content="Complete your VoltEdge order for high-capacity laptop power banks, Wi-Fi router UPS backups, and workspace gear. Same-day Lagos dispatch eligible.">
+  <meta name="theme-color" content="#064e3b">
+
+  <!-- Favicon -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220%200%2032%2032%22><rect width=%2232%22 height=%2232%22 rx=%228%22 fill=%22%2300e599%22/><path d=%22M18 4L10 17h5l-2 11 10-14h-6l3-10z%22 fill=%22%23090d16%22/></svg>">
+
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="css/style.css">
+
+  <!-- Phosphor Icons -->
+  <script src="https://unpkg.com/@phosphor-icons/web" async></script>
+
+  <style>
+    .checkout-page-wrap {
+      min-height: calc(100vh - 4.5rem);
+      padding: 3rem 0 5rem;
+      background: radial-gradient(circle at 50% 0%, rgba(6, 78, 59, 0.04) 0%, rgba(248, 250, 249, 1) 100%);
+    }
+
+    .checkout-breadcrumb {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-bottom: 1.5rem;
+    }
+
+    .checkout-breadcrumb a {
+      color: var(--primary);
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
+    .checkout-breadcrumb a:hover {
+      text-decoration: underline;
+    }
+
+    .checkout-header {
+      margin-bottom: 2.25rem;
+    }
+
+    .checkout-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      padding: 0.35rem 0.95rem;
+      background-color: var(--accent);
+      color: var(--accent-foreground);
+      border-radius: var(--radius-full);
+      font-size: 0.8rem;
+      font-weight: 800;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      margin-bottom: 0.75rem;
+    }
+
+    .checkout-title {
+      font-size: clamp(1.75rem, 4vw, 2.35rem);
+      font-weight: 800;
+      color: var(--text-main);
+      line-height: 1.2;
+      margin-bottom: 0.5rem;
+    }
+
+    .checkout-subtitle {
+      color: var(--text-muted);
+      font-size: 1rem;
+      max-width: 640px;
+    }
+
+    .checkout-grid {
+      display: grid;
+      grid-template-columns: 1.45fr 1fr;
+      gap: 2.5rem;
+      align-items: start;
+    }
+
+    /* Left Column: Form Card */
+    .checkout-main-card {
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xl);
+      padding: 2.25rem;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+    }
+
+    .step-section {
+      padding-bottom: 2rem;
+      margin-bottom: 2rem;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .step-section:last-of-type {
+      border-bottom: none;
+      padding-bottom: 0;
+      margin-bottom: 0;
+    }
+
+    .step-title {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: var(--text-main);
+      margin-bottom: 1.25rem;
+    }
+
+    .step-num {
+      width: 2rem;
+      height: 2rem;
+      background: var(--primary);
+      color: #ffffff;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.88rem;
+      font-weight: 800;
+      flex-shrink: 0;
+    }
+
+    .product-select-card {
+      display: flex;
+      align-items: center;
+      gap: 1.25rem;
+      padding: 1.25rem;
+      background: var(--bg-subtle);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-lg);
+      margin-top: 1rem;
+      transition: border-color var(--transition-fast);
+    }
+
+    .product-select-card:hover {
+      border-color: var(--primary-light);
+    }
+
+    .product-thumb-wrap {
+      width: 82px;
+      height: 82px;
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      background: #ffffff;
+      border: 1px solid var(--border);
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .product-thumb-wrap img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .product-card-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .product-card-sku {
+      display: inline-block;
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--text-dim);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      margin-bottom: 0.2rem;
+    }
+
+    .product-card-title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text-main);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-bottom: 0.35rem;
+    }
+
+    .product-card-price {
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: var(--primary);
+    }
+
+    /* Right Column: Sticky Summary */
+    .checkout-sidebar {
+      position: sticky;
+      top: 6rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .summary-card {
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xl);
+      padding: 2rem;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.05);
+    }
+
+    .summary-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-bottom: 1.25rem;
+      border-bottom: 1px solid var(--border-subtle);
+      margin-bottom: 1.25rem;
+    }
+
+    .summary-head h3 {
+      font-size: 1.2rem;
+      font-weight: 800;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .summary-badge {
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--brand-emerald);
+      background: var(--accent);
+      padding: 0.25rem 0.65rem;
+      border-radius: var(--radius-full);
+      text-transform: uppercase;
+    }
+
+    .summary-calc {
+      display: flex;
+      flex-direction: column;
+      gap: 0.85rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .calc-line {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.92rem;
+      color: var(--text-muted);
+    }
+
+    .calc-line strong {
+      color: var(--text-main);
+    }
+
+    .calc-line.total-line {
+      margin-top: 0.75rem;
+      padding-top: 1rem;
+      border-top: 2px dashed var(--border);
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: var(--text-main);
+    }
+
+    .calc-line.total-line .grand-total {
+      font-size: 1.6rem;
+      color: var(--primary);
+      font-weight: 900;
+      letter-spacing: -0.02em;
+    }
+
+    .trust-box {
+      background: var(--bg-subtle);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.65rem;
+      margin-bottom: 1.5rem;
+      font-size: 0.84rem;
+      color: var(--text-muted);
+    }
+
+    .trust-item {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+    }
+
+    .trust-item i {
+      font-size: 1.15rem;
+      color: var(--brand-emerald);
+      flex-shrink: 0;
+    }
+
+    .btn-checkout-submit {
+      width: 100%;
+      padding: 1.1rem 1.5rem;
+      font-size: 1.05rem;
+      font-weight: 800;
+      border-radius: var(--radius-full);
+      background-color: var(--primary);
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.65rem;
+      cursor: pointer;
+      transition: all var(--transition-normal);
+      border: none;
+      box-shadow: 0 4px 14px rgba(6, 78, 59, 0.25);
+    }
+
+    .btn-checkout-submit:hover:not(:disabled) {
+      background-color: var(--primary-hover);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(6, 78, 59, 0.35);
+    }
+
+    .btn-checkout-submit:disabled {
+      background-color: #94a3b8;
+      cursor: not-allowed;
+      box-shadow: none;
+      transform: none;
+    }
+
+    .spin-anim {
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      100% { transform: rotate(360deg); }
+    }
+
+    .support-card {
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 1.25rem 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+
+    .support-card-text {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    .support-card-text strong {
+      color: var(--text-main);
+      display: block;
+      font-size: 0.92rem;
+    }
+
+    .btn-sm-wa {
+      padding: 0.6rem 1rem;
+      background: var(--whatsapp);
+      color: #ffffff;
+      font-size: 0.84rem;
+      font-weight: 700;
+      border-radius: var(--radius-full);
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      white-space: nowrap;
+      transition: background-color var(--transition-fast);
+    }
+
+    .btn-sm-wa:hover {
+      background: var(--whatsapp-hover);
+    }
+
+    @media (max-width: 991px) {
+      .checkout-grid {
+        grid-template-columns: 1fr;
+      }
+      .checkout-sidebar {
+        position: static;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .checkout-main-card,
+      .summary-card {
+        padding: 1.5rem 1.25rem;
+      }
+      .form-row {
+        grid-template-columns: 1fr;
+        gap: 0;
+      }
+      .product-select-card {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Announcement Bar -->
+  <aside class="top-bar" aria-label="Announcement">
+    <div class="container top-bar-content">
+      <span class="top-bar-text">Same-Day Dispatch for Orders Placed Before 2:00 PM | 1-Year Full Warranty on All Gear</span>
+    </div>
+  </aside>
+
+  <!-- Sticky Header -->
+  <header class="site-header" id="site-header">
+    <div class="container nav-wrap">
+      <a href="index.html" class="brand-logo" aria-label="VoltEdge Home">
+        <div class="logo-icon">
+          <i class="ph-fill ph-lightning"></i>
+        </div>
+        <div class="logo-text">
+          VoltEdge
+          <span class="logo-subtitle">TECH & ACCESSORIES</span>
+        </div>
+      </a>
+
+      <!-- Desktop Nav Links -->
+      <nav aria-label="Primary Navigation">
+        <ul class="nav-links">
+          <li><a href="index.html#catalogue" class="nav-link">Products</a></li>
+          <li><a href="index.html#creator-gear" class="nav-link">Creator Accessories</a></li>
+          <li><a href="index.html#how-it-works" class="nav-link">How Fulfillment Works</a></li>
+          <li><a href="index.html#feedback" class="nav-link">Feedback</a></li>
+        </ul>
+      </nav>
+
+      <!-- Nav Actions -->
+      <div class="nav-actions">
+        <a href="https://wa.me/2347047922403?text=Hello%20VoltEdge%2C%20I%20have%20a%20question%20before%20placing%20my%20order." target="_blank" rel="noopener noreferrer" class="btn btn-whatsapp" style="padding: 0.65rem 1.15rem; font-size: 0.88rem;">
+          <i class="ph-fill ph-whatsapp-logo"></i> WhatsApp Concierge
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Checkout Container -->
+  <main class="checkout-page-wrap">
+    <div class="container">
+      
+      <!-- Breadcrumb -->
+      <nav class="checkout-breadcrumb" aria-label="Breadcrumb">
+        <a href="index.html"><i class="ph-bold ph-arrow-left"></i> Return to Catalogue</a>
+        <span>/</span>
+        <span>Checkout & Order Placement</span>
+      </nav>
+
+      <div class="checkout-header">
+        <div class="checkout-badge">
+          <i class="ph-bold ph-shield-check"></i> Direct Warehouse Fulfillment Desk
+        </div>
+        <h1 class="checkout-title">Complete Your Order</h1>
+        <p class="checkout-subtitle">
+          Submit your delivery details below to lock in stock from our fulfillment warehouse. Pay on delivery or direct bank transfer upon dispatch verification.
+        </p>
+      </div>
+
+      <div class="checkout-grid">
+        
+        <!-- Left Column: Order Form -->
+        <div class="checkout-main-card">
+          <form id="checkout-form" novalidate>
+
+            <!-- Step 1: Gear Selection -->
+            <section class="step-section">
+              <div class="step-title">
+                <span class="step-num">1</span>
+                <span>Select Your Equipment & Quantity</span>
+              </div>
+
+              <div class="form-group">
+                <label for="checkout-product-select" class="form-label">Selected Hardware *</label>
+                <select id="checkout-product-select" class="form-control" required>
+                  <!-- Populated dynamically from PRODUCTS_DATA -->
+                </select>
+              </div>
+
+              <!-- Product Preview Card -->
+              <div class="product-select-card" id="product-card-preview">
+                <div class="product-thumb-wrap">
+                  <img src="assets/images/pb-black.jpg" alt="Selected Product" id="checkout-preview-img">
+                </div>
+                <div class="product-card-info">
+                  <span class="product-card-sku" id="checkout-preview-sku">VE-PB-30K-BLK</span>
+                  <div class="product-card-title" id="checkout-preview-name">30,000mAh Laptop Power Bank (Black)</div>
+                  <div class="product-card-price" id="checkout-preview-price">₦65,000</div>
+                </div>
+              </div>
+
+              <!-- Quantity Selector -->
+              <div class="form-group" style="margin-top: 1.25rem;">
+                <label for="checkout-qty-input" class="form-label">
+                  <span>Quantity Units</span>
+                  <span class="form-label-desc">Max 50 units per order</span>
+                </label>
+                <div class="qty-stepper">
+                  <button type="button" class="qty-btn" id="chk-qty-minus" aria-label="Decrease quantity">&minus;</button>
+                  <input type="number" id="checkout-qty-input" class="qty-input" value="1" min="1" max="50">
+                  <button type="button" class="qty-btn" id="chk-qty-plus" aria-label="Increase quantity">&#43;</button>
+                </div>
+              </div>
+            </section>
+
+            <!-- Step 2: Contact Information -->
+            <section class="step-section">
+              <div class="step-title">
+                <span class="step-num">2</span>
+                <span>Recipient Contact Details</span>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="checkout-fullname" class="form-label">Full Name *</label>
+                  <input type="text" id="checkout-fullname" class="form-control" placeholder="e.g. Babatunde Adeleke" required>
+                  <div class="field-error" id="error-checkout-fullname">
+                    <i class="ph-bold ph-warning-circle"></i> Please enter your full name (minimum 2 letters).
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label for="checkout-email" class="form-label">Email Address *</label>
+                  <input type="email" id="checkout-email" class="form-control" placeholder="e.g. babatunde@company.com" required>
+                  <div class="field-error" id="error-checkout-email">
+                    <i class="ph-bold ph-warning-circle"></i> Please enter a valid email address.
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="checkout-phone" class="form-label">WhatsApp / Phone Number *</label>
+                <div class="phone-input-wrap">
+                  <div class="country-code-select-wrap">
+                    <select id="checkout-country-code" class="form-control country-code-select" aria-label="Country code">
+                      <option value="+234" selected>🇳🇬 +234</option>
+                      <option value="+1">🇺🇸 +1</option>
+                      <option value="+44">🇬🇧 +44</option>
+                      <option value="+233">🇬🇭 +233</option>
+                      <option value="+254">🇰🇪 +254</option>
+                      <option value="+27">🇿🇦 +27</option>
+                      <option value="+91">🇮🇳 +91</option>
+                      <option value="+971">🇦🇪 +971</option>
+                      <option value="+49">🇩🇪 +49</option>
+                    </select>
+                  </div>
+                  <input type="tel" id="checkout-phone" class="form-control phone-number-input" placeholder="803 123 4567" required>
+                </div>
+                <div class="field-error" id="error-checkout-phone">
+                  <i class="ph-bold ph-warning-circle"></i> Please enter a valid telephone number (at least 7 digits).
+                </div>
+              </div>
+            </section>
+
+            <!-- Step 3: Delivery Address -->
+            <section class="step-section">
+              <div class="step-title">
+                <span class="step-num">3</span>
+                <span>Delivery Address & Location</span>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="checkout-state" class="form-label">State / Region *</label>
+                  <select id="checkout-state" class="form-control" required>
+                    <option value="Lagos (Island / Lekki / VI)">Lagos (Island / Lekki / VI)</option>
+                    <option value="Lagos (Mainland / Ikeja / Surulere)">Lagos (Mainland / Ikeja / Surulere)</option>
+                    <option value="Abuja (FCT)">Abuja (FCT)</option>
+                    <option value="Port Harcourt (Rivers)">Port Harcourt (Rivers)</option>
+                    <option value="Ibadan (Oyo)">Ibadan (Oyo)</option>
+                    <option value="Enugu (Enugu)">Enugu (Enugu)</option>
+                    <option value="Asaba / Warri (Delta)">Asaba / Warri (Delta)</option>
+                    <option value="Benin City (Edo)">Benin City (Edo)</option>
+                    <option value="Other Nigerian State (Nationwide Dispatch)">Other Nigerian State (Nationwide Dispatch)</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label for="checkout-address" class="form-label">Street Address *</label>
+                  <input type="text" id="checkout-address" class="form-control" placeholder="Office / House address, landmark" required>
+                  <div class="field-error" id="error-checkout-address">
+                    <i class="ph-bold ph-warning-circle"></i> Please enter your street delivery address.
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="checkout-notes" class="form-label">
+                  <span>Special Delivery Notes (Optional)</span>
+                  <span class="form-label-desc" id="checkout-notes-count">0 / 500 characters</span>
+                </label>
+                <textarea id="checkout-notes" class="form-control" maxlength="500" placeholder="e.g. Deliver between 9am-4pm; call upon arrival at gate."></textarea>
+              </div>
+            </section>
+
+            <!-- Step 4: Terms Agreement -->
+            <section class="step-section">
+              <div class="terms-checkbox-wrap" id="chk-terms-wrap">
+                <label class="terms-label" for="checkout-terms">
+                  <input type="checkbox" id="checkout-terms" class="terms-input">
+                  <span class="terms-text">
+                    I agree to VoltEdge <a href="index.html#how-it-works" target="_blank" class="terms-link">Terms of Service</a> and confirm my delivery details are accurate.
+                  </span>
+                </label>
+                <div class="field-error" id="error-checkout-terms" style="margin-top: 0.5rem;">
+                  <i class="ph-bold ph-warning-circle"></i> Please accept the terms to complete your order.
+                </div>
+              </div>
+            </section>
+
+            <!-- Action Button for Mobile / Inline -->
+            <div class="checkout-btn-wrap" style="margin-top: 1.5rem;">
+              <button type="submit" class="btn-checkout-submit" id="btn-submit-checkout">
+                <i class="ph-bold ph-check-circle"></i>
+                <span>Complete Order & Request Dispatch</span>
+              </button>
+            </div>
+
+          </form>
+        </div>
+
+        <!-- Right Column: Sticky Summary & Trust -->
+        <aside class="checkout-sidebar">
+          
+          <div class="summary-card">
+            <div class="summary-head">
+              <h3><i class="ph ph-receipt"></i> Order Summary</h3>
+              <span class="summary-badge">Stock Reserved</span>
+            </div>
+
+            <div class="summary-calc">
+              <div class="calc-line">
+                <span>Selected Item:</span>
+                <strong id="summary-prod-name">30,000mAh Power Bank</strong>
+              </div>
+              <div class="calc-line">
+                <span>Unit Price:</span>
+                <strong id="summary-unit-price">₦65,000</strong>
+              </div>
+              <div class="calc-line">
+                <span>Quantity:</span>
+                <strong id="summary-qty-count">1 unit</strong>
+              </div>
+              <div class="calc-line">
+                <span>Subtotal:</span>
+                <strong id="summary-subtotal">₦65,000</strong>
+              </div>
+              <div class="calc-line">
+                <span>Logistics / Delivery:</span>
+                <span style="color: var(--primary); font-weight: 700;">Confirmed upon dispatch</span>
+              </div>
+              <div class="calc-line">
+                <span>1-Year Replacement Warranty:</span>
+                <span style="color: var(--brand-emerald); font-weight: 700;">Included Free</span>
+              </div>
+
+              <div class="calc-line total-line">
+                <span>Total Amount:</span>
+                <span class="grand-total" id="summary-grand-total">₦65,000</span>
+              </div>
+            </div>
+
+            <div class="trust-box">
+              <div class="trust-item">
+                <i class="ph-fill ph-shield-check"></i>
+                <span>100% Genuine Tech with 1-Year Warranty</span>
+              </div>
+              <div class="trust-item">
+                <i class="ph-fill ph-truck"></i>
+                <span>Fast Dispatch (Same-day in Lagos for orders before 2PM)</span>
+              </div>
+              <div class="trust-item">
+                <i class="ph-fill ph-wallet"></i>
+                <span>Payment verification upon delivery scheduling</span>
+              </div>
+            </div>
+
+            <button type="button" class="btn-checkout-submit" id="btn-sidebar-submit" onclick="document.getElementById('btn-submit-checkout').click();">
+              <i class="ph-bold ph-paper-plane-tilt"></i>
+              <span>Submit Order Now</span>
+            </button>
+            
+            <p style="font-size: 0.78rem; color: var(--text-muted); text-align: center; margin-top: 0.75rem;">
+              No payment is deducted right now. Our dispatch officer will call you to confirm order & delivery window.
+            </p>
+          </div>
+
+          <!-- Customer Support Assistance Widget -->
+          <div class="support-card">
+            <div class="support-card-text">
+              <strong>Need help with checkout?</strong>
+              <span>Chat with our team right now on WhatsApp.</span>
+            </div>
+            <a href="https://wa.me/2347047922403?text=Hello%20VoltEdge%20Team%2C%20I%20am%20at%20checkout%20and%20need%20assistance." target="_blank" rel="noopener noreferrer" class="btn-sm-wa">
+              <i class="ph-fill ph-whatsapp-logo"></i> Help
+            </a>
+          </div>
+
+        </aside>
+
+      </div>
+    </div>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-top">
+        <div>
+          <a href="index.html" class="brand-logo footer-brand-logo">
+            <div class="logo-icon" style="background: rgba(255, 255, 255, 0.18); border: 1px solid rgba(255, 255, 255, 0.3);">
+              <i class="ph-fill ph-lightning" style="color: #ffffff;"></i>
+            </div>
+            <div class="logo-text" style="color: #ffffff; font-weight: 800;">
+              VoltEdge<span style="color: #34d399;">Tech</span>
+              <span class="logo-subtitle" style="color: #ffffff; font-weight: 800;">& Accessories</span>
+            </div>
+          </a>
+          <p class="footer-brand-desc" style="color: rgba(255, 255, 255, 0.88); font-weight: 500;">
+            Powering productive workspaces with reliable technology accessories. Laptop power banks, router UPS backups, and ergonomic gear built for modern Nigerian professionals.
+          </p>
+        </div>
+
+        <div>
+          <h4 class="footer-col-title">Quick Links</h4>
+          <ul class="footer-links">
+            <li><a href="index.html#catalogue" class="footer-link">Products</a></li>
+            <li><a href="index.html#creator-gear" class="footer-link">Creator Accessories</a></li>
+            <li><a href="index.html#how-it-works" class="footer-link">How Fulfillment Works</a></li>
+            <li><a href="index.html#feedback" class="footer-link">Give Feedback</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <h4 class="footer-col-title">Customer Support</h4>
+          <div class="footer-contact-item">
+            <i class="ph-fill ph-whatsapp-logo" style="color: #25D366; font-size: 1.25rem;"></i>
+            <a href="https://wa.me/2347047922403" target="_blank" rel="noopener noreferrer" class="footer-link" style="color: #ffffff; font-weight: 700;">
+              Chat with us on WhatsApp
+            </a>
+          </div>
+          <div class="footer-contact-item">
+            <i class="ph-bold ph-phone" style="color: #ffffff; font-size: 1.15rem;"></i>
+            <span style="color: #ffffff; font-weight: 700;">+234 704 792 2403</span>
+          </div>
+          <div class="footer-contact-item">
+            <i class="ph-bold ph-shield-check" style="color: #ffffff; font-size: 1.15rem;"></i>
+            <span style="color: #ffffff; font-weight: 700;">1-Year Warranty Included</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <div style="color: rgba(255, 255, 255, 0.85); font-weight: 600;">&copy; 2026 VoltEdge Tech & Accessories. All rights reserved.</div>
+        <div style="display: flex; gap: 1.5rem;">
+          <a href="index.html" class="footer-link" style="color: #ffffff; font-weight: 700;">Return to Home &uarr;</a>
+          <a href="index.html#catalogue" class="footer-link" style="color: #ffffff; font-weight: 700;">Priced in ₦ Naira</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Products Catalog Data -->
+  <script src="js/products.js"></script>
+
+  <!-- Checkout Interaction Script -->
+  <script>
+    (function() {
+      // Configuration for n8n Webhook
+      const N8N_CONFIG = {
+        workflowName: 'Voltedge Order Processing Automation',
+        webhookUrl: 'https://ucy00zep.rpcld.net/webhook/voltedge-order'
+      };
+
+      // State
+      let selectedProduct = null;
+      let selectedQuantity = 1;
+
+      // Elements
+      const productSelect = document.getElementById('checkout-product-select');
+      const qtyInput = document.getElementById('checkout-qty-input');
+      const qtyMinusBtn = document.getElementById('chk-qty-minus');
+      const qtyPlusBtn = document.getElementById('chk-qty-plus');
+      
+      const previewImg = document.getElementById('checkout-preview-img');
+      const previewSku = document.getElementById('checkout-preview-sku');
+      const previewName = document.getElementById('checkout-preview-name');
+      const previewPrice = document.getElementById('checkout-preview-price');
+
+      const summaryProdName = document.getElementById('summary-prod-name');
+      const summaryUnitPrice = document.getElementById('summary-unit-price');
+      const summaryQtyCount = document.getElementById('summary-qty-count');
+      const summarySubtotal = document.getElementById('summary-subtotal');
+      const summaryGrandTotal = document.getElementById('summary-grand-total');
+
+      const form = document.getElementById('checkout-form');
+      const submitBtn = document.getElementById('btn-submit-checkout');
+      const sidebarSubmitBtn = document.getElementById('btn-sidebar-submit');
+
+      const nameInput = document.getElementById('checkout-fullname');
+      const emailInput = document.getElementById('checkout-email');
+      const countryCodeSelect = document.getElementById('checkout-country-code');
+      const phoneInput = document.getElementById('checkout-phone');
+      const stateSelect = document.getElementById('checkout-state');
+      const addressInput = document.getElementById('checkout-address');
+      const notesInput = document.getElementById('checkout-notes');
+      const notesCount = document.getElementById('checkout-notes-count');
+      const termsCheckbox = document.getElementById('checkout-terms');
+
+      // Helper: Format Naira
+      function formatNaira(amount) {
+        return '₦' + Number(amount).toLocaleString('en-NG');
+      }
+
+      // Initialize Products Dropdown
+      function initProducts() {
+        if (!window.PRODUCTS_DATA || !window.PRODUCTS_DATA.length) {
+          console.error('PRODUCTS_DATA not loaded');
+          return;
+        }
+
+        productSelect.innerHTML = '';
+        window.PRODUCTS_DATA.forEach(prod => {
+          const opt = document.createElement('option');
+          opt.value = prod.id;
+          opt.textContent = `${prod.name} — ${formatNaira(prod.price)}`;
+          productSelect.appendChild(opt);
+        });
+
+        // Determine preselected product from query params or localStorage
+        const params = new URLSearchParams(window.location.search);
+        const paramId = params.get('productId') || params.get('product') || params.get('id');
+        const paramQty = parseInt(params.get('qty') || params.get('quantity') || '1', 10);
+
+        if (!isNaN(paramQty) && paramQty >= 1 && paramQty <= 50) {
+          selectedQuantity = paramQty;
+          qtyInput.value = selectedQuantity;
+        }
+
+        let target = null;
+        if (paramId) {
+          target = window.PRODUCTS_DATA.find(p => p.id.toLowerCase() === paramId.toLowerCase());
+        }
+
+        if (!target) {
+          const cachedId = localStorage.getItem('voltedge_selected_product_id');
+          if (cachedId) {
+            target = window.PRODUCTS_DATA.find(p => p.id === cachedId);
+          }
+        }
+
+        if (!target) {
+          target = window.PRODUCTS_DATA[0];
+        }
+
+        selectedProduct = target;
+        productSelect.value = target.id;
+        updateDisplay();
+      }
+
+      // Update Live UI Display
+      function updateDisplay() {
+        if (!selectedProduct) return;
+
+        const totalAmount = selectedProduct.price * selectedQuantity;
+
+        // Update product preview card
+        if (previewImg) previewImg.src = selectedProduct.image;
+        if (previewSku) previewSku.textContent = selectedProduct.sku || selectedProduct.id;
+        if (previewName) previewName.textContent = selectedProduct.name;
+        if (previewPrice) previewPrice.textContent = formatNaira(selectedProduct.price);
+
+        // Update summary pane
+        if (summaryProdName) summaryProdName.textContent = selectedProduct.shortName || selectedProduct.name;
+        if (summaryUnitPrice) summaryUnitPrice.textContent = formatNaira(selectedProduct.price);
+        if (summaryQtyCount) summaryQtyCount.textContent = `${selectedQuantity} ${selectedQuantity > 1 ? 'units' : 'unit'}`;
+        if (summarySubtotal) summarySubtotal.textContent = formatNaira(totalAmount);
+        if (summaryGrandTotal) summaryGrandTotal.textContent = formatNaira(totalAmount);
+      }
+
+      // Event Listeners for Product and Quantity
+      productSelect.addEventListener('change', function() {
+        const prod = window.PRODUCTS_DATA.find(p => p.id === this.value);
+        if (prod) {
+          selectedProduct = prod;
+          localStorage.setItem('voltedge_selected_product_id', prod.id);
+          updateDisplay();
+        }
+      });
+
+      qtyMinusBtn.addEventListener('click', function() {
+        if (selectedQuantity > 1) {
+          selectedQuantity--;
+          qtyInput.value = selectedQuantity;
+          updateDisplay();
+        }
+      });
+
+      qtyPlusBtn.addEventListener('click', function() {
+        if (selectedQuantity < 50) {
+          selectedQuantity++;
+          qtyInput.value = selectedQuantity;
+          updateDisplay();
+        }
+      });
+
+      qtyInput.addEventListener('input', function() {
+        let val = parseInt(this.value, 10);
+        if (isNaN(val) || val < 1) val = 1;
+        if (val > 50) val = 50;
+        selectedQuantity = val;
+        this.value = val;
+        updateDisplay();
+      });
+
+      // Notes Character Counter
+      if (notesInput && notesCount) {
+        notesInput.addEventListener('input', function() {
+          notesCount.textContent = `${this.value.length} / 500 characters`;
+        });
+      }
+
+      // Form Validation
+      function validateForm(showErrors = false) {
+        let isValid = true;
+
+        const nameValid = nameInput.value.trim().length >= 2;
+        const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailInput.value.trim());
+        const phoneClean = phoneInput.value.replace(/[^0-9]/g, '');
+        const phoneValid = phoneClean.length >= 7;
+        const addressValid = addressInput.value.trim().length >= 4;
+        const termsValid = termsCheckbox.checked;
+
+        if (showErrors) {
+          toggleError('error-checkout-fullname', !nameValid);
+          toggleError('error-checkout-email', !emailValid);
+          toggleError('error-checkout-phone', !phoneValid);
+          toggleError('error-checkout-address', !addressValid);
+          toggleError('error-checkout-terms', !termsValid);
+        }
+
+        return nameValid && emailValid && phoneValid && addressValid && termsValid;
+      }
+
+      function toggleError(elemId, hasError) {
+        const el = document.getElementById(elemId);
+        if (el) {
+          el.style.display = hasError ? 'flex' : 'none';
+        }
+      }
+
+      // Inline validation on blur
+      [nameInput, emailInput, phoneInput, addressInput].forEach(field => {
+        field.addEventListener('blur', () => validateForm(true));
+        field.addEventListener('input', () => {
+          const errId = `error-${field.id}`;
+          toggleError(errId, false);
+        });
+      });
+
+      termsCheckbox.addEventListener('change', () => {
+        toggleError('error-checkout-terms', !termsCheckbox.checked);
+      });
+
+      // Form Submission
+      form.addEventListener('submit', async function(e) {
+        e.preventDefault();
+
+        if (!validateForm(true)) {
+          const firstError = document.querySelector('.field-error[style*="display: flex"]');
+          if (firstError) {
+            firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+          return;
+        }
+
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+        const randomSuffix = Math.floor(1000 + Math.random() * 9000);
+        const trackingCode = `VE-${year}${month}${day}-${randomSuffix}`;
+
+        const name = nameInput.value.trim();
+        const email = emailInput.value.trim();
+        const countryCode = countryCodeSelect.value;
+        const phone = phoneInput.value.trim();
+        const fullPhone = `${countryCode} ${phone}`;
+        const state = stateSelect.value;
+        const address = addressInput.value.trim();
+        const notes = notesInput ? notesInput.value.trim() : '';
+        const totalAmount = selectedProduct.price * selectedQuantity;
+
+        // Comprehensive Payload matching VoltEdge standard schema
+        const orderDetails = {
+          orderId: trackingCode,
+          order_id: trackingCode,
+          trackingCode: trackingCode,
+          workflowName: N8N_CONFIG.workflowName,
+          createdAt: now.toISOString(),
+          timestamp: now.toISOString(),
+
+          customer: {
+            fullName: name,
+            name: name,
+            email: email,
+            countryCode: countryCode,
+            phone: phone,
+            fullPhone: fullPhone,
+            address: address,
+            state: state,
+            deliveryState: state,
+            notes: notes
+          },
+
+          product: {
+            id: selectedProduct.id,
+            name: selectedProduct.name,
+            shortName: selectedProduct.shortName,
+            sku: selectedProduct.sku || selectedProduct.id,
+            unitPrice: selectedProduct.price,
+            formattedUnitPrice: formatNaira(selectedProduct.price),
+            quantity: selectedQuantity,
+            totalAmount: totalAmount,
+            formattedTotal: formatNaira(totalAmount),
+            image: selectedProduct.image
+          },
+
+          items: [
+            {
+              id: selectedProduct.id,
+              name: selectedProduct.name,
+              shortName: selectedProduct.shortName,
+              sku: selectedProduct.sku || selectedProduct.id,
+              unitPrice: selectedProduct.price,
+              quantity: selectedQuantity,
+              totalPrice: totalAmount,
+              image: selectedProduct.image
+            }
+          ],
+
+          fullName: name,
+          customerName: name,
+          email: email,
+          customerEmail: email,
+          countryCode: countryCode,
+          phoneNumber: phone,
+          phone: fullPhone,
+          customerPhone: fullPhone,
+          deliveryAddress: address,
+          address: address,
+          state: state,
+          deliveryState: state,
+          orderNotes: notes,
+          notes: notes,
+          productId: selectedProduct.id,
+          productName: selectedProduct.name,
+          productShortName: selectedProduct.shortName,
+          sku: selectedProduct.sku || selectedProduct.id,
+          quantity: selectedQuantity,
+          unitPrice: selectedProduct.price,
+          formattedUnitPrice: formatNaira(selectedProduct.price),
+          totalAmount: totalAmount,
+          totalPrice: totalAmount,
+          formattedTotal: formatNaira(totalAmount),
+          currency: 'NGN',
+          paymentStatus: 'pending_dispatch_confirmation',
+          status: 'order_submitted',
+          source: 'VoltEdge Checkout Page'
+        };
+
+        // Cache order in localStorage
+        try {
+          localStorage.setItem('voltedge_last_order', JSON.stringify(orderDetails));
+          const history = JSON.parse(localStorage.getItem('voltedge_orders') || '[]');
+          history.unshift(orderDetails);
+          localStorage.setItem('voltedge_orders', JSON.stringify(history.slice(0, 30)));
+        } catch (err) {
+          console.warn('Could not cache order details in localStorage:', err);
+        }
+
+        // Visual loading state
+        submitBtn.disabled = true;
+        if (sidebarSubmitBtn) sidebarSubmitBtn.disabled = true;
+        const originalBtnHTML = submitBtn.innerHTML;
+        submitBtn.innerHTML = '<i class="ph-bold ph-spinner spin-anim"></i> <span>Sending Order to Fulfillment...</span>';
+
+        // Dispatch to n8n Webhook
+        try {
+          console.log(`[VoltEdge Automation] Submitting order ${trackingCode} to ${N8N_CONFIG.webhookUrl}...`);
+          const res = await fetch(N8N_CONFIG.webhookUrl, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json, text/plain, */*'
+            },
+            body: JSON.stringify(orderDetails)
+          });
+          console.log('[VoltEdge Automation] Webhook response status:', res.status);
+        } catch (error) {
+          console.error('[VoltEdge Automation] Network error sending to n8n webhook:', error);
+        }
+
+        // Navigate to /order-success
+        const successUrl = `order-success.html?orderId=${encodeURIComponent(trackingCode)}`;
+        window.location.href = successUrl;
+      });
+
+      // Start on load
+      document.addEventListener('DOMContentLoaded', initProducts);
+    })();
+  </script>
+</body>
+</html>
+

@@ -702,7 +702,7 @@ window.selectForOrder = function(productId) {
 const N8N_ORDER_CONFIG = {
   workflowName: 'Voltedge Order Processing Automation',
   webhookUrl: 'https://ucy00zep.rpcld.net/webhook/voltedge-order',
-  testWebhookUrl: 'https://ucy00zep.rpcld.net/webhook-test/voltedge-order'
+  testWebhookUrl: 'https://ucy00zep.rpcld.net/webhook/voltedge-order'
 };
 
 /**
@@ -863,6 +863,7 @@ async function handleOrderSubmit(e) {
 
   // Cache order locally in localStorage
   try {
+    localStorage.setItem('voltedge_last_order', JSON.stringify(orderDetails));
     const existingOrders = JSON.parse(localStorage.getItem('voltedge_orders') || '[]');
     existingOrders.unshift(orderDetails);
     localStorage.setItem('voltedge_orders', JSON.stringify(existingOrders.slice(0, 30)));
@@ -877,6 +878,7 @@ async function handleOrderSubmit(e) {
   const confCustomerEmail = document.getElementById('conf-customer-email');
   const confCustomerPhone = document.getElementById('conf-customer-phone');
   const confCustomerAddress = document.getElementById('conf-customer-address');
+  const modalViewLink = document.getElementById('modal-view-order-link');
 
   if (confOrderCode) confOrderCode.textContent = trackingCode;
   if (confProductInfo) confProductInfo.textContent = `${currentQuantity}x ${currentSelectedProduct.name} (${formatNaira(totalAmount)})`;
@@ -884,6 +886,9 @@ async function handleOrderSubmit(e) {
   if (confCustomerEmail) confCustomerEmail.textContent = email;
   if (confCustomerPhone) confCustomerPhone.textContent = fullPhone;
   if (confCustomerAddress) confCustomerAddress.textContent = `${address}, ${state}`;
+  if (modalViewLink) {
+    modalViewLink.href = `order-success.html?orderId=${encodeURIComponent(trackingCode)}`;
+  }
 
   // WhatsApp support link inside modal for customer assistance
   const supportWaBtn = document.getElementById('conf-support-wa');
