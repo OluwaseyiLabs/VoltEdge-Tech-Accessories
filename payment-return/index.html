@@ -890,6 +890,44 @@
         return '₦' + Number(num).toLocaleString('en-NG');
       }
 
+      function isDummyValue(v) {
+        if (v === undefined || v === null) return true;
+        const s = String(v).trim().toLowerCase();
+        return (
+          s === '' ||
+          s === '—' ||
+          s === '-' ||
+          s === 'null' ||
+          s === 'undefined' ||
+          s === 'customer' ||
+          s === 'actual customer' ||
+          s === 'customer@example.com' ||
+          s === 'example@example.com' ||
+          s === '+234 701 234 5678' ||
+          s === '+2347012345678' ||
+          s === '+234 7012345678' ||
+          s === 'delivery address, lagos' ||
+          s === 'delivery address' ||
+          s === 'call upon arrival'
+        );
+      }
+
+      function pickNonDummy(...vals) {
+        // Pass 1: Prioritize genuine, non-dummy customer/order data
+        for (const v of vals) {
+          if (!isDummyValue(v)) {
+            return String(v).trim();
+          }
+        }
+        // Pass 2: Fallback to non-empty string if nothing else is available
+        for (const v of vals) {
+          if (v !== undefined && v !== null && String(v).trim() !== '' && String(v).trim() !== '—') {
+            return String(v).trim();
+          }
+        }
+        return '';
+      }
+
       function pick(...vals) {
         for (const v of vals) {
           if (v !== undefined && v !== null) {
@@ -910,6 +948,44 @@
         return 0;
       }
 
+      // Search across voltedge_last_order and voltedge_orders array for genuine customer details
+      function findCachedOrder(orderId) {
+        try {
+          const cleanId = (orderId || '').trim().toLowerCase();
+
+          // 1. Check voltedge_last_order
+          const last = JSON.parse(localStorage.getItem('voltedge_last_order') || '{}');
+          if (last && typeof last === 'object') {
+            const lId = String(last.order_id || last.orderId || last.trackingCode || '').trim().toLowerCase();
+            const matches = !cleanId || !lId || lId === cleanId;
+            if (matches && (last.customer_name || last.customerName || (last.customer && last.customer.fullName) || last.fullName)) {
+              return last;
+            }
+          }
+
+          // 2. Check voltedge_orders array
+          const list = JSON.parse(localStorage.getItem('voltedge_orders') || '[]');
+          if (Array.isArray(list)) {
+            const found = list.find(o => {
+              if (!o || typeof o !== 'object') return false;
+              const oId = String(o.order_id || o.orderId || o.trackingCode || '').trim().toLowerCase();
+              return oId === cleanId || !cleanId;
+            });
+            if (found && (found.customer_name || found.customerName || (found.customer && found.customer.fullName) || found.fullName)) {
+              return found;
+            }
+          }
+
+          // 3. Fallback to last order even if ID not matched
+          if (last && typeof last === 'object' && Object.keys(last).length > 0) {
+            return last;
+          }
+        } catch (e) {
+          console.warn('[VoltEdge] Error reading cached orders:', e);
+        }
+        return null;
+      }
+
       function getReturnParams() {
         const params = new URLSearchParams(window.location.search);
         let orderId = params.get('orderId') || params.get('order_id') || params.get('reference') || params.get('ref') || params.get('id') || '';
@@ -927,7 +1003,7 @@
         // Recover from local order cache if orderId missing
         if (!orderId) {
           try {
-            const cached = JSON.parse(localStorage.getItem('voltedge_last_order') || '{}');
+            const cached = findCachedOrder() || {};
             orderId = cached.order_id || cached.orderId || cached.trackingCode || '';
             if (!token) token = cached.lookup_token || cached.token || '';
           } catch {}
@@ -961,8 +1037,10 @@
       // Render customer and order details onto the page
       function renderOrderUI(order, fallbackId) {
         if (!order) order = {};
+        const cached = findCachedOrder(fallbackId) || findCachedOrder(order.order_id) || {};
+        const custObj = order.customer || cached.customer || {};
 
-        const orderCode = pick(order.order_id, order.orderId, order.trackingCode, fallbackId) || '—';
+        const orderCode = pickNonDummy(order.order_id, order.orderId, order.trackingCode, cached.order_id, cached.orderId, fallbackId) || '—';
         if (dispOrderRef) dispOrderRef.textContent = orderCode;
 
         // Breadcrumb
@@ -989,13 +1067,70 @@
           };
         }
 
-        // Customer details
-        const custObj = order.customer || {};
-        const custName = pick(order.customer_name, order['Customer Name'], order.customerName, order.fullName, custObj.fullName, custObj.name) || 'Customer';
-        const custPhone = pick(order.customer_phone, order['Customer Phone'], order.customerPhone, order.phone, custObj.fullPhone, custObj.phone) || '—';
-        const custEmail = pick(order.customer_email, order['Customer Email'], order.customerEmail, order.email, custObj.email) || '—';
-        const custDest = pick(order.delivery_address, order['Delivery Address'], order.deliveryAddress, order.address, custObj.address) || '—';
-        const custNotes = pick(order.delivery_notes, order['Delivery Notes'], order.deliveryNotes, order.notes, custObj.notes) || 'Call upon arrival';
+        // Customer details: strictly prioritize genuine non-dummy values
+        const custName = pickNonDummy(
+          cached.customer_name,
+          cached.customerName,
+          cached.fullName,
+          (cached.customer && cached.customer.fullName),
+          (cached.customer && cached.customer.name),
+          order.customer_name,
+          order['Customer Name'],
+          order.customerName,
+          order.fullName,
+          custObj.fullName,
+          custObj.name
+        ) || 'Customer';
+
+        const custPhone = pickNonDummy(
+          cached.customer_phone,
+          cached.customerPhone,
+          cached.phone,
+          (cached.customer && cached.customer.fullPhone),
+          (cached.customer && cached.customer.phone),
+          order.customer_phone,
+          order['Customer Phone'],
+          order.customerPhone,
+          order.phone,
+          custObj.fullPhone,
+          custObj.phone
+        ) || '—';
+
+        const custEmail = pickNonDummy(
+          cached.customer_email,
+          cached.customerEmail,
+          cached.email,
+          (cached.customer && cached.customer.email),
+          order.customer_email,
+          order['Customer Email'],
+          order.customerEmail,
+          order.email,
+          custObj.email
+        ) || '—';
+
+        const custDest = pickNonDummy(
+          cached.delivery_address,
+          cached.deliveryAddress,
+          cached.address,
+          (cached.customer && cached.customer.address),
+          order.delivery_address,
+          order['Delivery Address'],
+          order.deliveryAddress,
+          order.address,
+          custObj.address
+        ) || '—';
+
+        const custNotes = pickNonDummy(
+          cached.delivery_notes,
+          cached.deliveryNotes,
+          cached.notes,
+          (cached.customer && cached.customer.notes),
+          order.delivery_notes,
+          order['Delivery Notes'],
+          order.deliveryNotes,
+          order.notes,
+          custObj.notes
+        ) || 'None provided';
 
         const elCustName = document.getElementById('disp-customer-name');
         const elCustPhone = document.getElementById('disp-customer-phone');
@@ -1010,12 +1145,12 @@
         if (elCustNotes) elCustNotes.textContent = custNotes;
 
         // Product details & catalog matching
-        const prodObj = order.product || (order.items && order.items[0]) || {};
-        let prodName = pick(order.product_name, order['Product Name'], order.productName, prodObj.name, prodObj.shortName) || 'VoltEdge Hardware';
-        let prodSku = pick(order.product_sku, order['Product SKU'], order.productSku, prodObj.sku, order.sku) || 'VE-EQUIPMENT';
-        const prodQty = pickNum(order.quantity, order['Quantity'], order.qty, prodObj.quantity) || 1;
-        let unitPrice = pickNum(order.unit_price, order['Unit Price'], order.unitPrice, prodObj.unitPrice);
-        let totalPrice = pickNum(order.total_price, order['Total Price'], order.totalPrice, order.totalAmount, prodObj.totalAmount);
+        const prodObj = order.product || (order.items && order.items[0]) || (cached.product) || (cached.items && cached.items[0]) || {};
+        let prodName = pick(order.product_name, order['Product Name'], order.productName, prodObj.name, prodObj.shortName, cached.product_name) || 'VoltEdge Hardware';
+        let prodSku = pick(order.product_sku, order['Product SKU'], order.productSku, prodObj.sku, order.sku, cached.product_sku) || 'VE-EQUIPMENT';
+        const prodQty = pickNum(order.quantity, order['Quantity'], order.qty, prodObj.quantity, cached.quantity) || 1;
+        let unitPrice = pickNum(order.unit_price, order['Unit Price'], order.unitPrice, prodObj.unitPrice, cached.unit_price);
+        let totalPrice = pickNum(order.total_price, order['Total Price'], order.totalPrice, order.totalAmount, prodObj.totalAmount, cached.total_price, cached.totalAmount);
 
         // Catalog lookup for images and pricing
         let catalogMatch = null;
@@ -1058,7 +1193,7 @@
         if (elTotal) elTotal.textContent = formatNaira(totalPrice);
 
         // Product image
-        let prodImg = order.image || prodObj.image || (catalogMatch && catalogMatch.image) || '';
+        let prodImg = order.image || prodObj.image || (catalogMatch && catalogMatch.image) || cached.image || '';
         if (!prodImg) {
           prodImg = IS_SUBDIR ? '../assets/images/pb-black.jpg' : 'assets/images/pb-black.jpg';
         } else if (IS_SUBDIR && !prodImg.startsWith('http') && !prodImg.startsWith('../') && !prodImg.startsWith('/')) {
@@ -1070,8 +1205,12 @@
           imgEl.alt = prodName;
         }
 
-        // Order Date
-        const rawDate = pick(order.timestamp, order.TimeStamp, order.Timestamp, order.createdAt, order.orderDate, order.date);
+        // Order Date: Prefer user submission time if webhook timestamp is static mock
+        const isMockTimestamp = order.timestamp && isDummyValue(order.timestamp);
+        const rawDate = isMockTimestamp
+          ? pick(cached.timestamp, cached.createdAt, order.timestamp)
+          : pick(order.timestamp, order.TimeStamp, order.Timestamp, order.createdAt, cached.timestamp, cached.createdAt);
+
         const elOrderDate = document.getElementById('disp-order-date');
         if (elOrderDate) {
           let dateStr = '';
@@ -1123,11 +1262,7 @@
         showState('checking');
 
         // Retrieve local cache for immediate display/fallback
-        let cached = {};
-        try {
-          cached = JSON.parse(localStorage.getItem('voltedge_last_order') || '{}');
-        } catch {}
-
+        const cached = findCachedOrder(orderId) || {};
         const finalOrderId = orderId || cached.order_id || cached.orderId || cached.trackingCode || '';
 
         // Query the live webhook response from n8n
@@ -1146,8 +1281,25 @@
               : webhookResult;
         }
 
-        // Merge webhook data over cached data
-        const mergedOrder = { ...(cached || {}), ...(orderData || {}) };
+        // Check if webhook returned mock/static dummy values
+        const isMockCustomer = orderData && (
+          isDummyValue(orderData.customer_name) ||
+          isDummyValue(orderData.customer_email) ||
+          isDummyValue(orderData.customer_phone)
+        );
+
+        // Safe merge: Never let mock/static dummy data overwrite real customer details
+        let mergedOrder = { ...(cached || {}), ...(orderData || {}) };
+        if (isMockCustomer && cached && (cached.customer_name || cached.customerName || cached.fullName || (cached.customer && cached.customer.fullName))) {
+          mergedOrder.customer_name = cached.customer_name || cached.customerName || cached.fullName || (cached.customer && cached.customer.fullName);
+          mergedOrder.customer_phone = cached.customer_phone || cached.customerPhone || cached.phone || (cached.customer && cached.customer.fullPhone);
+          mergedOrder.customer_email = cached.customer_email || cached.customerEmail || cached.email || (cached.customer && cached.customer.email);
+          mergedOrder.delivery_address = cached.delivery_address || cached.deliveryAddress || cached.address || (cached.customer && cached.customer.address);
+          if (cached.delivery_notes || (cached.customer && cached.customer.notes)) {
+            mergedOrder.delivery_notes = cached.delivery_notes || cached.deliveryNotes || (cached.customer && cached.customer.notes);
+          }
+        }
+
         mergedOrder.order_id = finalOrderId;
         mergedOrder.payment_status = 'PAID';
         mergedOrder.order_status = 'Payment Confirmed — Ready to Pack';
