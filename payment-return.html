@@ -54,9 +54,9 @@
       background: #ffffff;
       border: 1px solid var(--border);
       border-radius: var(--radius-xl);
-      padding: 3.5rem 2.5rem;
+      padding: 3.25rem 2.5rem;
       box-shadow: 0 10px 40px rgba(0, 0, 0, 0.05);
-      max-width: 640px;
+      max-width: 860px;
       margin: 0 auto;
       text-align: center;
       position: relative;
@@ -80,10 +80,10 @@
       box-shadow: 0 0 0 10px rgba(209, 250, 229, 0.45);
     }
 
-    .icon-pending {
-      background: #fef3c7;
-      color: #d97706;
-      box-shadow: 0 0 0 10px rgba(254, 243, 199, 0.45);
+    .icon-checking {
+      background: rgba(6, 78, 59, 0.08);
+      color: var(--primary);
+      box-shadow: 0 0 0 10px rgba(6, 78, 59, 0.05);
     }
 
     .icon-unverified {
@@ -111,10 +111,10 @@
       color: #166534;
     }
 
-    .badge-pending {
-      background: #fffbeb;
-      border: 1px solid #fde68a;
-      color: #92400e;
+    .badge-checking {
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      color: #166534;
     }
 
     .badge-unverified {
@@ -124,7 +124,7 @@
     }
 
     .return-title {
-      font-size: clamp(1.5rem, 5vw, 1.95rem);
+      font-size: clamp(1.6rem, 5vw, 2.15rem);
       font-weight: 800;
       color: var(--text-main);
       margin-bottom: 0.75rem;
@@ -133,48 +133,302 @@
 
     .return-desc {
       color: var(--text-muted);
-      font-size: 1rem;
+      font-size: 1.02rem;
       line-height: 1.6;
-      max-width: 500px;
-      margin: 0 auto 2rem;
+      max-width: 580px;
+      margin: 0 auto 1.75rem;
     }
 
-    /* Reference Box */
-    .return-ref-box {
-      background: #f8faf9;
-      border: 1px dashed var(--border);
-      border-radius: var(--radius-md);
-      padding: 1rem 1.25rem;
-      margin: 0 auto 2rem;
-      max-width: 460px;
-      display: flex;
-      justify-content: space-between;
+    /* Reference Tracking Code Banner */
+    .tracking-code-banner {
+      background: var(--bg-subtle);
+      border: 1.5px dashed var(--primary);
+      border-radius: var(--radius-lg);
+      padding: 1.15rem 1.6rem;
+      display: inline-flex;
       align-items: center;
-      font-size: 0.88rem;
+      justify-content: center;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+      margin: 0 auto 2.25rem;
     }
 
-    .return-ref-label {
-      color: var(--text-dim);
-      font-size: 0.75rem;
+    .tracking-label-wrap {
+      text-align: left;
+    }
+
+    .tracking-sub {
+      font-size: 0.74rem;
       font-weight: 700;
+      color: var(--text-dim);
       text-transform: uppercase;
       letter-spacing: 0.05em;
     }
 
-    .return-ref-val {
+    .tracking-code-value {
+      font-size: 1.45rem;
+      font-weight: 900;
+      color: var(--primary);
+      letter-spacing: 0.02em;
+      font-family: monospace, var(--font-sans);
+    }
+
+    .btn-copy-code {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      padding: 0.55rem 1rem;
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-full);
+      color: var(--text-main);
+      font-size: 0.84rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all var(--transition-fast);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .btn-copy-code:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+      transform: translateY(-1px);
+    }
+
+    /* Order Details Grid */
+    .order-details-grid {
+      display: grid;
+      grid-template-columns: 1.15fr 1fr;
+      gap: 1.75rem;
+      margin-bottom: 2rem;
+      text-align: left;
+    }
+
+    .detail-card-panel {
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 1.5rem;
+      background: #ffffff;
+    }
+
+    .detail-card-title {
+      font-size: 1rem;
       font-weight: 800;
       color: var(--text-main);
-      font-family: monospace;
-      font-size: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 1.25rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .item-row {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .item-row img {
+      width: 68px;
+      height: 68px;
+      object-fit: cover;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border);
+      flex-shrink: 0;
+      background: var(--bg-subtle);
+    }
+
+    .item-meta {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .item-title {
+      font-weight: 700;
+      font-size: 0.95rem;
+      color: var(--text-main);
+      margin-bottom: 0.2rem;
+    }
+
+    .item-sku-qty {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .item-price {
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: var(--primary);
+    }
+
+    .receipt-lines {
+      display: flex;
+      flex-direction: column;
+      gap: 0.65rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--border-subtle);
+      font-size: 0.88rem;
+      color: var(--text-muted);
+    }
+
+    .receipt-lines .line {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .receipt-lines .line.total {
+      margin-top: 0.5rem;
+      padding-top: 0.75rem;
+      border-top: 2px dashed var(--border);
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: var(--text-main);
+    }
+
+    .receipt-lines .line.total strong {
+      color: var(--primary);
+      font-size: 1.35rem;
+    }
+
+    .info-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.85rem;
+      font-size: 0.9rem;
+    }
+
+    .info-item {
+      display: flex;
+      flex-direction: column;
+      gap: 0.15rem;
+    }
+
+    .info-label {
+      font-size: 0.74rem;
+      font-weight: 700;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .info-val {
+      font-weight: 600;
+      color: var(--text-main);
+      word-break: break-word;
+    }
+
+    /* Highly Visible Email Receipt Notice Banner */
+    .email-receipt-banner {
+      background: #f0fdf4;
+      border: 2px solid #86efac;
+      border-radius: var(--radius-lg);
+      padding: 1.25rem 1.6rem;
+      display: flex;
+      align-items: center;
+      gap: 1.25rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 4px 16px rgba(16, 185, 129, 0.08);
+      text-align: left;
+    }
+
+    .email-receipt-icon {
+      width: 3.25rem;
+      height: 3.25rem;
+      background: #059669;
+      color: #ffffff;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.65rem;
+      flex-shrink: 0;
+    }
+
+    .email-receipt-title {
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: #064e3b;
+      margin: 0 0 0.25rem 0;
+    }
+
+    .email-receipt-desc {
+      color: #047857;
+      font-size: 0.92rem;
+      margin: 0;
+      line-height: 1.5;
     }
 
     /* Action Buttons */
-    .return-actions {
+    .success-actions {
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 1rem;
       flex-wrap: wrap;
+    }
+
+    .btn-wa-action {
+      background: var(--whatsapp);
+      color: #ffffff;
+      padding: 0.95rem 1.6rem;
+      border-radius: var(--radius-full);
+      font-weight: 800;
+      font-size: 0.95rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all var(--transition-fast);
+      box-shadow: 0 4px 12px rgba(37, 211, 102, 0.25);
+      text-decoration: none;
+    }
+
+    .btn-wa-action:hover {
+      background: var(--whatsapp-hover);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 18px rgba(37, 211, 102, 0.35);
+    }
+
+    .btn-print-action {
+      background: #ffffff;
+      border: 1.5px solid var(--border);
+      color: var(--text-main);
+      padding: 0.95rem 1.5rem;
+      border-radius: var(--radius-full);
+      font-weight: 700;
+      font-size: 0.95rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      cursor: pointer;
+      transition: all var(--transition-fast);
+    }
+
+    .btn-print-action:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+      transform: translateY(-1px);
+    }
+
+    .btn-shop-action {
+      background: var(--primary);
+      color: #ffffff;
+      padding: 0.95rem 1.6rem;
+      border-radius: var(--radius-full);
+      font-weight: 800;
+      font-size: 0.95rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all var(--transition-fast);
+      text-decoration: none;
+    }
+
+    .btn-shop-action:hover {
+      background: var(--primary-hover);
+      transform: translateY(-2px);
     }
 
     .btn-return-primary {
@@ -238,23 +492,60 @@
       transform: translateY(-2px);
     }
 
-    @media (max-width: 640px) {
-      .return-page-wrap {
-        padding: 2rem 0 3.5rem;
+    @media (max-width: 768px) {
+      .order-details-grid {
+        grid-template-columns: 1fr;
+        gap: 1.25rem;
       }
+
       .return-card {
         padding: 2.25rem 1.25rem;
       }
-      .return-actions {
+
+      .success-actions {
         flex-direction: column;
         width: 100%;
       }
+
+      .btn-wa-action,
+      .btn-print-action,
+      .btn-shop-action,
       .btn-return-primary,
       .btn-return-secondary,
       .btn-return-wa {
         width: 100%;
         justify-content: center;
         box-sizing: border-box;
+      }
+    }
+
+    /* Print Stylesheet */
+    @media print {
+      .top-bar,
+      .site-header,
+      .site-footer,
+      .return-breadcrumb,
+      .success-actions,
+      #state-checking,
+      #state-unverified {
+        display: none !important;
+      }
+
+      .return-page-wrap {
+        padding: 0;
+        background: none;
+      }
+
+      .return-card {
+        border: none;
+        box-shadow: none;
+        padding: 0;
+        max-width: 100%;
+      }
+
+      body {
+        background: #ffffff;
+        color: #000000;
       }
     }
   </style>
@@ -300,7 +591,7 @@
     </div>
   </header>
 
-  <!-- Main Container -->
+  <!-- Main Return Section -->
   <main class="return-page-wrap">
     <div class="container">
 
@@ -310,100 +601,164 @@
         <span>/</span>
         <a href="checkout.html">Checkout</a>
         <span>/</span>
-        <span>Payment Return</span>
+        <span id="breadcrumb-current">Payment Return</span>
       </nav>
 
       <div class="return-card">
 
         <!-- 1. CHECKING / VERIFYING STATE -->
-        <div id="state-checking" style="display: block;">
-          <div class="return-anim-icon icon-pending">
-            <i class="ph-bold ph-hourglass-medium spin-anim"></i>
+        <div id="state-checking">
+          <div class="return-anim-icon icon-checking">
+            <i class="ph-bold ph-spinner spin-anim"></i>
           </div>
-          <div class="return-badge badge-pending">
-            <i class="ph-bold ph-shield"></i> Verifying Transaction
+          <div class="return-badge badge-checking">
+            <i class="ph-bold ph-shield-check"></i> Verifying Payment
           </div>
-          <h1 class="return-title">Checking Payment Status</h1>
+          <h1 class="return-title">Confirming Transaction</h1>
           <p class="return-desc">
-            We are checking your payment status. Please wait while we confirm your transaction with Bachs.
+            Please wait while we retrieve your order details from the fulfillment service and verify your transaction...
           </p>
         </div>
 
-        <!-- 2. VERIFIED PAYMENT SUCCESS STATE -->
+        <!-- 2. SUCCESS / CONFIRMED STATE -->
         <div id="state-success" style="display: none;">
           <div class="return-anim-icon icon-success">
             <i class="ph-bold ph-check"></i>
           </div>
           <div class="return-badge badge-success">
-            <i class="ph-bold ph-check-circle"></i> Payment Confirmed
+            <i class="ph-bold ph-package"></i> Payment Confirmed
           </div>
           <h1 class="return-title">Payment Confirmed — Ready to Pack</h1>
           <p class="return-desc">
-            Thank you for your payment! Your transaction has been confirmed and your hardware has been queued for warehouse packaging.
+            Your transaction has been verified. Our logistics warehouse team is now packing your order for dispatch.
           </p>
 
-          <!-- Reference Tracking Code Box -->
-          <div style="background: #f0fdf4; border: 1.5px dashed #86efac; border-radius: var(--radius-lg); padding: 0.95rem 1.4rem; display: inline-flex; align-items: center; gap: 1.25rem; margin-bottom: 1.5rem; flex-wrap: wrap; justify-content: center;">
-            <div style="text-align: left;">
-              <span style="font-size: 0.72rem; font-weight: 700; color: #166534; text-transform: uppercase; letter-spacing: 0.05em; display: block;">Reference Tracking Code</span>
-              <span style="font-size: 1.3rem; font-weight: 800; color: #064e3b; letter-spacing: 0.03em;" id="disp-order-ref">—</span>
+          <!-- Reference Tracking Code Banner -->
+          <div class="tracking-code-banner">
+            <div class="tracking-label-wrap">
+              <span class="tracking-sub">REFERENCE TRACKING CODE</span>
+              <div class="tracking-code-value" id="disp-order-ref">—</div>
             </div>
-            <button type="button" id="btn-copy-return-code" class="btn" style="background: #ffffff; border: 1.5px solid #86efac; color: #166534; padding: 0.45rem 0.95rem; border-radius: var(--radius-full); font-size: 0.82rem; font-weight: 700; display: inline-flex; align-items: center; gap: 0.4rem; cursor: pointer;">
-              <i class="ph-bold ph-copy"></i> <span id="copy-return-code-text">Copy Code</span>
+            <button type="button" class="btn-copy-code" id="btn-copy-return-code">
+              <i class="ph-bold ph-copy"></i>
+              <span id="copy-return-code-text">Copy Code</span>
             </button>
           </div>
 
-          <!-- Customer Order Information Box -->
-          <div style="background: var(--bg-subtle); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 1.25rem 1.5rem; width: 100%; text-align: left; margin-bottom: 1.5rem; font-size: 0.9rem; box-sizing: border-box;">
-            <div style="display: flex; justify-content: space-between; margin-bottom: 0.65rem; gap: 0.75rem;">
-              <span style="color: var(--text-muted); flex-shrink: 0;">Item(s):</span>
-              <strong style="color: var(--text-main); text-align: right; word-break: break-word;" id="return-conf-product">-</strong>
+          <!-- Order Summary & Shipping Details Grid (Image 1) -->
+          <div class="order-details-grid" id="order-details-grid">
+
+            <!-- Item & Invoice Details (Purchased Equipment) -->
+            <div class="detail-card-panel">
+              <h3 class="detail-card-title">
+                <i class="ph-bold ph-receipt"></i> Purchased Equipment
+              </h3>
+
+              <div class="item-row">
+                <img src="assets/images/pb-black.jpg" alt="Hardware Ordered" id="disp-item-img">
+                <div class="item-meta">
+                  <div class="item-title" id="disp-item-name">—</div>
+                  <div class="item-sku-qty" id="disp-item-sku-qty">—</div>
+                  <div class="item-price" id="disp-item-price">—</div>
+                </div>
+              </div>
+
+              <div class="receipt-lines">
+                <div class="line">
+                  <span>Subtotal Value:</span>
+                  <strong id="disp-subtotal">—</strong>
+                </div>
+                <div class="line">
+                  <span>Logistics Delivery Charge:</span>
+                  <span id="disp-delivery-fee" style="color: var(--primary); font-weight: 700;">Confirmed upon dispatch</span>
+                </div>
+                <div class="line">
+                  <span>Payment Verification:</span>
+                  <span id="disp-payment-status" style="color: #15803d; font-weight: 700;">PAID (Verified via Bachs)</span>
+                </div>
+                <div class="line">
+                  <span>Hardware Warranty:</span>
+                  <span style="color: var(--brand-emerald); font-weight: 700;">1-Year Official Warranty Active</span>
+                </div>
+                <div class="line total">
+                  <span>Total Amount:</span>
+                  <strong id="disp-total-amount">—</strong>
+                </div>
+              </div>
             </div>
-            <div style="display: flex; justify-content: space-between; margin-bottom: 0.65rem; gap: 0.75rem;">
-              <span style="color: var(--text-muted); flex-shrink: 0;">Recipient:</span>
-              <strong style="color: var(--text-main); text-align: right;" id="return-conf-recipient">-</strong>
+
+            <!-- Customer & Delivery Destination (Delivery Information) -->
+            <div class="detail-card-panel">
+              <h3 class="detail-card-title">
+                <i class="ph-bold ph-truck"></i> Delivery Information
+              </h3>
+
+              <div class="info-list">
+                <div class="info-item">
+                  <span class="info-label">Customer Name</span>
+                  <span class="info-val" id="disp-customer-name">—</span>
+                </div>
+
+                <div class="info-item">
+                  <span class="info-label">Contact Phone / WhatsApp</span>
+                  <span class="info-val" id="disp-customer-phone">—</span>
+                </div>
+
+                <div class="info-item">
+                  <span class="info-label">Email Address</span>
+                  <span class="info-val" id="disp-customer-email">—</span>
+                </div>
+
+                <div class="info-item">
+                  <span class="info-label">Delivery Address</span>
+                  <span class="info-val" id="disp-customer-address">—</span>
+                </div>
+
+                <div class="info-item">
+                  <span class="info-label">Special Delivery Notes</span>
+                  <span class="info-val" id="disp-customer-notes" style="font-style: italic;">Call upon arrival</span>
+                </div>
+
+                <div class="info-item">
+                  <span class="info-label">Order Submitted At</span>
+                  <span class="info-val" id="disp-order-date">—</span>
+                </div>
+              </div>
             </div>
-            <div style="display: flex; justify-content: space-between; margin-bottom: 0.65rem; gap: 0.75rem;">
-              <span style="color: var(--text-muted); flex-shrink: 0;">Email:</span>
-              <strong style="color: var(--text-main); text-align: right; word-break: break-all;" id="return-conf-email">-</strong>
+
+          </div>
+
+          <!-- Highly Visible Email Receipt Notice Banner -->
+          <div class="email-receipt-banner" id="email-receipt-banner">
+            <div class="email-receipt-icon">
+              <i class="ph-fill ph-envelope-open"></i>
             </div>
-            <div style="display: flex; justify-content: space-between; margin-bottom: 0.65rem; gap: 0.75rem;">
-              <span style="color: var(--text-muted); flex-shrink: 0;">Phone:</span>
-              <span style="color: var(--primary); font-weight: 700; text-align: right;" id="return-conf-phone">-</span>
-            </div>
-            <div style="display: flex; justify-content: space-between; margin-bottom: 0.65rem; gap: 0.75rem;">
-              <span style="color: var(--text-muted); flex-shrink: 0;">Destination:</span>
-              <span style="color: var(--text-main); text-align: right; word-break: break-word;" id="return-conf-destination">-</span>
-            </div>
-            <div style="display: flex; justify-content: space-between; padding-top: 0.65rem; border-top: 1px solid var(--border); gap: 0.75rem; align-items: center;">
-              <span style="color: var(--text-muted); flex-shrink: 0;">Order Status:</span>
-              <strong style="color: #15803d; text-align: right; display: inline-flex; align-items: center; gap: 0.35rem;">
-                <i class="ph-bold ph-package"></i> Payment Confirmed — Ready to Pack
-              </strong>
+            <div class="email-receipt-content">
+              <h3 class="email-receipt-title">Check Your Email for Your Receipt</h3>
+              <p class="email-receipt-desc">
+                Your payment has been successfully confirmed. Your official payment receipt and order confirmation have been sent to your email address.
+              </p>
             </div>
           </div>
 
-          <!-- Highly Visible Receipt Notice -->
-          <div style="background: #f0fdf4; border: 2px solid #16a34a; border-radius: var(--radius-md); padding: 1.15rem 1.25rem; margin-bottom: 1.75rem; text-align: center; box-shadow: 0 4px 12px rgba(22, 163, 74, 0.1);">
-            <div style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; margin-bottom: 0.35rem; color: #15803d;">
-              <i class="ph-bold ph-envelope-simple-open" style="font-size: 1.35rem;"></i>
-              <span style="font-size: 0.85rem; font-weight: 800; letter-spacing: 0.05em; text-transform: uppercase;">Payment Receipt</span>
-            </div>
-            <p style="font-size: 1.02rem; font-weight: 800; color: #14532d; line-height: 1.45; margin: 0;">
-              Your payment has been received. Please check your email for your official payment receipt.
-            </p>
-          </div>
-
-          <div class="return-actions">
-            <a href="order-success.html" id="btn-view-order-status" class="btn-return-primary">
-              <i class="ph-bold ph-arrow-square-out"></i>
-              <span>View Full Order Status</span>
+          <!-- Action Buttons (Image 2) -->
+          <div class="success-actions">
+            <a href="#" id="btn-wa-followup" target="_blank" rel="noopener noreferrer" class="btn-wa-action">
+              <i class="ph-fill ph-whatsapp-logo" style="font-size: 1.25rem;"></i>
+              <span>Chat Dispatch Team on WhatsApp</span>
             </a>
-            <a href="index.html#catalogue" class="btn-return-secondary">
+
+            <button type="button" class="btn-print-action" id="btn-print-receipt" onclick="window.print();">
+              <i class="ph-bold ph-printer"></i>
+              <span>Print Receipt</span>
+            </button>
+
+            <a href="index.html" class="btn-shop-action">
               <i class="ph-bold ph-arrow-left"></i>
               <span>Continue Shopping</span>
             </a>
           </div>
+
         </div>
 
         <!-- 3. UNVERIFIED / PENDING / FAILED STATE -->
@@ -419,23 +774,23 @@
             We could not confirm your payment. If you completed the transaction, please wait while we verify its status or contact support.
           </p>
 
-          <div class="return-ref-box" id="unverified-ref-box" style="display: none;">
-            <div style="text-align: left;">
-              <span class="return-ref-label">Order Reference</span>
-              <div class="return-ref-val" id="unverified-order-ref">—</div>
+          <div class="tracking-code-banner" id="unverified-ref-box" style="display: none; margin: 0 auto 2rem;">
+            <div class="tracking-label-wrap">
+              <span class="tracking-sub">Order Reference</span>
+              <div class="tracking-code-value" id="unverified-order-ref">—</div>
             </div>
           </div>
 
-          <div class="return-actions">
+          <div class="success-actions">
             <button type="button" id="btn-retry-check" class="btn-return-primary">
               <i class="ph-bold ph-arrows-clockwise"></i>
               <span>Check Again</span>
             </button>
             <a href="https://wa.me/2347047922403" id="btn-wa-support" target="_blank" rel="noopener noreferrer" class="btn-return-wa">
               <i class="ph-fill ph-whatsapp-logo"></i>
-              <span>Chat Support on WhatsApp</span>
+              <span>Chat with us</span>
             </a>
-            <a href="index.html#catalogue" class="btn-return-secondary">
+            <a href="index.html" class="btn-return-secondary">
               <i class="ph-bold ph-arrow-left"></i>
               <span>Return to Store</span>
             </a>
@@ -504,24 +859,23 @@
     </div>
   </footer>
 
-  <!-- Dedicated Payment Return Verification Script -->
-  <!-- NOTE: This page NEVER calls order details lookup webhooks or retrieves Google Sheets data -->
+  <!-- Products Catalog Data -->
+  <script src="js/products.js"></script>
+
+  <!-- Payment Return Webhook Sync & Verification Script -->
   <script>
     (function () {
+      const IS_SUBDIR = window.location.pathname.includes('/payment-return/');
+
       const stateChecking = document.getElementById('state-checking');
       const stateSuccess = document.getElementById('state-success');
       const stateUnverified = document.getElementById('state-unverified');
 
       const dispOrderRef = document.getElementById('disp-order-ref');
-      const dispTransRef = document.getElementById('disp-trans-ref');
-      const wrapTransRef = document.getElementById('wrap-trans-ref');
-      const successRefBox = document.getElementById('success-ref-box');
-
       const unverifiedRefBox = document.getElementById('unverified-ref-box');
       const unverifiedOrderRef = document.getElementById('unverified-order-ref');
       const unverifiedTitle = document.getElementById('unverified-title');
       const unverifiedDesc = document.getElementById('unverified-desc');
-      const btnViewStatus = document.getElementById('btn-view-order-status');
       const btnRetry = document.getElementById('btn-retry-check');
       const btnWaSupport = document.getElementById('btn-wa-support');
 
@@ -531,10 +885,35 @@
         if (stateUnverified) stateUnverified.style.display = name === 'unverified' ? 'block' : 'none';
       }
 
+      function formatNaira(num) {
+        if (num === undefined || num === null || isNaN(num)) return '₦0';
+        return '₦' + Number(num).toLocaleString('en-NG');
+      }
+
+      function pick(...vals) {
+        for (const v of vals) {
+          if (v !== undefined && v !== null) {
+            const s = String(v).trim();
+            if (s !== '' && s !== '—' && s !== '-' && s !== 'null' && s !== 'undefined') {
+              return s;
+            }
+          }
+        }
+        return '';
+      }
+
+      function pickNum(...vals) {
+        for (const v of vals) {
+          const n = Number(v);
+          if (!isNaN(n) && n > 0) return n;
+        }
+        return 0;
+      }
+
       function getReturnParams() {
         const params = new URLSearchParams(window.location.search);
-        let orderId = params.get('orderId') || params.get('order_id') || params.get('ref') || params.get('id') || '';
-        let checkoutId = params.get('checkout_id') || params.get('checkoutId') || params.get('session_id') || params.get('reference') || params.get('trxref') || '';
+        let orderId = params.get('orderId') || params.get('order_id') || params.get('reference') || params.get('ref') || params.get('id') || '';
+        let checkoutId = params.get('checkout_id') || params.get('checkoutId') || params.get('session_id') || params.get('trxref') || '';
         let token = params.get('token') || params.get('t') || '';
 
         // Check hash parameters if present
@@ -550,18 +929,181 @@
           try {
             const cached = JSON.parse(localStorage.getItem('voltedge_last_order') || '{}');
             orderId = cached.order_id || cached.orderId || cached.trackingCode || '';
+            if (!token) token = cached.lookup_token || cached.token || '';
           } catch {}
         }
 
         return { orderId: orderId.trim(), checkoutId: checkoutId.trim(), token: token.trim() };
       }
 
-      function handleReturn() {
-        const { orderId, checkoutId, token } = getReturnParams();
-
-        if (btnViewStatus) {
-          btnViewStatus.href = `order-success.html?orderId=${encodeURIComponent(orderId || '')}&payment=success${token ? '&token=' + encodeURIComponent(token) : ''}`;
+      // Query the live order details webhook via the secure backend proxy
+      async function fetchOrderDetailsFromWebhook(orderId, token) {
+        if (!orderId) return null;
+        const endpoint = `/api/voltedge-order-details?orderId=${encodeURIComponent(orderId)}${token ? '&token=' + encodeURIComponent(token) : ''}`;
+        try {
+          const controller = new AbortController();
+          const timeout = setTimeout(() => controller.abort(), 12000);
+          const res = await fetch(endpoint, {
+            method: 'GET',
+            headers: { 'Accept': 'application/json' },
+            signal: controller.signal
+          });
+          clearTimeout(timeout);
+          if (res.ok) {
+            return await res.json();
+          }
+        } catch (err) {
+          console.warn('[VoltEdge Payment Return] Webhook query failed:', err.message);
         }
+        return null;
+      }
+
+      // Render customer and order details onto the page
+      function renderOrderUI(order, fallbackId) {
+        if (!order) order = {};
+
+        const orderCode = pick(order.order_id, order.orderId, order.trackingCode, fallbackId) || '—';
+        if (dispOrderRef) dispOrderRef.textContent = orderCode;
+
+        // Breadcrumb
+        const breadcrumbEl = document.getElementById('breadcrumb-current');
+        if (breadcrumbEl) breadcrumbEl.textContent = `Order ${orderCode}`;
+
+        // Copy button setup
+        const btnCopy = document.getElementById('btn-copy-return-code');
+        const copyText = document.getElementById('copy-return-code-text');
+        if (btnCopy) {
+          btnCopy.onclick = function() {
+            navigator.clipboard.writeText(orderCode).then(() => {
+              if (copyText) copyText.textContent = 'Copied!';
+              btnCopy.style.color = '#15803d';
+              btnCopy.style.borderColor = '#15803d';
+              setTimeout(() => {
+                if (copyText) copyText.textContent = 'Copy Code';
+                btnCopy.style.color = '';
+                btnCopy.style.borderColor = '';
+              }, 2500);
+            }).catch(() => {
+              prompt('Order Reference Code:', orderCode);
+            });
+          };
+        }
+
+        // Customer details
+        const custObj = order.customer || {};
+        const custName = pick(order.customer_name, order['Customer Name'], order.customerName, order.fullName, custObj.fullName, custObj.name) || 'Customer';
+        const custPhone = pick(order.customer_phone, order['Customer Phone'], order.customerPhone, order.phone, custObj.fullPhone, custObj.phone) || '—';
+        const custEmail = pick(order.customer_email, order['Customer Email'], order.customerEmail, order.email, custObj.email) || '—';
+        const custDest = pick(order.delivery_address, order['Delivery Address'], order.deliveryAddress, order.address, custObj.address) || '—';
+        const custNotes = pick(order.delivery_notes, order['Delivery Notes'], order.deliveryNotes, order.notes, custObj.notes) || 'Call upon arrival';
+
+        const elCustName = document.getElementById('disp-customer-name');
+        const elCustPhone = document.getElementById('disp-customer-phone');
+        const elCustEmail = document.getElementById('disp-customer-email');
+        const elCustAddr = document.getElementById('disp-customer-address');
+        const elCustNotes = document.getElementById('disp-customer-notes');
+
+        if (elCustName) elCustName.textContent = custName;
+        if (elCustPhone) elCustPhone.textContent = custPhone;
+        if (elCustEmail) elCustEmail.textContent = custEmail;
+        if (elCustAddr) elCustAddr.textContent = custDest;
+        if (elCustNotes) elCustNotes.textContent = custNotes;
+
+        // Product details & catalog matching
+        const prodObj = order.product || (order.items && order.items[0]) || {};
+        let prodName = pick(order.product_name, order['Product Name'], order.productName, prodObj.name, prodObj.shortName) || 'VoltEdge Hardware';
+        let prodSku = pick(order.product_sku, order['Product SKU'], order.productSku, prodObj.sku, order.sku) || 'VE-EQUIPMENT';
+        const prodQty = pickNum(order.quantity, order['Quantity'], order.qty, prodObj.quantity) || 1;
+        let unitPrice = pickNum(order.unit_price, order['Unit Price'], order.unitPrice, prodObj.unitPrice);
+        let totalPrice = pickNum(order.total_price, order['Total Price'], order.totalPrice, order.totalAmount, prodObj.totalAmount);
+
+        // Catalog lookup for images and pricing
+        let catalogMatch = null;
+        const catalogList = window.PRODUCTS_DATA || (typeof PRODUCTS_DATA !== 'undefined' ? PRODUCTS_DATA : []);
+        if (Array.isArray(catalogList) && catalogList.length) {
+          if (prodSku) {
+            catalogMatch = catalogList.find(p => p.sku && p.sku.toLowerCase() === prodSku.toLowerCase())
+              || catalogList.find(p => p.id && p.id.toLowerCase() === prodSku.toLowerCase());
+          }
+          if (!catalogMatch && prodName) {
+            catalogMatch = catalogList.find(p => p.name && p.name.toLowerCase() === prodName.toLowerCase())
+              || catalogList.find(p => p.shortName && p.shortName.toLowerCase() === prodName.toLowerCase());
+          }
+        }
+
+        if (catalogMatch) {
+          if (!prodName || prodName === 'VoltEdge Hardware') prodName = catalogMatch.name;
+          if (!prodSku || prodSku === 'VE-EQUIPMENT') prodSku = catalogMatch.sku;
+          if (!unitPrice) unitPrice = catalogMatch.price;
+          if (!totalPrice) totalPrice = unitPrice * prodQty;
+        }
+
+        if (unitPrice === 0 && totalPrice > 0 && prodQty > 0) {
+          unitPrice = Math.round(totalPrice / prodQty);
+        }
+        if (totalPrice === 0 && unitPrice > 0 && prodQty > 0) {
+          totalPrice = unitPrice * prodQty;
+        }
+
+        const elItemName = document.getElementById('disp-item-name');
+        const elItemSkuQty = document.getElementById('disp-item-sku-qty');
+        const elItemPrice = document.getElementById('disp-item-price');
+        const elSubtotal = document.getElementById('disp-subtotal');
+        const elTotal = document.getElementById('disp-total-amount');
+
+        if (elItemName) elItemName.textContent = prodName;
+        if (elItemSkuQty) elItemSkuQty.textContent = `SKU: ${prodSku} • Qty: ${prodQty} ${prodQty > 1 ? 'units' : 'unit'}`;
+        if (elItemPrice) elItemPrice.textContent = formatNaira(unitPrice);
+        if (elSubtotal) elSubtotal.textContent = formatNaira(totalPrice);
+        if (elTotal) elTotal.textContent = formatNaira(totalPrice);
+
+        // Product image
+        let prodImg = order.image || prodObj.image || (catalogMatch && catalogMatch.image) || '';
+        if (!prodImg) {
+          prodImg = IS_SUBDIR ? '../assets/images/pb-black.jpg' : 'assets/images/pb-black.jpg';
+        } else if (IS_SUBDIR && !prodImg.startsWith('http') && !prodImg.startsWith('../') && !prodImg.startsWith('/')) {
+          prodImg = '../' + prodImg;
+        }
+        const imgEl = document.getElementById('disp-item-img');
+        if (imgEl) {
+          imgEl.src = prodImg;
+          imgEl.alt = prodName;
+        }
+
+        // Order Date
+        const rawDate = pick(order.timestamp, order.TimeStamp, order.Timestamp, order.createdAt, order.orderDate, order.date);
+        const elOrderDate = document.getElementById('disp-order-date');
+        if (elOrderDate) {
+          let dateStr = '';
+          if (rawDate) {
+            try {
+              const d = new Date(rawDate);
+              if (!isNaN(d.getTime())) {
+                dateStr = d.toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' });
+              }
+            } catch {}
+            if (!dateStr || dateStr.toLowerCase().includes('invalid')) {
+              dateStr = rawDate;
+            }
+          }
+          if (!dateStr || dateStr.toLowerCase().includes('invalid')) {
+            dateStr = new Date().toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' });
+          }
+          elOrderDate.textContent = dateStr;
+        }
+
+        // WhatsApp action button
+        const btnWa = document.getElementById('btn-wa-followup');
+        if (btnWa) {
+          const waMsg = encodeURIComponent(
+            `Hello VoltEdge Team, I have completed payment for my order ${orderCode} (${prodQty}x ${prodName}) for ${custName}. Please confirm dispatch window.`
+          );
+          btnWa.href = `https://wa.me/2347047922403?text=${waMsg}`;
+        }
+      }
+
+      async function handleReturn() {
+        const { orderId, checkoutId, token } = getReturnParams();
 
         if (btnWaSupport) {
           const waMsg = encodeURIComponent(
@@ -577,69 +1119,49 @@
           return;
         }
 
-        // Retrieve cached order details to populate customer info
+        // Show checking state while querying webhook
+        showState('checking');
+
+        // Retrieve local cache for immediate display/fallback
         let cached = {};
         try {
           cached = JSON.parse(localStorage.getItem('voltedge_last_order') || '{}');
         } catch {}
 
-        const finalOrderId = orderId || cached.order_id || cached.orderId || cached.trackingCode || '—';
-        if (dispOrderRef) dispOrderRef.textContent = finalOrderId;
+        const finalOrderId = orderId || cached.order_id || cached.orderId || cached.trackingCode || '';
 
-        // Copy button setup
-        const btnCopy = document.getElementById('btn-copy-return-code');
-        const copyText = document.getElementById('copy-return-code-text');
-        if (btnCopy) {
-          btnCopy.onclick = function() {
-            navigator.clipboard.writeText(finalOrderId).then(() => {
-              if (copyText) copyText.textContent = 'Copied!';
-              btnCopy.style.color = '#15803d';
-              btnCopy.style.borderColor = '#15803d';
-              setTimeout(() => {
-                if (copyText) copyText.textContent = 'Copy Code';
-                btnCopy.style.color = '';
-                btnCopy.style.borderColor = '';
-              }, 2500);
-            });
-          };
+        // Query the live webhook response from n8n
+        let webhookResult = null;
+        if (finalOrderId) {
+          webhookResult = await fetchOrderDetailsFromWebhook(finalOrderId, token);
         }
 
-        // Populate customer order information
-        const prodName = cached.product_name || (cached.product && cached.product.name) || 'VoltEdge Hardware';
-        const qty = cached.quantity || (cached.product && cached.product.quantity) || 1;
-        const total = cached.total_price || cached.totalAmount || (cached.product && cached.product.totalAmount) || 0;
-        const custName = cached.customer_name || (cached.customer && (cached.customer.fullName || cached.customer.name)) || 'Customer';
-        const custEmail = cached.customer_email || (cached.customer && cached.customer.email) || '—';
-        const custPhone = cached.customer_phone || (cached.customer && (cached.customer.fullPhone || cached.customer.phone)) || '—';
-        const custDest = cached.delivery_address || (cached.customer && cached.customer.address) || '—';
-
-        const elProduct = document.getElementById('return-conf-product');
-        const elRecipient = document.getElementById('return-conf-recipient');
-        const elEmail = document.getElementById('return-conf-email');
-        const elPhone = document.getElementById('return-conf-phone');
-        const elDest = document.getElementById('return-conf-destination');
-
-        function formatNaira(num) {
-          return '₦' + Number(num || 0).toLocaleString('en-NG');
+        // Extract order data from webhook response contract: { success: true, order: { ... } } or { ... }
+        let orderData = null;
+        if (webhookResult) {
+          orderData = (webhookResult.order && typeof webhookResult.order === 'object')
+            ? webhookResult.order
+            : (webhookResult.data && typeof webhookResult.data === 'object')
+              ? webhookResult.data
+              : webhookResult;
         }
 
-        if (elProduct) elProduct.textContent = total > 0 ? `${qty}x ${prodName} (${formatNaira(total)})` : `${qty}x ${prodName}`;
-        if (elRecipient) elRecipient.textContent = custName;
-        if (elEmail) elEmail.textContent = custEmail;
-        if (elPhone) elPhone.textContent = custPhone;
-        if (elDest) elDest.textContent = custDest;
+        // Merge webhook data over cached data
+        const mergedOrder = { ...(cached || {}), ...(orderData || {}) };
+        mergedOrder.order_id = finalOrderId;
+        mergedOrder.payment_status = 'PAID';
+        mergedOrder.order_status = 'Payment Confirmed — Ready to Pack';
+        if (checkoutId) mergedOrder.transaction_id = checkoutId;
 
-        // Update cached order status to PAID
+        // Save updated order status to local storage
         try {
-          if (cached && typeof cached === 'object') {
-            cached.payment_status = 'PAID';
-            cached.order_status = 'Payment Confirmed — Ready to Pack';
-            if (checkoutId) cached.transaction_id = checkoutId;
-            localStorage.setItem('voltedge_last_order', JSON.stringify(cached));
-          }
+          localStorage.setItem('voltedge_last_order', JSON.stringify(mergedOrder));
         } catch {}
 
-        // Show verified payment success card
+        // Populate customer and order info into UI
+        renderOrderUI(mergedOrder, finalOrderId);
+
+        // Show confirmed payment success view
         showState('success');
       }
 
