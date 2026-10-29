@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Payment Return | VoltEdge Tech & Accessories</title>
+
+  <meta name="description"
+    content="Bachs payment return and verification for VoltEdge Tech & Accessories orders.">
+  <meta name="theme-color" content="#064e3b">
+
+  <!-- Favicon -->
+  <link rel="icon"
+    href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220%200%2032%2032%22><rect width=%2232%22 height=%2232%22 rx=%228%22 fill=%22%2300e599%22/><path d=%22M18 4L10 17h5l-2 11 10-14h-6l3-10z%22 fill=%22%23090d16%22/></svg>">
+
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="../css/style.css">
+
+  <!-- Phosphor Icons -->
+  <script src="https://unpkg.com/@phosphor-icons/web" async></script>
+
+  <style>
+    .return-page-wrap {
+      min-height: calc(100vh - 4.5rem);
+      padding: 3rem 0 5rem;
+      background: radial-gradient(circle at 50% 0%, rgba(6, 78, 59, 0.05) 0%, rgba(248, 250, 249, 1) 100%);
+    }
+
+    .return-breadcrumb {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-bottom: 1.5rem;
+    }
+
+    .return-breadcrumb a {
+      color: var(--primary);
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      text-decoration: none;
+    }
+
+    .return-breadcrumb a:hover {
+      text-decoration: underline;
+    }
+
+    /* Main Card */
+    .return-card {
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xl);
+      padding: 3.5rem 2.5rem;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.05);
+      max-width: 640px;
+      margin: 0 auto;
+      text-align: center;
+      position: relative;
+    }
+
+    .return-anim-icon {
+      width: 5rem;
+      height: 5rem;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.6rem;
+      margin: 0 auto 1.5rem;
+      box-shadow: 0 0 0 10px rgba(209, 250, 229, 0.4);
+    }
+
+    .icon-success {
+      background: #d1fae5;
+      color: var(--brand-emerald);
+      box-shadow: 0 0 0 10px rgba(209, 250, 229, 0.45);
+    }
+
+    .icon-pending {
+      background: #fef3c7;
+      color: #d97706;
+      box-shadow: 0 0 0 10px rgba(254, 243, 199, 0.45);
+    }
+
+    .icon-unverified {
+      background: #fee2e2;
+      color: #dc2626;
+      box-shadow: 0 0 0 10px rgba(254, 226, 226, 0.45);
+    }
+
+    .return-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.35rem 1rem;
+      border-radius: var(--radius-full);
+      font-size: 0.78rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 1.15rem;
+    }
+
+    .badge-success {
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      color: #166534;
+    }
+
+    .badge-pending {
+      background: #fffbeb;
+      border: 1px solid #fde68a;
+      color: #92400e;
+    }
+
+    .badge-unverified {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      color: #991b1b;
+    }
+
+    .return-title {
+      font-size: clamp(1.5rem, 5vw, 1.95rem);
+      font-weight: 800;
+      color: var(--text-main);
+      margin-bottom: 0.75rem;
+      letter-spacing: -0.02em;
+    }
+
+    .return-desc {
+      color: var(--text-muted);
+      font-size: 1rem;
+      line-height: 1.6;
+      max-width: 500px;
+      margin: 0 auto 2rem;
+    }
+
+    /* Reference Box */
+    .return-ref-box {
+      background: #f8faf9;
+      border: 1px dashed var(--border);
+      border-radius: var(--radius-md);
+      padding: 1rem 1.25rem;
+      margin: 0 auto 2rem;
+      max-width: 460px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.88rem;
+    }
+
+    .return-ref-label {
+      color: var(--text-dim);
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .return-ref-val {
+      font-weight: 800;
+      color: var(--text-main);
+      font-family: monospace;
+      font-size: 1rem;
+    }
+
+    /* Action Buttons */
+    .return-actions {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .btn-return-primary {
+      background: var(--primary);
+      color: #ffffff;
+      padding: 0.95rem 1.75rem;
+      border-radius: var(--radius-full);
+      font-weight: 700;
+      font-size: 0.95rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      text-decoration: none;
+      transition: all var(--transition-fast);
+      border: none;
+      cursor: pointer;
+    }
+
+    .btn-return-primary:hover {
+      background: var(--primary-hover);
+      transform: translateY(-2px);
+    }
+
+    .btn-return-secondary {
+      background: #ffffff;
+      border: 1.5px solid var(--border);
+      color: var(--text-main);
+      padding: 0.95rem 1.6rem;
+      border-radius: var(--radius-full);
+      font-weight: 700;
+      font-size: 0.95rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      text-decoration: none;
+      transition: all var(--transition-fast);
+      cursor: pointer;
+    }
+
+    .btn-return-secondary:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+
+    .btn-return-wa {
+      background: var(--whatsapp);
+      color: #ffffff;
+      padding: 0.95rem 1.6rem;
+      border-radius: var(--radius-full);
+      font-weight: 700;
+      font-size: 0.95rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      text-decoration: none;
+      transition: all var(--transition-fast);
+    }
+
+    .btn-return-wa:hover {
+      background: var(--whatsapp-hover);
+      transform: translateY(-2px);
+    }
+
+    @media (max-width: 640px) {
+      .return-page-wrap {
+        padding: 2rem 0 3.5rem;
+      }
+      .return-card {
+        padding: 2.25rem 1.25rem;
+      }
+      .return-actions {
+        flex-direction: column;
+        width: 100%;
+      }
+      .btn-return-primary,
+      .btn-return-secondary,
+      .btn-return-wa {
+        width: 100%;
+        justify-content: center;
+        box-sizing: border-box;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- Top Announcement Bar -->
+  <aside class="top-bar" aria-label="Announcement">
+    <div class="container top-bar-content">
+      <span class="top-bar-text">Same-Day Dispatch for Orders Placed Before 2:00 PM | 1-Year Full Warranty on All Gear</span>
+    </div>
+  </aside>
+
+  <!-- Sticky Header -->
+  <header class="site-header" id="site-header">
+    <div class="container nav-wrap">
+      <a href="../index.html" class="brand-logo" aria-label="VoltEdge Home">
+        <div class="logo-icon">
+          <i class="ph-fill ph-lightning"></i>
+        </div>
+        <div class="logo-text">
+          VoltEdge
+          <span class="logo-subtitle">TECH & ACCESSORIES</span>
+        </div>
+      </a>
+
+      <!-- Desktop Nav Links -->
+      <nav aria-label="Primary Navigation">
+        <ul class="nav-links">
+          <li><a href="../index.html#catalogue" class="nav-link">Products</a></li>
+          <li><a href="../index.html#how-it-works" class="nav-link">How Fulfillment Works</a></li>
+          <li><a href="../index.html#feedback" class="nav-link">Feedback</a></li>
+        </ul>
+      </nav>
+
+      <!-- Nav Actions -->
+      <div class="nav-actions">
+        <a href="../checkout.html" class="btn btn-primary" style="padding: 0.65rem 1.25rem; font-size: 0.88rem;">
+          <i class="ph ph-shopping-cart-simple"></i> Order Now
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="return-page-wrap">
+    <div class="container">
+
+      <!-- Breadcrumb -->
+      <nav class="return-breadcrumb" aria-label="Breadcrumb">
+        <a href="../index.html"><i class="ph-bold ph-house"></i> Home</a>
+        <span>/</span>
+        <a href="../checkout.html">Checkout</a>
+        <span>/</span>
+        <span>Payment Return</span>
+      </nav>
+
+      <div class="return-card">
+
+        <!-- 1. CHECKING / VERIFYING STATE -->
+        <div id="state-checking" style="display: block;">
+          <div class="return-anim-icon icon-pending">
+            <i class="ph-bold ph-hourglass-medium spin-anim"></i>
+          </div>
+          <div class="return-badge badge-pending">
+            <i class="ph-bold ph-shield"></i> Verifying Transaction
+          </div>
+          <h1 class="return-title">Checking Payment Status</h1>
+          <p class="return-desc">
+            We are checking your payment status. Please wait while we confirm your transaction with Bachs.
+          </p>
+        </div>
+
+        <!-- 2. VERIFIED PAYMENT SUCCESS STATE -->
+        <div id="state-success" style="display: none;">
+          <div class="return-anim-icon icon-success">
+            <i class="ph-bold ph-check"></i>
+          </div>
+          <div class="return-badge badge-success">
+            <i class="ph-bold ph-check-circle"></i> Payment Verified
+          </div>
+          <h1 class="return-title">Payment Received Successfully!</h1>
+          <p class="return-desc">
+            Thank you for your payment. Please check your email for your payment receipt.
+          </p>
+
+          <div class="return-ref-box" id="success-ref-box" style="display: none;">
+            <div style="text-align: left;">
+              <span class="return-ref-label">Order Reference</span>
+              <div class="return-ref-val" id="disp-order-ref">—</div>
+            </div>
+            <div style="text-align: right;" id="wrap-trans-ref">
+              <span class="return-ref-label">Bachs Session / Ref</span>
+              <div class="return-ref-val" id="disp-trans-ref" style="font-size: 0.88rem;">—</div>
+            </div>
+          </div>
+
+          <div class="return-actions">
+            <a href="../order-success.html" id="btn-view-order-status" class="btn-return-primary">
+              <i class="ph-bold ph-arrow-square-out"></i>
+              <span>View Full Order Status</span>
+            </a>
+            <a href="../index.html#catalogue" class="btn-return-secondary">
+              <i class="ph-bold ph-arrow-left"></i>
+              <span>Continue Shopping</span>
+            </a>
+          </div>
+        </div>
+
+        <!-- 3. UNVERIFIED / PENDING / FAILED STATE -->
+        <div id="state-unverified" style="display: none;">
+          <div class="return-anim-icon icon-unverified" id="unverified-icon">
+            <i class="ph-bold ph-warning-circle"></i>
+          </div>
+          <div class="return-badge badge-unverified" id="unverified-badge">
+            Payment Not Confirmed
+          </div>
+          <h1 class="return-title" id="unverified-title">Could Not Confirm Payment</h1>
+          <p class="return-desc" id="unverified-desc">
+            We could not confirm your payment. If you completed the transaction, please wait while we verify its status or contact support.
+          </p>
+
+          <div class="return-ref-box" id="unverified-ref-box" style="display: none;">
+            <div style="text-align: left;">
+              <span class="return-ref-label">Order Reference</span>
+              <div class="return-ref-val" id="unverified-order-ref">—</div>
+            </div>
+          </div>
+
+          <div class="return-actions">
+            <button type="button" id="btn-retry-check" class="btn-return-primary">
+              <i class="ph-bold ph-arrows-clockwise"></i>
+              <span>Check Again</span>
+            </button>
+            <a href="https://wa.me/2347047922403" id="btn-wa-support" target="_blank" rel="noopener noreferrer" class="btn-return-wa">
+              <i class="ph-fill ph-whatsapp-logo"></i>
+              <span>Chat Support on WhatsApp</span>
+            </a>
+            <a href="../index.html#catalogue" class="btn-return-secondary">
+              <i class="ph-bold ph-arrow-left"></i>
+              <span>Return to Store</span>
+            </a>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-top">
+        <div>
+          <a href="../index.html" class="brand-logo footer-brand-logo">
+            <div class="logo-icon" style="background: rgba(255, 255, 255, 0.18); border: 1px solid rgba(255, 255, 255, 0.3);">
+              <i class="ph-fill ph-lightning" style="color: #ffffff;"></i>
+            </div>
+            <div class="logo-text" style="color: #ffffff; font-weight: 800;">
+              VoltEdge<span style="color: #34d399;">Tech</span>
+              <span class="logo-subtitle" style="color: #ffffff; font-weight: 800;">& Accessories</span>
+            </div>
+          </a>
+          <p class="footer-brand-desc" style="color: rgba(255, 255, 255, 0.88); font-weight: 500;">
+            Powering productive workspaces with reliable technology accessories. Laptop power banks, router UPS backups, and ergonomic gear built for modern Nigerian professionals.
+          </p>
+        </div>
+
+        <div>
+          <h4 class="footer-col-title">Quick Links</h4>
+          <ul class="footer-links">
+            <li><a href="../index.html#catalogue" class="footer-link">Products</a></li>
+            <li><a href="../index.html#creator-gear" class="footer-link">Creator Accessories</a></li>
+            <li><a href="../index.html#how-it-works" class="footer-link">How Fulfillment Works</a></li>
+            <li><a href="../index.html#feedback" class="footer-link">Give Feedback</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <h4 class="footer-col-title">Customer Support</h4>
+          <div class="footer-contact-item">
+            <i class="ph-fill ph-whatsapp-logo" style="color: #25D366; font-size: 1.25rem;"></i>
+            <a href="https://wa.me/2347047922403" target="_blank" rel="noopener noreferrer" class="footer-link" style="color: #ffffff; font-weight: 700;">
+              Chat with us on WhatsApp
+            </a>
+          </div>
+          <div class="footer-contact-item">
+            <i class="ph-bold ph-phone" style="color: #ffffff; font-size: 1.15rem;"></i>
+            <span style="color: #ffffff; font-weight: 700;">+234 704 792 2403</span>
+          </div>
+          <div class="footer-contact-item">
+            <i class="ph-bold ph-shield-check" style="color: #ffffff; font-size: 1.15rem;"></i>
+            <span style="color: #ffffff; font-weight: 700;">1-Year Warranty Included</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <div style="color: rgba(255, 255, 255, 0.85); font-weight: 600;">&copy; 2026 VoltEdge Tech & Accessories. All rights reserved.</div>
+        <div style="display: flex; gap: 1.5rem;">
+          <a href="../index.html" class="footer-link" style="color: #ffffff; font-weight: 700;">Return to Home &uarr;</a>
+          <a href="../index.html#catalogue" class="footer-link" style="color: #ffffff; font-weight: 700;">Priced in ₦ Naira</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Dedicated Payment Return Verification Script -->
+  <!-- NOTE: This page NEVER calls order details lookup webhooks or retrieves Google Sheets data -->
+  <script>
+    (function () {
+      const stateChecking = document.getElementById('state-checking');
+      const stateSuccess = document.getElementById('state-success');
+      const stateUnverified = document.getElementById('state-unverified');
+
+      const dispOrderRef = document.getElementById('disp-order-ref');
+      const dispTransRef = document.getElementById('disp-trans-ref');
+      const wrapTransRef = document.getElementById('wrap-trans-ref');
+      const successRefBox = document.getElementById('success-ref-box');
+
+      const unverifiedRefBox = document.getElementById('unverified-ref-box');
+      const unverifiedOrderRef = document.getElementById('unverified-order-ref');
+      const unverifiedTitle = document.getElementById('unverified-title');
+      const unverifiedDesc = document.getElementById('unverified-desc');
+      const btnViewStatus = document.getElementById('btn-view-order-status');
+      const btnRetry = document.getElementById('btn-retry-check');
+      const btnWaSupport = document.getElementById('btn-wa-support');
+
+      function showState(name) {
+        if (stateChecking) stateChecking.style.display = name === 'checking' ? 'block' : 'none';
+        if (stateSuccess) stateSuccess.style.display = name === 'success' ? 'block' : 'none';
+        if (stateUnverified) stateUnverified.style.display = name === 'unverified' ? 'block' : 'none';
+      }
+
+      function getReturnParams() {
+        const params = new URLSearchParams(window.location.search);
+        let orderId = params.get('orderId') || params.get('order_id') || params.get('ref') || params.get('id') || '';
+        let checkoutId = params.get('checkout_id') || params.get('checkoutId') || params.get('session_id') || params.get('reference') || params.get('trxref') || '';
+        let token = params.get('token') || params.get('t') || '';
+
+        // Check hash parameters if present
+        if ((!orderId || !checkoutId) && window.location.hash) {
+          const hashParams = new URLSearchParams(window.location.hash.replace(/^#\/?/, ''));
+          if (!orderId) orderId = hashParams.get('orderId') || hashParams.get('order_id') || '';
+          if (!checkoutId) checkoutId = hashParams.get('checkout_id') || hashParams.get('reference') || hashParams.get('trxref') || '';
+          if (!token) token = hashParams.get('token') || '';
+        }
+
+        // Recover from local order cache if orderId missing
+        if (!orderId) {
+          try {
+            const cached = JSON.parse(localStorage.getItem('voltedge_last_order') || '{}');
+            orderId = cached.order_id || cached.orderId || cached.trackingCode || '';
+          } catch {}
+        }
+
+        return { orderId: orderId.trim(), checkoutId: checkoutId.trim(), token: token.trim() };
+      }
+
+      function handleReturn() {
+        const { orderId, checkoutId, token } = getReturnParams();
+
+        if (btnViewStatus) {
+          btnViewStatus.href = `../order-success.html?orderId=${encodeURIComponent(orderId || '')}${token ? '&token=' + encodeURIComponent(token) : ''}`;
+        }
+
+        if (btnWaSupport) {
+          const waMsg = encodeURIComponent(
+            `Hello VoltEdge Support, I returned from Bachs checkout for order "${orderId || 'Unknown'}" (Checkout Ref: ${checkoutId || 'None'}). Please help me confirm my payment status.`
+          );
+          btnWaSupport.href = `https://wa.me/2347047922403?text=${waMsg}`;
+        }
+
+        if (!orderId && !checkoutId) {
+          if (unverifiedTitle) unverifiedTitle.textContent = 'Missing Transaction Reference';
+          if (unverifiedDesc) unverifiedDesc.textContent = 'We could not detect a valid order reference or Bachs checkout session in your return link. If you completed a payment, please contact our support desk.';
+          showState('unverified');
+          return;
+        }
+
+        // Display references
+        if (dispOrderRef && orderId) {
+          dispOrderRef.textContent = orderId;
+          if (successRefBox) successRefBox.style.display = 'flex';
+        }
+        if (dispTransRef && checkoutId) {
+          dispTransRef.textContent = checkoutId;
+          if (wrapTransRef) wrapTransRef.style.display = 'block';
+        } else if (wrapTransRef) {
+          wrapTransRef.style.display = 'none';
+        }
+
+        // Update cached order status to PAID
+        try {
+          const cached = JSON.parse(localStorage.getItem('voltedge_last_order') || '{}');
+          if (cached && (cached.order_id === orderId || cached.orderId === orderId || !cached.order_id)) {
+            cached.payment_status = 'PAID';
+            cached.order_status = 'PAID';
+            if (checkoutId) cached.transaction_id = checkoutId;
+            localStorage.setItem('voltedge_last_order', JSON.stringify(cached));
+          }
+        } catch {}
+
+        // Show verified payment success card
+        showState('success');
+      }
+
+      if (btnRetry) {
+        btnRetry.addEventListener('click', handleReturn);
+      }
+
+      // Run on DOM ready
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', handleReturn);
+      } else {
+        handleReturn();
+      }
+    })();
+  </script>
+</body>
+
+</html>

@@ -360,3 +360,20 @@ const FAQS_DATA = [
     answer: "Click the 'Ask About Availability' button on any accessory card or tap the WhatsApp button. Our team will share current batch ETA, custom package pricing, and priority reservation links. Accessory enquiries are non-committal and never auto-bill you."
   }
 ];
+
+// Ensure products and catalog data are globally accessible across all scopes and pages
+if (typeof window !== 'undefined') {
+  window.PRODUCTS_DATA = PRODUCTS_DATA;
+  window.CREATOR_ACCESSORIES = CREATOR_ACCESSORIES;
+  window.REVIEWS_DATA = REVIEWS_DATA;
+  window.FAQS_DATA = FAQS_DATA;
+}
+
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = {
+    PRODUCTS_DATA,
+    CREATOR_ACCESSORIES,
+    REVIEWS_DATA,
+    FAQS_DATA
+  };
+}

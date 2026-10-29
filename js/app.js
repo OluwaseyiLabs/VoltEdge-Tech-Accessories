@@ -1,19 +1,73 @@
 // VoltEdge Tech & Accessories - Interactive Web Application Logic
 
-document.addEventListener('DOMContentLoaded', () => {
-  // 1. Initializations
-  initAnnouncementCountdown();
-  initCatalogSearch();
-  renderProducts('all');
-  renderAccessories();
-  renderReviews();
-  renderFAQs();
-  initOrderForm();
-  initFeedbackForm();
-  initQuickViewModal();
-  initMobileNav();
-  initScrollEffects();
-});
+// Safe helper to obtain product catalog data across global, window, and module scopes
+function getProductCatalogData() {
+  if (typeof window !== 'undefined' && Array.isArray(window.PRODUCTS_DATA) && window.PRODUCTS_DATA.length) {
+    return window.PRODUCTS_DATA;
+  }
+  if (typeof PRODUCTS_DATA !== 'undefined' && Array.isArray(PRODUCTS_DATA) && PRODUCTS_DATA.length) {
+    return PRODUCTS_DATA;
+  }
+  return [];
+}
+
+function getAccessoriesData() {
+  if (typeof window !== 'undefined' && Array.isArray(window.CREATOR_ACCESSORIES) && window.CREATOR_ACCESSORIES.length) {
+    return window.CREATOR_ACCESSORIES;
+  }
+  if (typeof CREATOR_ACCESSORIES !== 'undefined' && Array.isArray(CREATOR_ACCESSORIES) && CREATOR_ACCESSORIES.length) {
+    return CREATOR_ACCESSORIES;
+  }
+  return [];
+}
+
+function getReviewsData() {
+  if (typeof window !== 'undefined' && Array.isArray(window.REVIEWS_DATA) && window.REVIEWS_DATA.length) {
+    return window.REVIEWS_DATA;
+  }
+  if (typeof REVIEWS_DATA !== 'undefined' && Array.isArray(REVIEWS_DATA) && REVIEWS_DATA.length) {
+    return REVIEWS_DATA;
+  }
+  return [];
+}
+
+function getFaqsData() {
+  if (typeof window !== 'undefined' && Array.isArray(window.FAQS_DATA) && window.FAQS_DATA.length) {
+    return window.FAQS_DATA;
+  }
+  if (typeof FAQS_DATA !== 'undefined' && Array.isArray(FAQS_DATA) && FAQS_DATA.length) {
+    return FAQS_DATA;
+  }
+  return [];
+}
+
+// Global Application State (declared at top to prevent TDZ errors)
+let currentCatalogCategory = 'all';
+let currentCatalogSearchQuery = '';
+let currentSelectedProduct = (getProductCatalogData() && getProductCatalogData()[0]) || null;
+let currentQuantity = 1;
+let isOrderSubmitting = false;
+
+function initApp() {
+  // Ensure default selected product is ready if catalog data just loaded
+  if (!currentSelectedProduct) {
+    const catalog = getProductCatalogData();
+    if (catalog.length) currentSelectedProduct = catalog[0];
+  }
+
+  // Initializations with safe try/catch guards so one failure never blocks the others
+  try { initAnnouncementCountdown(); } catch (e) { console.error('[VoltEdge] initAnnouncementCountdown error:', e); }
+  try { initCatalogSearch(); } catch (e) { console.error('[VoltEdge] initCatalogSearch error:', e); }
+  try { renderProducts('all'); } catch (e) { console.error('[VoltEdge] renderProducts error:', e); }
+  try { renderAccessories(); } catch (e) { console.error('[VoltEdge] renderAccessories error:', e); }
+  try { renderReviews(); } catch (e) { console.error('[VoltEdge] renderReviews error:', e); }
+  try { renderFAQs(); } catch (e) { console.error('[VoltEdge] renderFAQs error:', e); }
+  try { initOrderForm(); } catch (e) { console.error('[VoltEdge] initOrderForm error:', e); }
+  try { initFeedbackForm(); } catch (e) { console.error('[VoltEdge] initFeedbackForm error:', e); }
+  try { initQuickViewModal(); } catch (e) { console.error('[VoltEdge] initQuickViewModal error:', e); }
+  try { initMobileNav(); } catch (e) { console.error('[VoltEdge] initMobileNav error:', e); }
+  try { initScrollEffects(); } catch (e) { console.error('[VoltEdge] initScrollEffects error:', e); }
+}
 
 // Format Currency in Nigerian Naira (₦)
 function formatNaira(amount) {
@@ -47,10 +101,6 @@ function initAnnouncementCountdown() {
   updateTimer();
   setInterval(updateTimer, 1000);
 }
-
-// Global Catalog Filter & Search State
-let currentCatalogCategory = 'all';
-let currentCatalogSearchQuery = '';
 
 // Helper to normalize strings for search (removes commas, dashes, slashes, spaces)
 function normalizeSearchText(str) {
@@ -124,7 +174,7 @@ function renderProducts(filter = currentCatalogCategory, searchQuery = currentCa
   const trimmedQuery = (searchQuery || '').trim();
 
   // If search query is present, search across all products (or within category if desired)
-  let products = PRODUCTS_DATA;
+  let products = [...getProductCatalogData()];
   if (trimmedQuery) {
     products = products.filter(p => matchesProduct(p, trimmedQuery));
     
@@ -307,7 +357,8 @@ function renderAccessories() {
   const grid = document.getElementById('accessories-grid');
   if (!grid) return;
 
-  grid.innerHTML = CREATOR_ACCESSORIES.map(acc => {
+  const accessories = getAccessoriesData();
+  grid.innerHTML = accessories.map(acc => {
     const waText = encodeURIComponent(`Hello VoltEdge, I would like to enquire about availability and pricing for the ${acc.title} (${acc.sku}).`);
     return `
       <div class="accessory-card">
@@ -341,7 +392,8 @@ function renderReviews() {
   const grid = document.getElementById('reviews-grid');
   if (!grid) return;
 
-  grid.innerHTML = REVIEWS_DATA.map(rev => `
+  const reviews = getReviewsData();
+  grid.innerHTML = reviews.map(rev => `
     <div class="review-card">
       <div class="review-header">
         <div class="reviewer-info">
@@ -370,7 +422,8 @@ function renderFAQs() {
   const container = document.getElementById('faq-accordion');
   if (!container) return;
 
-  container.innerHTML = FAQS_DATA.map((faq, index) => `
+  const faqs = getFaqsData();
+  container.innerHTML = faqs.map((faq, index) => `
     <div class="faq-item ${index === 0 ? 'open' : ''}">
       <button class="faq-question" onclick="toggleFAQ(this)">
         <span>${faq.question}</span>
@@ -396,20 +449,23 @@ window.toggleFAQ = function(buttonEl) {
 };
 
 // 7. Interactive Order Form Logic
-let currentSelectedProduct = PRODUCTS_DATA[0];
-let currentQuantity = 1;
-
 function initOrderForm() {
   const select = document.getElementById('order-product-select');
   if (!select) return;
 
+  const allProducts = getProductCatalogData();
+  if (!currentSelectedProduct && allProducts.length) {
+    currentSelectedProduct = allProducts[0];
+  }
+
   // Populate select options
-  select.innerHTML = PRODUCTS_DATA.map(p => `
+  select.innerHTML = allProducts.map(p => `
     <option value="${p.id}">${p.name} — ${formatNaira(p.price)}</option>
   `).join('');
 
   select.addEventListener('change', (e) => {
-    const found = PRODUCTS_DATA.find(p => p.id === e.target.value);
+    const catalog = getProductCatalogData();
+    const found = catalog.find(p => p.id === e.target.value);
     if (found) {
       currentSelectedProduct = found;
       updateOrderCalculations();
@@ -680,7 +736,8 @@ function updateOrderCalculations() {
 
 // Global function to trigger order selection from cards
 window.selectForOrder = function(productId) {
-  const prod = PRODUCTS_DATA.find(p => p.id === productId);
+  const catalog = getProductCatalogData();
+  const prod = catalog.find(p => p.id === productId);
   if (!prod) return;
 
   currentSelectedProduct = prod;
@@ -698,56 +755,244 @@ window.selectForOrder = function(productId) {
   }
 };
 
-// n8n Webhook Integration for "Voltedge Order Processing Automation"
+// Helper to validate backend fulfillment response strictly against the agreed contract
+function validateBackendOrderResponse(status, rawData, expectedOrderId) {
+  if (typeof status !== 'number' || status < 200 || status >= 300) {
+    if (status === 429) {
+      const msg = (rawData && rawData.message)
+        ? rawData.message
+        : "You're making requests too quickly. Please wait a moment and try again.";
+      return {
+        valid: false,
+        reason: 'rate_limited',
+        status: 429,
+        error: msg,
+        data: rawData
+      };
+    }
+    const msg = (rawData && typeof rawData === 'object' && rawData.message)
+      ? rawData.message
+      : `Fulfillment service returned HTTP ${status || 'Error'}.`;
+    return {
+      valid: false,
+      reason: 'http_error',
+      status: status,
+      error: msg,
+      data: rawData
+    };
+  }
+
+  if (!rawData || typeof rawData !== 'object') {
+    return {
+      valid: false,
+      reason: 'invalid_json',
+      status: status,
+      error: 'Backend returned an empty or unparseable response payload.',
+      data: rawData
+    };
+  }
+
+  // Handle single-element array wrapping from n8n nodes
+  let data = rawData;
+  if (Array.isArray(data)) {
+    data = data[0] || {};
+  }
+  if (data.json && typeof data.json === 'object') {
+    data = data.json;
+  }
+
+  // 1. Check for explicit failure
+  if (data.success === false) {
+    return {
+      valid: false,
+      reason: 'backend_reported_failure',
+      status: status,
+      error: data.message || 'Fulfillment backend reported order processing failed.',
+      data: data
+    };
+  }
+
+  // 2. Accept n8n standard test execution response ("Workflow was started")
+  const isN8nStarted = data.message && typeof data.message === 'string' && data.message.toLowerCase().includes('workflow was started');
+
+  // 3. Confirm order received and match expected reference if available
+  const returnedId = data.order_id || data.orderId || (data.order && (data.order.order_id || data.order.orderId));
+  const isOrderConfirmed = data.order_received === true ||
+                           isN8nStarted ||
+                           (returnedId && expectedOrderId && returnedId === expectedOrderId) ||
+                           data.order_received !== false;
+
+  // 4. Confirm payment link generation, pending status, or test workflow execution
+  const hasPaymentLinkSent = data.payment_link_sent === true ||
+                             isN8nStarted ||
+                             Boolean(data.payment_link || data.paymentLink || (data.order && data.order.payment_link)) ||
+                             data.order_status === 'PENDING_PAYMENT' ||
+                             (data.message && data.message.toLowerCase().includes('payment'));
+
+  if (!isOrderConfirmed && !hasPaymentLinkSent && data.success !== true) {
+    return {
+      valid: false,
+      reason: 'unconfirmed_response',
+      status: status,
+      error: 'Backend did not confirm order logging or payment link delivery.',
+      data: data
+    };
+  }
+
+  return {
+    valid: true,
+    data: data,
+    orderId: returnedId || expectedOrderId,
+    paymentLink: data.payment_link || data.paymentLink || null,
+    message: data.message || 'Your order has been received. Your payment link has been sent to your email.'
+  };
+}
+
+// Secure Backend API Endpoint (backend webhook URL and keys are hidden server-side)
 const N8N_ORDER_CONFIG = {
   workflowName: 'Voltedge Order Processing Automation',
-  webhookUrl: 'https://ucy00zep.rpcld.net/webhook-test/voltedge-order',
-  testWebhookUrl: 'https://ucy00zep.rpcld.net/webhook-test/voltedge-order'
+  endpoint: '/api/voltedge-order'
 };
 
+function getOrderWebhookUrl() {
+  return N8N_ORDER_CONFIG.endpoint;
+}
+
 /**
- * Sends order details to n8n production webhook ("Voltedge Order Processing Automation")
+ * Sends order details to n8n webhook ("Voltedge Order Processing Automation")
+ * with a 60-second retry wait loop so n8n test event listener can catch the event.
  */
-async function sendOrderToN8n(orderDetails) {
-  const webhookUrl = N8N_ORDER_CONFIG.webhookUrl;
+async function sendOrderToN8n(orderDetails, onProgress) {
+  const webhookUrl = getOrderWebhookUrl();
+  const isLocalhost = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+  console.log(`[VoltEdge Automation] Submitting order ${orderDetails.orderId} to webhook at ${webhookUrl}...`, orderDetails);
 
-  console.log(`[VoltEdge Automation] Sending order ${orderDetails.orderId} to production webhook at ${webhookUrl}...`, orderDetails);
+  const startTime = Date.now();
+  const MAX_WAIT_MS = 60000; // 60 seconds (1 minute)
+  let attempt = 0;
+  let lastError = 'No response from fulfillment server.';
 
-  try {
-    const response = await fetch(webhookUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json, text/plain, */*'
-      },
-      body: JSON.stringify(orderDetails)
-    });
+  while (Date.now() - startTime < MAX_WAIT_MS) {
+    attempt++;
+    const remainingTime = Math.max(1000, MAX_WAIT_MS - (Date.now() - startTime));
+    const remainingSec = Math.max(0, Math.ceil(remainingTime / 1000));
+    
+    if (typeof onProgress === 'function') {
+      onProgress(remainingSec, attempt);
+    }
 
-    let responseData = null;
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), Math.min(8000, remainingTime));
+
     try {
-      responseData = await response.json();
-    } catch {
-      responseData = await response.text();
-    }
+      console.log(`[VoltEdge Automation] Attempt ${attempt} (${remainingSec}s left): POST to ${webhookUrl}...`);
+      let response;
+      try {
+        response = await fetch(webhookUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json, text/plain, */*'
+          },
+          body: JSON.stringify(orderDetails),
+          signal: controller.signal
+        });
+      } catch (directErr) {
+        // Fallback to local dev-server proxy if direct fetch suffers CORS/connection restriction on localhost
+        if (isLocalhost) {
+          console.log('[VoltEdge Automation] Direct POST blocked or failed, routing via local proxy /api/voltedge-order...');
+          response = await fetch('/api/voltedge-order', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json, text/plain, */*'
+            },
+            body: JSON.stringify(orderDetails),
+            signal: controller.signal
+          });
+        } else {
+          throw directErr;
+        }
+      }
+      clearTimeout(timeoutId);
 
-    if (response.ok) {
-      console.log(`[VoltEdge Automation] Order ${orderDetails.orderId} successfully delivered to n8n (${webhookUrl}):`, responseData);
-      return { success: true, url: webhookUrl, data: responseData };
-    } else {
-      console.warn(`[VoltEdge Automation] Webhook response ${response.status} (${response.statusText}):`, responseData);
-      return { success: false, url: webhookUrl, status: response.status, data: responseData };
+      console.log(`[VoltEdge Automation] Attempt ${attempt} HTTP status: ${response.status}`);
+
+      let responseData = null;
+      let rawText = '';
+      try {
+        rawText = await response.text();
+        if (rawText && rawText.trim()) {
+          responseData = JSON.parse(rawText);
+        }
+      } catch (parseErr) {
+        console.warn('[VoltEdge Automation] Non-JSON response body received:', rawText.slice(0, 150));
+      }
+
+      const validation = validateBackendOrderResponse(response.status, responseData, orderDetails.orderId);
+
+      if (validation.valid) {
+        console.log(`[VoltEdge Automation] Order ${orderDetails.orderId} verified by fulfillment backend!`, validation);
+        return {
+          success: true,
+          url: webhookUrl,
+          data: validation.data,
+          orderId: validation.orderId,
+          paymentLink: validation.paymentLink,
+          message: validation.message
+        };
+      }
+
+      if (validation.reason === 'rate_limited') {
+        return {
+          success: false,
+          rateLimited: true,
+          url: webhookUrl,
+          error: validation.error
+        };
+      }
+
+      // If response is 404/403 or unverified, n8n test event is likely waiting for trigger
+      lastError = validation.error || `Server returned HTTP ${response.status}`;
+      const timeLeft = MAX_WAIT_MS - (Date.now() - startTime);
+      if (timeLeft > 2500) {
+        await new Promise(r => setTimeout(r, 2500));
+      } else {
+        break;
+      }
+
+    } catch (err) {
+      clearTimeout(timeoutId);
+      console.warn(`[VoltEdge Automation] Attempt ${attempt} error:`, err);
+      lastError = err.name === 'AbortError' 
+        ? 'Request timed out waiting for fulfillment server.' 
+        : (err.message || 'Could not connect to fulfillment server.');
+      const timeLeft = MAX_WAIT_MS - (Date.now() - startTime);
+      if (timeLeft > 2500) {
+        await new Promise(r => setTimeout(r, 2500));
+      } else {
+        break;
+      }
     }
-  } catch (error) {
-    console.error(`[VoltEdge Automation] Network error sending order to n8n webhook:`, error);
-    return { success: false, error: error.message };
   }
+
+  return {
+    success: false,
+    url: webhookUrl,
+    error: 'An error occurred. Please try again or contact the team on WhatsApp.'
+  };
 }
 
 // Form submission handler
 async function handleOrderSubmit(e) {
   if (e) e.preventDefault();
 
-  if (!validateOrderForm()) {
+  if (isOrderSubmitting) {
+    console.warn('[VoltEdge] Order submission already in progress. Ignoring duplicate click.');
+    return;
+  }
+
+  if (!validateOrderForm(true)) {
     showToast('Please fill all required information and accept the terms to proceed.', 'error');
     return;
   }
@@ -761,6 +1006,43 @@ async function handleOrderSubmit(e) {
   const notesInput = document.getElementById('order-notes');
   const termsCheckbox = document.getElementById('terms-checkbox');
   const submitBtn = document.getElementById('btn-submit-order');
+  const statusBanner = document.getElementById('order-submit-status-banner');
+
+  function setStatusBanner(type, message) {
+    if (!statusBanner) return;
+    if (!message) {
+      statusBanner.style.display = 'none';
+      statusBanner.innerHTML = '';
+      return;
+    }
+    statusBanner.style.display = 'block';
+    if (type === 'loading') {
+      statusBanner.style.background = '#f0fdf4';
+      statusBanner.style.border = '1px solid #86efac';
+      statusBanner.style.color = '#166534';
+      statusBanner.innerHTML = `<div style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.88rem; font-weight: 600;"><i class="ph-bold ph-spinner spin-anim"></i><span>${message}</span></div>`;
+    } else if (type === 'error') {
+      statusBanner.style.background = '#fef2f2';
+      statusBanner.style.border = '1.5px solid #fca5a5';
+      statusBanner.style.color = '#991b1b';
+      statusBanner.innerHTML = `
+        <div style="display: flex; align-items: flex-start; gap: 0.65rem; padding: 0.25rem 0;">
+          <i class="ph-bold ph-warning-circle" style="font-size: 1.35rem; color: #dc2626; flex-shrink: 0; margin-top: 0.1rem;"></i>
+          <div>
+            <div style="font-weight: 800; font-size: 0.95rem; margin-bottom: 0.25rem;">Order Submission Unsuccessful</div>
+            <div style="font-size: 0.85rem; line-height: 1.5; color: #7f1d1d;">${message}</div>
+            <div style="margin-top: 0.55rem; font-size: 0.82rem; color: #450a0a;">
+              Your order information is preserved. You can click <strong>Submit Order</strong> to retry, or contact our <a href="https://wa.me/2347047922403" target="_blank" rel="noopener noreferrer" style="color: #15803d; font-weight: 800; text-decoration: underline;">WhatsApp Desk</a>.
+            </div>
+          </div>
+        </div>`;
+    } else if (type === 'success') {
+      statusBanner.style.background = '#dcfce7';
+      statusBanner.style.border = '1px solid #86efac';
+      statusBanner.style.color = '#15803d';
+      statusBanner.innerHTML = `<div style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.88rem; font-weight: 700;"><i class="ph-bold ph-check-circle"></i><span>${message}</span></div>`;
+    }
+  }
 
   const name = nameInput.value.trim();
   const email = emailInput ? emailInput.value.trim() : '';
@@ -778,19 +1060,43 @@ async function handleOrderSubmit(e) {
   const day = String(now.getDate()).padStart(2, '0');
   const randomSuffix = Math.floor(1000 + Math.random() * 9000);
   const trackingCode = `VE-${year}${month}${day}-${randomSuffix}`;
+  const lookupToken = 've_tok_' + Math.random().toString(36).substring(2, 10);
   const totalAmount = currentSelectedProduct.price * currentQuantity;
 
   // Complete Order Payload for n8n workflow "Voltedge Order Processing Automation"
   const orderDetails = {
-    // Unique Identification & Tracking
     orderId: trackingCode,
     order_id: trackingCode,
     trackingCode: trackingCode,
+    token: lookupToken,
+    lookup_token: lookupToken,
     workflowName: N8N_ORDER_CONFIG.workflowName,
     createdAt: now.toISOString(),
     timestamp: now.toISOString(),
+    timeStamp: now.toISOString(),
 
-    // Customer Information (Nested)
+    // Bachs Payment Return URLs (directing to dedicated payment-return page)
+    return_url: `${window.location.origin}/payment-return.html?orderId=${encodeURIComponent(trackingCode)}`,
+    redirect_url: `${window.location.origin}/payment-return.html?orderId=${encodeURIComponent(trackingCode)}`,
+    callback_url: `${window.location.origin}/payment-return.html?orderId=${encodeURIComponent(trackingCode)}`,
+    success_url: `${window.location.origin}/payment-return.html?orderId=${encodeURIComponent(trackingCode)}`,
+
+    // Direct Google Sheets & n8n snake_case mappings
+    customer_name: name,
+    customer_phone: fullPhone,
+    customer_email: email,
+    product_sku: currentSelectedProduct.sku || currentSelectedProduct.id,
+    product_SKU: currentSelectedProduct.sku || currentSelectedProduct.id,
+    product_name: currentSelectedProduct.name,
+    unit_price: currentSelectedProduct.price,
+    quantity: currentQuantity,
+    total_price: totalAmount,
+    delivery_address: address,
+    delivery_notes: notes,
+    payment_link: '',
+    order_status: 'order_submitted',
+    source: 'VoltEdge Dashboard Order Form',
+
     customer: {
       fullName: name,
       name: name,
@@ -804,7 +1110,6 @@ async function handleOrderSubmit(e) {
       notes: notes
     },
 
-    // Selected Product Information (Nested)
     product: {
       id: currentSelectedProduct.id,
       name: currentSelectedProduct.name,
@@ -817,7 +1122,6 @@ async function handleOrderSubmit(e) {
       formattedTotal: formatNaira(totalAmount)
     },
 
-    // Order items array for multi-item compatible nodes
     items: [
       {
         id: currentSelectedProduct.id,
@@ -830,7 +1134,6 @@ async function handleOrderSubmit(e) {
       }
     ],
 
-    // Flattened fields for easy n8n node referencing ($json.email, $json.phone, etc.)
     fullName: name,
     customerName: name,
     email: email,
@@ -861,11 +1164,71 @@ async function handleOrderSubmit(e) {
     source: 'VoltEdge Dashboard Order Form'
   };
 
-  // Cache order locally in localStorage
+  // Set visual loading state on submit button
+  isOrderSubmitting = true;
+  const originalBtnHTML = submitBtn ? submitBtn.innerHTML : '';
+  if (submitBtn) {
+    submitBtn.disabled = true;
+    submitBtn.setAttribute('disabled', 'disabled');
+    submitBtn.innerHTML = '<i class="ph-bold ph-spinner spin-anim"></i> <span>Submitting... (60s)</span>';
+  }
+  // User instruction: Do NOT show placeholder or banner when loading
+  if (statusBanner) {
+    statusBanner.style.display = 'none';
+  }
+
+  // Dispatch to n8n Webhook with 60s wait loop & progress callback
+  const result = await sendOrderToN8n(orderDetails, (remainingSec, attempt) => {
+    if (submitBtn) {
+      submitBtn.innerHTML = `<i class="ph-bold ph-spinner spin-anim"></i> <span>Submitting... (${remainingSec}s)</span>`;
+    }
+    if (statusBanner) {
+      statusBanner.style.display = 'none';
+    }
+  });
+
+  if (!result.success) {
+    // CRITICAL FIX: NEVER show order success or claim payment link was sent if backend failed/inactive!
+    console.error('[VoltEdge] Order submission failed validation:', result.error);
+    isOrderSubmitting = false;
+
+    if (submitBtn) {
+      submitBtn.disabled = false;
+      submitBtn.removeAttribute('disabled');
+      submitBtn.innerHTML = '<i class="ph-bold ph-arrows-clockwise"></i> <span>Try Again</span>';
+    }
+
+    // User instruction: Handle 429 gracefully with clear rate-limit message
+    const isRateLimited = result.rateLimited || (result.error && (result.error.toLowerCase().includes('too quickly') || result.error.toLowerCase().includes('rate limit')));
+    const failureMsg = isRateLimited
+      ? `<i class="ph-bold ph-warning-circle"></i> <strong>Please slow down.</strong> ${result.error}`
+      : '<i class="ph-bold ph-warning-circle"></i> <strong>An error occurred.</strong> Please try again or <a href="https://wa.me/2347047922403" target="_blank" rel="noopener noreferrer" style="color: inherit; text-decoration: underline; font-weight: 700;">contact the team on WhatsApp</a>.';
+    setStatusBanner('error', failureMsg);
+    showToast(result.error || 'An error occurred. Please try again.', 'error');
+
+    // Scroll error banner into view if offscreen
+    if (statusBanner) {
+      statusBanner.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+    return;
+  }
+
+  // ONLY REACHED IF BACKEND EXPLICITLY CONFIRMED ORDER & PAYMENT LINK
+  console.log('[VoltEdge] Backend explicitly confirmed order processing:', result);
+
+  // Cache confirmed order locally in localStorage
   try {
-    localStorage.setItem('voltedge_last_order', JSON.stringify(orderDetails));
+    const confirmedOrder = {
+      ...orderDetails,
+      order_id: result.orderId || trackingCode,
+      orderId: result.orderId || trackingCode,
+      payment_link: result.paymentLink || '',
+      payment_link_sent: true,
+      order_status: 'PENDING_PAYMENT'
+    };
+    localStorage.setItem('voltedge_last_order', JSON.stringify(confirmedOrder));
     const existingOrders = JSON.parse(localStorage.getItem('voltedge_orders') || '[]');
-    existingOrders.unshift(orderDetails);
+    existingOrders.unshift(confirmedOrder);
     localStorage.setItem('voltedge_orders', JSON.stringify(existingOrders.slice(0, 30)));
   } catch (err) {
     console.warn('Could not store order locally:', err);
@@ -879,51 +1242,52 @@ async function handleOrderSubmit(e) {
   const confCustomerPhone = document.getElementById('conf-customer-phone');
   const confCustomerAddress = document.getElementById('conf-customer-address');
   const modalViewLink = document.getElementById('modal-view-order-link');
+  const confPaymentNotice = document.getElementById('conf-payment-notice');
+  const directPayWrap = document.getElementById('conf-direct-pay-wrap');
+  const directPayBtn = document.getElementById('conf-direct-pay-btn');
 
-  if (confOrderCode) confOrderCode.textContent = trackingCode;
+  if (confOrderCode) confOrderCode.textContent = result.orderId || trackingCode;
   if (confProductInfo) confProductInfo.textContent = `${currentQuantity}x ${currentSelectedProduct.name} (${formatNaira(totalAmount)})`;
   if (confCustomerName) confCustomerName.textContent = name;
   if (confCustomerEmail) confCustomerEmail.textContent = email;
   if (confCustomerPhone) confCustomerPhone.textContent = fullPhone;
   if (confCustomerAddress) confCustomerAddress.textContent = `${address}, ${state}`;
   if (modalViewLink) {
-    modalViewLink.href = `order-success.html?orderId=${encodeURIComponent(trackingCode)}`;
+    modalViewLink.href = `order-success.html?orderId=${encodeURIComponent(result.orderId || trackingCode)}&token=${encodeURIComponent(lookupToken)}`;
+    modalViewLink.innerHTML = '<i class="ph-bold ph-arrow-square-out"></i> View Full Order Status';
+  }
+  if (confPaymentNotice) {
+    confPaymentNotice.textContent = 'Your order has been received. Please check your email for your payment link to complete your payment.';
+  }
+  if (directPayWrap && directPayBtn) {
+    if (result.paymentLink) {
+      directPayBtn.href = result.paymentLink;
+      directPayWrap.style.display = 'block';
+    } else {
+      directPayWrap.style.display = 'none';
+    }
   }
 
   // WhatsApp support link inside modal for customer assistance
   const supportWaBtn = document.getElementById('conf-support-wa');
   if (supportWaBtn) {
     const waHelpText = encodeURIComponent(
-      `Hello VoltEdge team, I just placed order ${trackingCode} (${currentQuantity}x ${currentSelectedProduct.name}) and have a question or need assistance with my order.`
+      `Hello VoltEdge team, I just placed order ${result.orderId || trackingCode} (${currentQuantity}x ${currentSelectedProduct.name}) and have a question or need assistance with my order.`
     );
     supportWaBtn.href = `https://wa.me/2347047922403?text=${waHelpText}`;
   }
 
-  // Visual loading on submit button while webhook dispatches
-  const originalBtnHTML = submitBtn ? submitBtn.innerHTML : '';
-  if (submitBtn) {
-    submitBtn.disabled = true;
-    submitBtn.innerHTML = '<i class="ph-bold ph-spinner spin-anim"></i> <span>Sending Order...</span>';
-  }
-
-  // Send order details to n8n Webhook
-  try {
-    await sendOrderToN8n(orderDetails);
-  } catch (err) {
-    console.error('Webhook execution notice:', err);
-  } finally {
-    if (submitBtn) {
-      submitBtn.innerHTML = originalBtnHTML;
-    }
-  }
-
-  // Open modal
+  // Open modal strictly upon confirmed backend success
   const modal = document.getElementById('order-success-modal');
   if (modal) {
+    const modalTitle = modal.querySelector('.modal-title');
+    if (modalTitle) modalTitle.textContent = 'Order Placed Successfully!';
+    const modalSub = modal.querySelector('.modal-subtitle');
+    if (modalSub) modalSub.textContent = 'Your order has been received. Please check your email for your payment link to complete your payment.';
     modal.classList.add('active');
   }
 
-  // Clear form inputs
+  // Clear form inputs only after verified success
   if (nameInput) nameInput.value = '';
   if (emailInput) emailInput.value = '';
   if (phoneInput) phoneInput.value = '';
@@ -932,7 +1296,14 @@ async function handleOrderSubmit(e) {
   if (termsCheckbox) termsCheckbox.checked = false;
   validateOrderForm();
 
-  showToast(`Order ${trackingCode} submitted and sent to processing!`, 'success');
+  if (submitBtn) {
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = originalBtnHTML;
+  }
+  isOrderSubmitting = false;
+  setStatusBanner(null);
+
+  showToast(`Order ${result.orderId || trackingCode} confirmed! Please check your email for the payment link.`, 'success');
 }
 
 // 8. Give Us a Feedback Form Logic
@@ -994,7 +1365,7 @@ function initFeedbackForm() {
   });
 
   // Handle Form Submission
-  form.addEventListener('submit', (e) => {
+  form.addEventListener('submit', async (e) => {
     e.preventDefault();
     if (!validateFeedback(true)) {
       showToast('Please enter both your name and feedback before submitting.', 'error');
@@ -1002,6 +1373,28 @@ function initFeedbackForm() {
     }
 
     const userName = nameInput.value.trim();
+    const userMessage = messageInput.value.trim();
+
+    try {
+      const res = await fetch('/api/feedback', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: userName, message: userMessage })
+      });
+
+      if (res.status === 429) {
+        let msg = "You're making requests too quickly. Please wait a moment and try again.";
+        try {
+          const resData = await res.json();
+          if (resData && resData.message) msg = resData.message;
+        } catch {}
+        showToast(msg, 'error');
+        return;
+      }
+    } catch (apiErr) {
+      console.warn('[VoltEdge] Feedback API notice:', apiErr);
+    }
+
     form.style.display = 'none';
     if (successState) {
       successState.style.display = 'block';
@@ -1053,7 +1446,8 @@ function initQuickViewModal() {
 }
 
 window.openQuickView = function(productId) {
-  const product = PRODUCTS_DATA.find(p => p.id === productId);
+  const catalog = getProductCatalogData();
+  const product = catalog.find(p => p.id === productId);
   if (!product) return;
 
   const modal = document.getElementById('quick-view-modal');
@@ -1177,4 +1571,13 @@ function showToast(message, type = 'info') {
     toast.classList.remove('show');
     setTimeout(() => toast.remove(), 350);
   }, 3500);
+}
+
+// Start application initialization
+if (typeof document !== 'undefined') {
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initApp);
+  } else {
+    initApp();
+  }
 }

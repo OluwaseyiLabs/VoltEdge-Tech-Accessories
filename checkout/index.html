@@ -276,31 +276,6 @@
       letter-spacing: -0.02em;
     }
 
-    .trust-box {
-      background: var(--bg-subtle);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-md);
-      padding: 1rem;
-      display: flex;
-      flex-direction: column;
-      gap: 0.65rem;
-      margin-bottom: 1.5rem;
-      font-size: 0.84rem;
-      color: var(--text-muted);
-    }
-
-    .trust-item {
-      display: flex;
-      align-items: center;
-      gap: 0.65rem;
-    }
-
-    .trust-item i {
-      font-size: 1.15rem;
-      color: var(--brand-emerald);
-      flex-shrink: 0;
-    }
-
     .btn-checkout-submit {
       width: 100%;
       padding: 1.1rem 1.5rem;
@@ -390,9 +365,22 @@
     }
 
     @media (max-width: 640px) {
+      .checkout-page-wrap {
+        padding: 1.5rem 0 3rem;
+      }
+      .checkout-header {
+        margin-bottom: 1.5rem;
+        text-align: center;
+      }
+      .checkout-title {
+        font-size: clamp(1.4rem, 6vw, 1.85rem);
+      }
+      .checkout-subtitle {
+        font-size: 0.88rem;
+      }
       .checkout-main-card,
       .summary-card {
-        padding: 1.5rem 1.25rem;
+        padding: 1.25rem 0.95rem;
       }
       .form-row {
         grid-template-columns: 1fr;
@@ -401,6 +389,70 @@
       .product-select-card {
         flex-direction: column;
         align-items: flex-start;
+        gap: 0.85rem;
+        padding: 1rem 0.85rem;
+      }
+      .product-select-card .product-thumb {
+        width: 58px;
+        height: 58px;
+      }
+      .product-select-card .product-info {
+        width: 100%;
+      }
+      .product-select-card .product-name {
+        font-size: 0.92rem;
+      }
+      .product-select-card .product-price {
+        font-size: 1.05rem;
+      }
+      .qty-control-box {
+        width: 100%;
+        justify-content: space-between;
+      }
+      .phone-input-wrap {
+        width: 100%;
+      }
+      .btn-checkout-submit {
+        width: 100%;
+        font-size: 0.92rem;
+        padding: 0.85rem 1rem;
+        justify-content: center;
+      }
+      .support-card {
+        flex-direction: column;
+        gap: 0.75rem;
+        text-align: center;
+      }
+      .btn-sm-wa {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .checkout-main-card,
+      .summary-card {
+        padding: 1rem 0.85rem;
+        border-radius: var(--radius-md);
+      }
+      .step-section {
+        margin-bottom: 1.5rem;
+        padding-bottom: 1.35rem;
+      }
+      .step-title {
+        font-size: 0.98rem;
+        gap: 0.5rem;
+      }
+      .step-num {
+        width: 1.75rem;
+        height: 1.75rem;
+        font-size: 0.8rem;
+      }
+      .calc-line {
+        font-size: 0.85rem;
+      }
+      .calc-line.total-line .grand-total {
+        font-size: 1.25rem;
       }
     }
   </style>
@@ -431,7 +483,6 @@
       <nav aria-label="Primary Navigation">
         <ul class="nav-links">
           <li><a href="../index.html#catalogue" class="nav-link">Products</a></li>
-          <li><a href="../index.html#creator-gear" class="nav-link">Creator Accessories</a></li>
           <li><a href="../index.html#how-it-works" class="nav-link">How Fulfillment Works</a></li>
           <li><a href="../index.html#feedback" class="nav-link">Feedback</a></li>
         </ul>
@@ -440,7 +491,7 @@
       <!-- Nav Actions -->
       <div class="nav-actions">
         <a href="https://wa.me/2347047922403?text=Hello%20VoltEdge%2C%20I%20have%20a%20question%20before%20placing%20my%20order." target="_blank" rel="noopener noreferrer" class="btn btn-whatsapp" style="padding: 0.65rem 1.15rem; font-size: 0.88rem;">
-          <i class="ph-fill ph-whatsapp-logo"></i> WhatsApp Concierge
+          <i class="ph-fill ph-whatsapp-logo"></i> Chat with us
         </a>
       </div>
     </div>
@@ -467,7 +518,75 @@
         </p>
       </div>
 
-      <div class="checkout-grid">
+      <!-- Dedicated Experience A: Order Submission Success State -->
+      <div id="checkout-success-view" style="display: none; max-width: 680px; margin: 0 auto; background: #ffffff; border: 1px solid var(--border); border-radius: var(--radius-xl); padding: 3rem 2rem; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.05); text-align: center;">
+        <div style="width: 4.8rem; height: 4.8rem; background: #d1fae5; color: var(--brand-emerald); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; margin: 0 auto 1.25rem; box-shadow: 0 0 0 10px rgba(209, 250, 229, 0.45);">
+          <i class="ph-bold ph-check"></i>
+        </div>
+
+        <h2 style="font-size: 1.85rem; color: var(--text-main); font-weight: 800; margin-bottom: 0.5rem;">Order Placed Successfully!</h2>
+        <p style="color: var(--text-muted); font-size: 1rem; max-width: 520px; margin: 0 auto 1.5rem; line-height: 1.55;">
+          Your order has been received. Please check your email for your payment link to complete your payment.
+        </p>
+
+        <!-- Reference Tracking Code Box -->
+        <div style="background: #f0fdf4; border: 1.5px dashed #86efac; border-radius: var(--radius-lg); padding: 1rem 1.5rem; display: inline-flex; align-items: center; gap: 1.25rem; margin-bottom: 1.75rem; flex-wrap: wrap; justify-content: center;">
+          <div style="text-align: left;">
+            <span style="font-size: 0.72rem; font-weight: 700; color: #166534; text-transform: uppercase; letter-spacing: 0.05em; display: block;">Reference Tracking Code</span>
+            <span style="font-size: 1.35rem; font-weight: 800; color: #064e3b; letter-spacing: 0.03em;" id="chk-conf-order-code">VE-XXXXXXXX-XXXX</span>
+          </div>
+          <button type="button" id="chk-btn-copy-code" class="btn" style="background: #ffffff; border: 1.5px solid #86efac; color: #166534; padding: 0.5rem 1rem; border-radius: var(--radius-full); font-size: 0.85rem; font-weight: 700; display: inline-flex; align-items: center; gap: 0.4rem; cursor: pointer;">
+            <i class="ph-bold ph-copy"></i> <span id="chk-copy-code-text">Copy Code</span>
+          </button>
+        </div>
+
+        <!-- Order Summary Details -->
+        <div style="background: var(--bg-subtle); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 1.25rem 1.5rem; width: 100%; text-align: left; margin-bottom: 1.5rem; font-size: 0.9rem; box-sizing: border-box;">
+          <div style="display: flex; justify-content: space-between; margin-bottom: 0.65rem; gap: 0.75rem;">
+            <span style="color: var(--text-muted); flex-shrink: 0;">Item(s):</span>
+            <strong style="color: var(--text-main); text-align: right; word-break: break-word;" id="chk-conf-product">-</strong>
+          </div>
+          <div style="display: flex; justify-content: space-between; margin-bottom: 0.65rem; gap: 0.75rem;">
+            <span style="color: var(--text-muted); flex-shrink: 0;">Recipient:</span>
+            <strong style="color: var(--text-main); text-align: right;" id="chk-conf-recipient">-</strong>
+          </div>
+          <div style="display: flex; justify-content: space-between; margin-bottom: 0.65rem; gap: 0.75rem;">
+            <span style="color: var(--text-muted); flex-shrink: 0;">Email:</span>
+            <strong style="color: var(--text-main); text-align: right; word-break: break-all;" id="chk-conf-email">-</strong>
+          </div>
+          <div style="display: flex; justify-content: space-between; margin-bottom: 0.65rem; gap: 0.75rem;">
+            <span style="color: var(--text-muted); flex-shrink: 0;">Phone:</span>
+            <span style="color: var(--primary); font-weight: 700; text-align: right;" id="chk-conf-phone">-</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; gap: 0.75rem;">
+            <span style="color: var(--text-muted); flex-shrink: 0;">Destination:</span>
+            <span style="color: var(--text-main); text-align: right; word-break: break-word;" id="chk-conf-destination">-</span>
+          </div>
+        </div>
+
+        <!-- Prominent Payment Link Notice -->
+        <div style="background: #f0fdf4; border: 2px solid #16a34a; border-radius: var(--radius-md); padding: 1.15rem 1.25rem; margin-bottom: 1.75rem; text-align: center; box-shadow: 0 4px 12px rgba(22, 163, 74, 0.1);">
+          <div style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; margin-bottom: 0.35rem; color: #15803d;">
+            <i class="ph-bold ph-envelope-simple-open" style="font-size: 1.35rem;"></i>
+            <span style="font-size: 0.85rem; font-weight: 800; letter-spacing: 0.05em; text-transform: uppercase;">Notice</span>
+          </div>
+          <p style="font-size: 1.02rem; font-weight: 800; color: #14532d; line-height: 1.45; margin: 0;">
+            Your order has been received. Please check your email for your payment link to complete your payment.
+          </p>
+        </div>
+
+        <!-- Buttons: View Full Order Status & Continue Shopping -->
+        <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+          <a href="order-success.html" id="chk-btn-view-status" class="btn btn-primary" style="padding: 0.95rem 1.75rem; font-size: 1rem; font-weight: 700; border-radius: var(--radius-full); text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem;">
+            <i class="ph-bold ph-arrow-square-out"></i> <span>View Full Order Status</span>
+          </a>
+          <a href="../index.html#catalogue" class="btn" style="padding: 0.95rem 1.75rem; font-size: 1rem; font-weight: 700; border-radius: var(--radius-full); border: 1.5px solid var(--border); color: var(--text-main); text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem; background: #ffffff;">
+            <i class="ph-bold ph-arrow-left"></i> <span>Continue Shopping</span>
+          </a>
+        </div>
+      </div>
+
+      <div class="checkout-grid" id="checkout-main-grid">
         
         <!-- Left Column: Order Form -->
         <div class="checkout-main-card">
@@ -603,33 +722,12 @@
               </div>
             </section>
 
-            <!-- Step 4: Terms Agreement -->
-            <section class="step-section">
-              <div class="terms-checkbox-wrap" id="chk-terms-wrap">
-                <label class="terms-label" for="checkout-terms">
-                  <input type="checkbox" id="checkout-terms" class="terms-input">
-                  <span class="terms-text">
-                    I agree to VoltEdge <a href="../index.html#how-it-works" target="_blank" class="terms-link">Terms of Service</a> and confirm my delivery details are accurate.
-                  </span>
-                </label>
-                <div class="field-error" id="error-checkout-terms" style="margin-top: 0.5rem;">
-                  <i class="ph-bold ph-warning-circle"></i> Please accept the terms to complete your order.
-                </div>
-              </div>
             </section>
-
-            <!-- Action Button for Mobile / Inline -->
-            <div class="checkout-btn-wrap" style="margin-top: 1.5rem;">
-              <button type="submit" class="btn-checkout-submit" id="btn-submit-checkout">
-                <i class="ph-bold ph-check-circle"></i>
-                <span>Complete Order & Request Dispatch</span>
-              </button>
-            </div>
 
           </form>
         </div>
 
-        <!-- Right Column: Sticky Summary & Trust -->
+        <!-- Right Column: Sticky Summary & Order Submission -->
         <aside class="checkout-sidebar">
           
           <div class="summary-card">
@@ -670,25 +768,25 @@
               </div>
             </div>
 
-            <div class="trust-box">
-              <div class="trust-item">
-                <i class="ph-fill ph-shield-check"></i>
-                <span>100% Genuine Tech with 1-Year Warranty</span>
-              </div>
-              <div class="trust-item">
-                <i class="ph-fill ph-truck"></i>
-                <span>Fast Dispatch (Same-day in Lagos for orders before 2PM)</span>
-              </div>
-              <div class="trust-item">
-                <i class="ph-fill ph-wallet"></i>
-                <span>Payment verification upon delivery scheduling</span>
+            <!-- Terms Agreement inside Order Summary -->
+            <div class="terms-checkbox-wrap" id="chk-terms-wrap" style="margin-top: 1.25rem; margin-bottom: 1rem; text-align: left;">
+              <label class="terms-label" for="checkout-terms">
+                <input type="checkbox" id="checkout-terms" form="checkout-form" class="terms-input">
+                <span class="terms-text" style="font-size: 0.85rem;">
+                  I agree to VoltEdge <a href="../index.html#how-it-works" target="_blank" class="terms-link">Terms of Service</a> and confirm my delivery details are accurate.
+                </span>
+              </label>
+              <div class="field-error" id="error-checkout-terms" style="margin-top: 0.5rem;">
+                <i class="ph-bold ph-warning-circle"></i> Please accept the terms to complete your order.
               </div>
             </div>
 
-            <button type="button" class="btn-checkout-submit" id="btn-sidebar-submit" onclick="document.getElementById('btn-submit-checkout').click();">
-              <i class="ph-bold ph-paper-plane-tilt"></i>
-              <span>Submit Order Now</span>
+            <!-- Submit Button inside Order Summary -->
+            <button type="submit" form="checkout-form" class="btn-checkout-submit" id="btn-submit-checkout">
+              <i class="ph-bold ph-check-circle"></i>
+              <span id="btn-submit-text">Complete Order & Request Dispatch</span>
             </button>
+            <div id="checkout-status-msg" style="display: none; margin-top: 0.85rem; padding: 0.85rem 1rem; border-radius: var(--radius-md); font-size: 0.86rem; text-align: center; line-height: 1.45;"></div>
             
             <p style="font-size: 0.78rem; color: var(--text-muted); text-align: center; margin-top: 0.75rem;">
               No payment is deducted right now. Our dispatch officer will call you to confirm order & delivery window.
@@ -776,11 +874,74 @@
   <!-- Checkout Interaction Script -->
   <script>
     (function() {
-      // Configuration for n8n Webhook
+      // Secure Backend API Endpoint (backend webhook URL and keys are hidden server-side)
       const N8N_CONFIG = {
         workflowName: 'Voltedge Order Processing Automation',
-        webhookUrl: 'https://ucy00zep.rpcld.net/webhook-test/voltedge-order'
+        endpoint: '/api/voltedge-order'
       };
+
+      function getOrderWebhookUrl() {
+        return N8N_CONFIG.endpoint;
+      }
+
+      // Helper to strictly validate backend fulfillment response against agreed contract
+      function validateBackendOrderResponse(status, rawData, expectedOrderId) {
+        if (typeof status !== 'number' || status < 200 || status >= 300) {
+          if (status === 429) {
+            const msg = (rawData && rawData.message)
+              ? rawData.message
+              : "You're making requests too quickly. Please wait a moment and try again.";
+            return { valid: false, reason: 'rate_limited', status: 429, error: msg, data: rawData };
+          }
+          const msg = (rawData && typeof rawData === 'object' && rawData.message)
+            ? rawData.message
+            : `Fulfillment service returned HTTP ${status || 'Error'}.`;
+          return { valid: false, reason: 'http_error', status: status, error: msg, data: rawData };
+        }
+
+        if (!rawData || typeof rawData !== 'object') {
+          return { valid: false, reason: 'invalid_json', status: status, error: 'Backend returned an empty or unparseable response payload.', data: rawData };
+        }
+
+        let data = rawData;
+        if (Array.isArray(data)) {
+          data = data[0] || {};
+        }
+        if (data.json && typeof data.json === 'object') {
+          data = data.json;
+        }
+
+        if (data.success === false) {
+          return { valid: false, reason: 'backend_reported_failure', status: status, error: data.message || 'Fulfillment backend reported order processing failed.', data: data };
+        }
+
+        // Accept n8n default test event response ("Workflow was started")
+        const isN8nStarted = data.message && typeof data.message === 'string' && data.message.toLowerCase().includes('workflow was started');
+
+        const returnedId = data.order_id || data.orderId || (data.order && (data.order.order_id || data.order.orderId));
+        const isOrderConfirmed = data.order_received === true ||
+                                 isN8nStarted ||
+                                 (returnedId && expectedOrderId && returnedId === expectedOrderId) ||
+                                 data.order_received !== false;
+
+        const hasPaymentLinkSent = data.payment_link_sent === true ||
+                                   isN8nStarted ||
+                                   Boolean(data.payment_link || data.paymentLink || (data.order && data.order.payment_link)) ||
+                                   data.order_status === 'PENDING_PAYMENT' ||
+                                   (data.message && data.message.toLowerCase().includes('payment'));
+
+        if (!isOrderConfirmed && !hasPaymentLinkSent && data.success !== true) {
+          return { valid: false, reason: 'unconfirmed_response', status: status, error: 'Backend did not confirm order logging or payment link delivery.', data: data };
+        }
+
+        return {
+          valid: true,
+          data: data,
+          orderId: returnedId || expectedOrderId,
+          paymentLink: data.payment_link || data.paymentLink || null,
+          message: data.message || 'Your order has been received. Your payment link has been sent to your email.'
+        };
+      }
 
       // State
       let selectedProduct = null;
@@ -824,18 +985,21 @@
 
       // Initialize Products Dropdown
       function initProducts() {
-        if (!window.PRODUCTS_DATA || !window.PRODUCTS_DATA.length) {
-          console.error('PRODUCTS_DATA not loaded');
+        const prodList = window.PRODUCTS_DATA || (typeof PRODUCTS_DATA !== 'undefined' ? PRODUCTS_DATA : []);
+        if (!prodList || !prodList.length) {
+          console.error('[VoltEdge Checkout] PRODUCTS_DATA not loaded');
           return;
         }
 
-        productSelect.innerHTML = '';
-        window.PRODUCTS_DATA.forEach(prod => {
-          const opt = document.createElement('option');
-          opt.value = prod.id;
-          opt.textContent = `${prod.name} — ${formatNaira(prod.price)}`;
-          productSelect.appendChild(opt);
-        });
+        if (productSelect) {
+          productSelect.innerHTML = '';
+          prodList.forEach(prod => {
+            const opt = document.createElement('option');
+            opt.value = prod.id;
+            opt.textContent = `${prod.name} — ${formatNaira(prod.price)}`;
+            productSelect.appendChild(opt);
+          });
+        }
 
         // Determine preselected product from query params or localStorage
         const params = new URLSearchParams(window.location.search);
@@ -844,27 +1008,29 @@
 
         if (!isNaN(paramQty) && paramQty >= 1 && paramQty <= 50) {
           selectedQuantity = paramQty;
-          qtyInput.value = selectedQuantity;
+          if (qtyInput) qtyInput.value = selectedQuantity;
         }
 
         let target = null;
         if (paramId) {
-          target = window.PRODUCTS_DATA.find(p => p.id.toLowerCase() === paramId.toLowerCase());
+          target = prodList.find(p => p.id.toLowerCase() === paramId.toLowerCase());
         }
 
         if (!target) {
           const cachedId = localStorage.getItem('voltedge_selected_product_id');
           if (cachedId) {
-            target = window.PRODUCTS_DATA.find(p => p.id === cachedId);
+            target = prodList.find(p => p.id === cachedId);
           }
         }
 
         if (!target) {
-          target = window.PRODUCTS_DATA[0];
+          target = prodList[0];
         }
 
         selectedProduct = target;
-        productSelect.value = target.id;
+        if (productSelect && target) {
+          productSelect.value = target.id;
+        }
         updateDisplay();
       }
 
@@ -874,14 +1040,8 @@
 
         const totalAmount = selectedProduct.price * selectedQuantity;
 
-        // Update product preview card (ensure relative path from /checkout/ folder)
-        if (previewImg) {
-          let imgSrc = selectedProduct.image;
-          if (imgSrc && !imgSrc.startsWith('http') && !imgSrc.startsWith('../') && !imgSrc.startsWith('/')) {
-            imgSrc = '../' + imgSrc;
-          }
-          previewImg.src = imgSrc;
-        }
+        // Update product preview card
+        if (previewImg) previewImg.src = selectedProduct.image;
         if (previewSku) previewSku.textContent = selectedProduct.sku || selectedProduct.id;
         if (previewName) previewName.textContent = selectedProduct.name;
         if (previewPrice) previewPrice.textContent = formatNaira(selectedProduct.price);
@@ -895,14 +1055,17 @@
       }
 
       // Event Listeners for Product and Quantity
-      productSelect.addEventListener('change', function() {
-        const prod = window.PRODUCTS_DATA.find(p => p.id === this.value);
-        if (prod) {
-          selectedProduct = prod;
-          localStorage.setItem('voltedge_selected_product_id', prod.id);
-          updateDisplay();
-        }
-      });
+      if (productSelect) {
+        productSelect.addEventListener('change', function() {
+          const prodList = window.PRODUCTS_DATA || (typeof PRODUCTS_DATA !== 'undefined' ? PRODUCTS_DATA : []);
+          const prod = prodList.find(p => p.id === this.value);
+          if (prod) {
+            selectedProduct = prod;
+            localStorage.setItem('voltedge_selected_product_id', prod.id);
+            updateDisplay();
+          }
+        });
+      }
 
       qtyMinusBtn.addEventListener('click', function() {
         if (selectedQuantity > 1) {
@@ -978,9 +1141,17 @@
         toggleError('error-checkout-terms', !termsCheckbox.checked);
       });
 
+      // Prevent duplicate submissions and race conditions
+      let isCheckoutSubmitting = false;
+
       // Form Submission
       form.addEventListener('submit', async function(e) {
         e.preventDefault();
+
+        if (isCheckoutSubmitting) {
+          console.warn('[VoltEdge Checkout] Submission already in progress. Ignoring duplicate click.');
+          return;
+        }
 
         if (!validateForm(true)) {
           const firstError = document.querySelector('.field-error[style*="display: flex"]');
@@ -990,12 +1161,15 @@
           return;
         }
 
+        isCheckoutSubmitting = true;
+
         const now = new Date();
         const year = now.getFullYear();
         const month = String(now.getMonth() + 1).padStart(2, '0');
         const day = String(now.getDate()).padStart(2, '0');
         const randomSuffix = Math.floor(1000 + Math.random() * 9000);
         const trackingCode = `VE-${year}${month}${day}-${randomSuffix}`;
+        const lookupToken = 've_tok_' + Math.random().toString(36).substring(2, 10);
 
         const name = nameInput.value.trim();
         const email = emailInput.value.trim();
@@ -1012,9 +1186,34 @@
           orderId: trackingCode,
           order_id: trackingCode,
           trackingCode: trackingCode,
+          token: lookupToken,
+          lookup_token: lookupToken,
           workflowName: N8N_CONFIG.workflowName,
           createdAt: now.toISOString(),
           timestamp: now.toISOString(),
+          timeStamp: now.toISOString(),
+
+          // Bachs Payment Return URLs (directing to dedicated payment-return page)
+          return_url: `${window.location.origin}/payment-return.html?orderId=${encodeURIComponent(trackingCode)}`,
+          redirect_url: `${window.location.origin}/payment-return.html?orderId=${encodeURIComponent(trackingCode)}`,
+          callback_url: `${window.location.origin}/payment-return.html?orderId=${encodeURIComponent(trackingCode)}`,
+          success_url: `${window.location.origin}/payment-return.html?orderId=${encodeURIComponent(trackingCode)}`,
+
+          // Direct Google Sheets & n8n snake_case mappings
+          customer_name: name,
+          customer_phone: fullPhone,
+          customer_email: email,
+          product_sku: selectedProduct.sku || selectedProduct.id,
+          product_SKU: selectedProduct.sku || selectedProduct.id,
+          product_name: selectedProduct.name,
+          unit_price: selectedProduct.price,
+          quantity: selectedQuantity,
+          total_price: totalAmount,
+          delivery_address: address,
+          delivery_notes: notes,
+          payment_link: '',
+          order_status: 'order_submitted',
+          source: 'VoltEdge Checkout Page',
 
           customer: {
             fullName: name,
@@ -1095,35 +1294,243 @@
           console.warn('Could not cache order details in localStorage:', err);
         }
 
-        // Visual loading state
+        // Visual loading state & status elements
         submitBtn.disabled = true;
         if (sidebarSubmitBtn) sidebarSubmitBtn.disabled = true;
-        const originalBtnHTML = submitBtn.innerHTML;
-        submitBtn.innerHTML = '<i class="ph-bold ph-spinner spin-anim"></i> <span>Sending Order to Fulfillment...</span>';
 
-        // Dispatch to n8n Webhook
-        try {
-          console.log(`[VoltEdge Automation] Submitting order ${trackingCode} to ${N8N_CONFIG.webhookUrl}...`);
-          const res = await fetch(N8N_CONFIG.webhookUrl, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Accept': 'application/json, text/plain, */*'
-            },
-            body: JSON.stringify(orderDetails)
+        const statusMsgEl = document.getElementById('checkout-status-msg');
+        const sidebarStatusMsgEl = document.getElementById('checkout-sidebar-status-msg');
+
+        function setStatus(type, msg) {
+          [statusMsgEl, sidebarStatusMsgEl].forEach(el => {
+            if (!el) return;
+            if (type === 'loading') {
+              // User instruction: Do NOT show placeholder or text banner when loading
+              el.style.display = 'none';
+              return;
+            }
+            el.style.display = 'block';
+            el.innerHTML = msg;
+            if (type === 'error') {
+              el.style.background = '#fef2f2';
+              el.style.color = '#991b1b';
+              el.style.border = '1px solid #fecaca';
+            } else if (type === 'success') {
+              el.style.background = '#dcfce7';
+              el.style.color = '#15803d';
+              el.style.border = '1px solid #86efac';
+            }
           });
-          console.log('[VoltEdge Automation] Webhook response status:', res.status);
-        } catch (error) {
-          console.error('[VoltEdge Automation] Network error sending to n8n webhook:', error);
         }
 
-        // Navigate to /order-success
-        const successUrl = `../order-success/?orderId=${encodeURIComponent(trackingCode)}`;
-        window.location.href = successUrl;
+        const startTime = Date.now();
+        const MAX_WAIT_MS = 60000; // 1 minute
+        let attempt = 0;
+        let webhookConfirmed = false;
+        let lastErrorDetails = '';
+
+        // Live countdown timer: wait up to 1 minute for webhook response
+        // User instruction: ONLY show active countdown number in the submit button!
+        const initialBtnHTML = `<i class="ph-bold ph-spinner spin-anim"></i> <span>Submitting... (60s)</span>`;
+        submitBtn.innerHTML = initialBtnHTML;
+        if (sidebarSubmitBtn) sidebarSubmitBtn.innerHTML = initialBtnHTML;
+        if (statusMsgEl) statusMsgEl.style.display = 'none';
+        if (sidebarStatusMsgEl) sidebarStatusMsgEl.style.display = 'none';
+
+        const countdownTimer = setInterval(() => {
+          const remainingSec = Math.max(0, Math.ceil((MAX_WAIT_MS - (Date.now() - startTime)) / 1000));
+          const btnText = `<i class="ph-bold ph-spinner spin-anim"></i> <span>Submitting... (${remainingSec}s)</span>`;
+          submitBtn.innerHTML = btnText;
+          if (sidebarSubmitBtn) sidebarSubmitBtn.innerHTML = btnText;
+        }, 1000);
+
+        const targetWebhookUrl = getOrderWebhookUrl();
+        let confirmedBackendData = null;
+
+        // Wait loop: Polls/awaits webhook response for up to 1 minute with strict contract validation
+        while (Date.now() - startTime < MAX_WAIT_MS) {
+          attempt++;
+          const remainingTime = Math.max(1000, MAX_WAIT_MS - (Date.now() - startTime));
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), Math.min(10000, remainingTime));
+
+          try {
+            console.log(`[VoltEdge Automation] Attempt ${attempt}: POST ${targetWebhookUrl}...`);
+            let res;
+            try {
+              res = await fetch(targetWebhookUrl, {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Accept': 'application/json, text/plain, */*'
+                },
+                body: JSON.stringify(orderDetails),
+                signal: controller.signal
+              });
+            } catch (fetchErr) {
+              const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+              if (isLocalhost) {
+                console.log('[VoltEdge Automation] Direct POST blocked or failed, retrying via local proxy /api/voltedge-order...');
+                res = await fetch('/api/voltedge-order', {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json, text/plain, */*'
+                  },
+                  body: JSON.stringify(orderDetails),
+                  signal: controller.signal
+                });
+              } else {
+                throw fetchErr;
+              }
+            }
+            clearTimeout(timeoutId);
+
+            console.log(`[VoltEdge Automation] Webhook response status: ${res.status}`);
+
+            let resData = null;
+            let rawBody = '';
+            try {
+              rawBody = await res.text();
+              if (rawBody && rawBody.trim()) {
+                resData = JSON.parse(rawBody);
+              }
+            } catch (parseErr) {
+              lastErrorDetails = `Server returned non-JSON body (HTTP ${res.status}): ${rawBody.slice(0, 120)}`;
+            }
+
+            // Strictly validate response against agreed contract
+            const validation = validateBackendOrderResponse(res.status, resData, trackingCode);
+
+            if (validation.valid) {
+              console.log('[VoltEdge Automation] Order verified by backend:', validation);
+              confirmedBackendData = validation.data;
+              webhookConfirmed = true;
+              break;
+            } else {
+              console.warn(`[VoltEdge Automation] Attempt ${attempt} contract validation failed (${validation.reason}):`, validation.error);
+              lastErrorDetails = validation.error || `Server returned HTTP ${res.status}`;
+              
+              // If rate-limited, immediately stop retrying and present 429 message
+              if (validation.reason === 'rate_limited') {
+                break;
+              }
+
+              // Wait 3 seconds before next retry if within 60s window
+              const timeLeft = MAX_WAIT_MS - (Date.now() - startTime);
+              if (timeLeft > 3000) {
+                await new Promise(resolve => setTimeout(resolve, 3000));
+              } else {
+                break;
+              }
+            }
+
+          } catch (err) {
+            clearTimeout(timeoutId);
+            console.warn(`[VoltEdge Automation] Attempt ${attempt} network error:`, err);
+            lastErrorDetails = err.name === 'AbortError' 
+              ? 'Request timed out waiting for fulfillment server.'
+              : (err.message || 'Connection to fulfillment server failed.');
+            const timeLeft = MAX_WAIT_MS - (Date.now() - startTime);
+            if (timeLeft > 3000) {
+              await new Promise(resolve => setTimeout(resolve, 3000));
+            } else {
+              break;
+            }
+          }
+        }
+
+        clearInterval(countdownTimer);
+
+        // Strictly require verified backend response before displaying success state
+        if (webhookConfirmed) {
+          const finalOrderId = (confirmedBackendData && (confirmedBackendData.order_id || confirmedBackendData.orderId)) || trackingCode;
+
+          // Cache verified backend response in localStorage
+          try {
+            const finalSaved = {
+              ...orderDetails,
+              order_id: finalOrderId,
+              orderId: finalOrderId,
+              payment_link: (confirmedBackendData && (confirmedBackendData.payment_link || confirmedBackendData.paymentLink)) || '',
+              payment_link_sent: true,
+              order_status: 'PENDING_PAYMENT'
+            };
+            localStorage.setItem('voltedge_last_order', JSON.stringify(finalSaved));
+          } catch {}
+
+          // Display Experience A: Order Submission Success State
+          const successView = document.getElementById('checkout-success-view');
+          const mainGrid = document.getElementById('checkout-main-grid');
+          const headerEl = document.querySelector('.checkout-header');
+
+          const confCodeEl = document.getElementById('chk-conf-order-code');
+          const confProdEl = document.getElementById('chk-conf-product');
+          const confRecipEl = document.getElementById('chk-conf-recipient');
+          const confEmailEl = document.getElementById('chk-conf-email');
+          const confPhoneEl = document.getElementById('chk-conf-phone');
+          const confDestEl = document.getElementById('chk-conf-destination');
+          const btnViewStatus = document.getElementById('chk-btn-view-status');
+          const btnCopyCode = document.getElementById('chk-btn-copy-code');
+          const copyCodeText = document.getElementById('chk-copy-code-text');
+
+          if (confCodeEl) confCodeEl.textContent = finalOrderId;
+          if (confProdEl) confProdEl.textContent = `${selectedQuantity}x ${selectedProduct.name} (${formatNaira(totalAmount)})`;
+          if (confRecipEl) confRecipEl.textContent = name;
+          if (confEmailEl) confEmailEl.textContent = email;
+          if (confPhoneEl) confPhoneEl.textContent = fullPhone;
+          if (confDestEl) confDestEl.textContent = `${address}, ${stateSelect ? stateSelect.value : ''}`;
+          if (btnViewStatus) {
+            btnViewStatus.href = `order-success.html?orderId=${encodeURIComponent(finalOrderId)}&token=${encodeURIComponent(lookupToken)}`;
+          }
+
+          if (btnCopyCode) {
+            btnCopyCode.onclick = function() {
+              navigator.clipboard.writeText(finalOrderId).then(() => {
+                if (copyCodeText) copyCodeText.textContent = 'Copied!';
+                btnCopyCode.style.color = '#15803d';
+                btnCopyCode.style.borderColor = '#15803d';
+                setTimeout(() => {
+                  if (copyCodeText) copyCodeText.textContent = 'Copy Code';
+                  btnCopyCode.style.color = '';
+                  btnCopyCode.style.borderColor = '';
+                }, 2500);
+              });
+            };
+          }
+
+          if (mainGrid) mainGrid.style.display = 'none';
+          if (headerEl) headerEl.style.display = 'none';
+          if (successView) {
+            successView.style.display = 'block';
+            successView.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }
+        } else {
+          // Webhook failed or 1 minute expired without successful validation
+          isCheckoutSubmitting = false;
+          console.error('[VoltEdge Automation] Order submission could not be verified by backend:', lastErrorDetails);
+          
+          const isRateLimited = lastErrorDetails && (lastErrorDetails.toLowerCase().includes('too quickly') || lastErrorDetails.toLowerCase().includes('rate limit'));
+          const errorMsg = isRateLimited
+            ? `<i class="ph-bold ph-warning-circle"></i> <strong>Please slow down.</strong> ${lastErrorDetails}`
+            : '<i class="ph-bold ph-warning-circle"></i> <strong>An error occurred.</strong> Please try again or <a href="https://wa.me/2347047922403" target="_blank" rel="noopener noreferrer" style="color: inherit; text-decoration: underline; font-weight: 700;">contact the team on WhatsApp</a>.';
+          
+          setStatus('error', errorMsg);
+          
+          submitBtn.disabled = false;
+          if (sidebarSubmitBtn) sidebarSubmitBtn.disabled = false;
+          const retryHTML = '<i class="ph-bold ph-arrows-clockwise"></i> <span>Try Again</span>';
+          submitBtn.innerHTML = retryHTML;
+          if (sidebarSubmitBtn) sidebarSubmitBtn.innerHTML = retryHTML;
+        }
       });
 
       // Start on load
-      document.addEventListener('DOMContentLoaded', initProducts);
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initProducts);
+      } else {
+        initProducts();
+      }
     })();
   </script>
 </body>

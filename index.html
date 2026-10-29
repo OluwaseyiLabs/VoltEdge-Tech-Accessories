@@ -69,11 +69,8 @@
       <nav aria-label="Primary Navigation">
         <ul class="nav-links">
           <li><a href="#catalogue" class="nav-link">Products</a></li>
-          <li><a href="#creator-gear" class="nav-link">Creator Accessories</a></li>
           <li><a href="#how-it-works" class="nav-link">How Dispatch Works</a></li>
           <li><a href="#corporate" class="nav-link">Corporate Bundles</a></li>
-          <li><a href="#order-form-section" class="nav-link">Order Form</a></li>
-          <li><a href="checkout.html" class="nav-link">Checkout</a></li>
           <li><a href="#feedback" class="nav-link">Feedback</a></li>
         </ul>
       </nav>
@@ -81,7 +78,7 @@
       <!-- Nav Actions -->
       <div class="nav-actions">
         <a href="checkout.html" class="btn btn-primary" id="nav-order-btn">
-          Checkout Now
+          Order Now
         </a>
 
         <button class="menu-toggle" id="menu-toggle" aria-label="Toggle Navigation Menu">
@@ -108,11 +105,8 @@
 
     <ul class="drawer-links">
       <li><a href="#catalogue" class="drawer-link">Core Catalogue</a></li>
-      <li><a href="#creator-gear" class="drawer-link">Creator Accessories</a></li>
       <li><a href="#corporate" class="drawer-link">Corporate & Team Kits</a></li>
       <li><a href="#how-it-works" class="drawer-link">How Fulfillment Works</a></li>
-      <li><a href="#order-form-section" class="drawer-link">Order Form</a></li>
-      <li><a href="checkout.html" class="drawer-link">Secure Checkout</a></li>
       <li><a href="#reviews" class="drawer-link">Customer Reviews</a></li>
       <li><a href="#faq" class="drawer-link">Frequently Asked Questions</a></li>
       <li><a href="#feedback" class="drawer-link">Give Feedback</a></li>
@@ -121,10 +115,10 @@
     <div style="margin-top: auto; display: flex; flex-direction: column; gap: 0.75rem;">
       <a href="https://wa.me/2347047922403?text=Hello%20VoltEdge%20Tech%20%26%20Accessories%2C%20I%20would%20like%20to%20place%20an%20order."
         target="_blank" class="btn btn-whatsapp" style="width: 100%;">
-        <i class="ph-fill ph-whatsapp-logo"></i> WhatsApp Concierge
+        <i class="ph-fill ph-whatsapp-logo"></i> Chat with us
       </a>
       <a href="checkout.html" class="btn btn-volt" style="width: 100%;">
-        <i class="ph ph-shopping-bag-open"></i> Proceed to Checkout
+        <i class="ph ph-shopping-bag-open"></i> Order Now
       </a>
     </div>
   </div>
@@ -134,9 +128,6 @@
     <section class="hero-section" id="hero">
       <div class="container hero-grid">
         <div class="hero-content">
-          <div class="hero-pill">
-            <i class="ph-bold ph-lightning"></i> RELIABLE POWER. BETTER WORKSPACES.
-          </div>
 
           <h1 class="hero-title">
             Stay Powered Through<br>
@@ -608,6 +599,7 @@
                 <p class="submit-hint" id="submit-hint">
                   <i class="ph ph-info"></i> Please fill in your details and agree to terms to submit.
                 </p>
+                <div id="order-submit-status-banner" style="display: none; margin-top: 0.85rem; width: 100%;"></div>
               </div>
             </div>
           </div>
@@ -850,10 +842,9 @@
           <i class="ph-bold ph-check"></i>
         </div>
 
-        <h3 style="font-size: 1.5rem; color: var(--text-main); margin-bottom: 0.5rem; font-weight: 800;">Order Logged
-          Successfully!</h3>
+        <h3 style="font-size: 1.5rem; color: var(--text-main); margin-bottom: 0.5rem; font-weight: 800;">Order Placed Successfully!</h3>
         <p style="color: var(--text-muted); font-size: 0.92rem; max-width: 440px;">
-          Your order has been queued into our warehouse fulfillment wave. Here is your reference tracking ID:
+          Your order has been received. Please check your email for your payment link to complete your payment.
         </p>
 
         <div class="order-code-badge" id="conf-order-code">VE-20261023-3405</div>
@@ -898,21 +889,27 @@
             <span
               style="font-size: 0.85rem; font-weight: 800; letter-spacing: 0.05em; text-transform: uppercase;">Notice</span>
           </div>
-          <p style="font-size: 1.05rem; font-weight: 800; color: #14532d; line-height: 1.45; margin: 0;">
-            Payment details has been sent to your email, please check your email to make payment.
+          <p style="font-size: 1.05rem; font-weight: 800; color: #14532d; line-height: 1.45; margin: 0;" id="conf-payment-notice">
+            Your order has been received. Please check your email for your payment link to complete your payment.
           </p>
+          <div id="conf-direct-pay-wrap" style="display: none; margin-top: 0.85rem;">
+            <a href="#" id="conf-direct-pay-btn" target="_blank" rel="noopener noreferrer" class="btn"
+              style="background: #16a34a; color: #ffffff; padding: 0.75rem 1.4rem; border-radius: var(--radius-full); font-weight: 700; font-size: 0.92rem; display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; text-decoration: none; width: 100%; box-sizing: border-box;">
+              <i class="ph-bold ph-credit-card"></i> Pay Now with Bachs &rarr;
+            </a>
+          </div>
         </div>
 
-        <!-- Actions: View Full Order Confirmation Page & Close -->
+        <!-- Actions: View Full Order Status & Continue Shopping -->
         <div style="width: 100%; display: flex; flex-direction: column; gap: 0.65rem;">
           <a href="order-success.html" id="modal-view-order-link" class="btn btn-volt"
             style="width: 100%; padding: 0.95rem 1.5rem; font-size: 1rem; font-weight: 700; border-radius: var(--radius-full); text-align: center; justify-content: center;">
-            <i class="ph-bold ph-arrow-square-out"></i> View Full Order Status Page
+            <i class="ph-bold ph-arrow-square-out"></i> View Full Order Status
           </a>
           <button type="button" class="btn btn-primary"
             style="width: 100%; padding: 0.85rem 1.5rem; font-size: 0.95rem; font-weight: 700; border-radius: var(--radius-full);"
             onclick="document.getElementById('order-success-modal').classList.remove('active')">
-            Close
+            Continue Shopping
           </button>
         </div>
 

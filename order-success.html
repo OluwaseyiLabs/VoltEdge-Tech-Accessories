@@ -1,15 +1,18 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Order Confirmed | VoltEdge Tech & Accessories</title>
-  
-  <meta name="description" content="Your VoltEdge order has been logged successfully and queued for fulfillment. Track your order status and warranty details.">
+
+  <meta name="description"
+    content="Your VoltEdge order has been logged successfully and queued for fulfillment. Track your order status and warranty details.">
   <meta name="theme-color" content="#064e3b">
 
   <!-- Favicon -->
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220%200%2032%2032%22><rect width=%2232%22 height=%2232%22 rx=%228%22 fill=%22%2300e599%22/><path d=%22M18 4L10 17h5l-2 11 10-14h-6l3-10z%22 fill=%22%23090d16%22/></svg>">
+  <link rel="icon"
+    href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220%200%2032%2032%22><rect width=%2232%22 height=%2232%22 rx=%228%22 fill=%22%2300e599%22/><path d=%22M18 4L10 17h5l-2 11 10-14h-6l3-10z%22 fill=%22%23090d16%22/></svg>">
 
   <!-- Stylesheet -->
   <link rel="stylesheet" href="css/style.css">
@@ -80,8 +83,15 @@
     }
 
     @keyframes popIn {
-      0% { transform: scale(0.5); opacity: 0; }
-      100% { transform: scale(1); opacity: 1; }
+      0% {
+        transform: scale(0.5);
+        opacity: 0;
+      }
+
+      100% {
+        transform: scale(1);
+        opacity: 1;
+      }
     }
 
     .spin-anim {
@@ -89,7 +99,9 @@
     }
 
     @keyframes voltSpin {
-      100% { transform: rotate(360deg); }
+      100% {
+        transform: rotate(360deg);
+      }
     }
 
     .success-status-pill {
@@ -394,6 +406,46 @@
       word-break: break-word;
     }
 
+    /* Highly Visible Email Receipt Notice Banner */
+    .email-receipt-banner {
+      background: #f0fdf4;
+      border: 2px solid #86efac;
+      border-radius: var(--radius-lg);
+      padding: 1.4rem 1.75rem;
+      display: flex;
+      align-items: center;
+      gap: 1.25rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 4px 16px rgba(16, 185, 129, 0.08);
+    }
+
+    .email-receipt-icon {
+      width: 3.5rem;
+      height: 3.5rem;
+      background: #059669;
+      color: #ffffff;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.75rem;
+      flex-shrink: 0;
+    }
+
+    .email-receipt-title {
+      font-size: 1.2rem;
+      font-weight: 800;
+      color: #064e3b;
+      margin: 0 0 0.35rem 0;
+    }
+
+    .email-receipt-desc {
+      color: #047857;
+      font-size: 0.95rem;
+      margin: 0;
+      line-height: 1.55;
+    }
+
     /* Notice Box */
     .dispatch-notice-box {
       background: #eff6ff;
@@ -555,18 +607,28 @@
 
     /* Print Stylesheet */
     @media print {
-      .top-bar, .site-header, .site-footer, .success-breadcrumb, .success-actions, .fulfillment-timeline, .state-view {
+
+      .top-bar,
+      .site-header,
+      .site-footer,
+      .success-breadcrumb,
+      .success-actions,
+      .fulfillment-timeline,
+      .state-view {
         display: none !important;
       }
+
       .success-page-wrap {
         padding: 0;
         background: none;
       }
+
       .success-card {
         border: none;
         box-shadow: none;
         padding: 0;
       }
+
       body {
         background: #ffffff;
         color: #000000;
@@ -574,30 +636,206 @@
     }
 
     @media (max-width: 768px) {
+      .success-page-wrap {
+        padding: 1.5rem 0 3rem;
+      }
+
       .success-card {
-        padding: 2rem 1.25rem;
+        padding: 1.75rem 1.15rem;
       }
-      .order-details-grid {
-        grid-template-columns: 1fr;
+
+      .success-main-title {
+        font-size: clamp(1.45rem, 5.5vw, 1.95rem);
       }
-      .timeline-steps {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 1.25rem 0.5rem;
+
+      .success-main-desc {
+        font-size: 0.92rem;
+        margin-bottom: 1.25rem;
       }
+
       .tracking-code-banner {
         flex-direction: column;
         gap: 0.85rem;
         width: 100%;
+        padding: 1.15rem 1rem;
+        text-align: center;
+        box-sizing: border-box;
+      }
+
+      .tracking-label-wrap {
+        text-align: center;
+        width: 100%;
+      }
+
+      .tracking-code-value {
+        font-size: clamp(1.15rem, 5vw, 1.45rem);
+        word-break: break-all;
+      }
+
+      .btn-copy-code {
+        width: 100%;
+        justify-content: center;
+        padding: 0.65rem 1rem;
+      }
+
+      .fulfillment-timeline {
+        padding: 1.25rem 0.85rem;
+        margin-bottom: 1.85rem;
+      }
+
+      .timeline-steps {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1.15rem 0.5rem;
+      }
+
+      .order-details-grid {
+        grid-template-columns: 1fr;
+        gap: 1.25rem;
+        margin-bottom: 1.75rem;
+      }
+
+      .detail-card-panel {
+        padding: 1.25rem 1rem;
+      }
+
+      .email-receipt-banner {
+        flex-direction: column;
+        text-align: center;
+        padding: 1.25rem 1rem;
+        gap: 0.85rem;
+      }
+
+      .dispatch-notice-box {
+        flex-direction: column;
+        gap: 0.65rem;
+        padding: 1rem 1.15rem;
+        margin-bottom: 1.75rem;
+      }
+
+      .success-actions {
+        flex-direction: column;
+        width: 100%;
+        gap: 0.75rem;
+      }
+
+      .btn-wa-action,
+      .btn-print-action,
+      .btn-shop-action {
+        width: 100%;
+        justify-content: center;
+        box-sizing: border-box;
+        text-align: center;
+        padding: 0.85rem 1.25rem;
+        font-size: 0.9rem;
+      }
+
+      .state-view {
+        padding: 2rem 0.75rem;
+      }
+
+      .state-title {
+        font-size: 1.35rem;
+      }
+
+      .state-desc {
+        font-size: 0.88rem;
+      }
+
+      .state-lookup-form {
+        flex-direction: column;
+        width: 100%;
+      }
+
+      .state-lookup-input {
+        width: 100%;
+      }
+
+      .state-lookup-form button {
+        width: 100%;
+        justify-content: center;
+      }
+
+      #error-technical-box {
+        font-size: 0.72rem;
+        padding: 0.75rem;
+        max-width: 100%;
+        box-sizing: border-box;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .success-card {
+        padding: 1.25rem 0.85rem;
+        border-radius: var(--radius-md);
+      }
+
+      .timeline-title {
+        font-size: 0.75rem;
+        margin-bottom: 0.85rem;
+      }
+
+      .timeline-steps {
+        gap: 0.85rem 0.35rem;
+      }
+
+      .step-marker {
+        width: 2rem;
+        height: 2rem;
+        font-size: 0.88rem;
+        margin-bottom: 0.4rem;
+      }
+
+      .step-name {
+        font-size: 0.74rem;
+      }
+
+      .step-status-tag {
+        font-size: 0.64rem;
+      }
+
+      .item-row {
+        gap: 0.75rem;
+      }
+
+      .item-row img {
+        width: 56px;
+        height: 56px;
+      }
+
+      .item-title {
+        font-size: 0.88rem;
+      }
+
+      .item-price {
+        font-size: 0.98rem;
+      }
+
+      .receipt-lines {
+        font-size: 0.82rem;
+      }
+
+      .receipt-lines .line.total strong {
+        font-size: 1.18rem;
+      }
+
+      .info-label {
+        font-size: 0.68rem;
+      }
+
+      .info-val {
+        font-size: 0.84rem;
       }
     }
   </style>
 </head>
+
 <body>
 
   <!-- Top Announcement Bar -->
   <aside class="top-bar" aria-label="Announcement">
     <div class="container top-bar-content">
-      <span class="top-bar-text">Same-Day Dispatch for Orders Placed Before 2:00 PM | 1-Year Full Warranty on All Gear</span>
+      <span class="top-bar-text">Same-Day Dispatch for Orders Placed Before 2:00 PM | 1-Year Full Warranty on All
+        Gear</span>
     </div>
   </aside>
 
@@ -618,7 +856,6 @@
       <nav aria-label="Primary Navigation">
         <ul class="nav-links">
           <li><a href="index.html#catalogue" class="nav-link">Products</a></li>
-          <li><a href="index.html#creator-gear" class="nav-link">Creator Accessories</a></li>
           <li><a href="index.html#how-it-works" class="nav-link">How Fulfillment Works</a></li>
           <li><a href="index.html#feedback" class="nav-link">Feedback</a></li>
         </ul>
@@ -627,7 +864,7 @@
       <!-- Nav Actions -->
       <div class="nav-actions">
         <a href="checkout.html" class="btn btn-primary" style="padding: 0.65rem 1.25rem; font-size: 0.88rem;">
-          <i class="ph ph-shopping-cart-simple"></i> New Order
+          <i class="ph ph-shopping-cart-simple"></i> Order Now
         </a>
       </div>
     </div>
@@ -636,7 +873,7 @@
   <!-- Main Order Success Section -->
   <main class="success-page-wrap">
     <div class="container">
-      
+
       <!-- Breadcrumb -->
       <nav class="success-breadcrumb" aria-label="Breadcrumb">
         <a href="index.html"><i class="ph-bold ph-house"></i> Home</a>
@@ -656,10 +893,15 @@
           <div class="state-badge" style="background: var(--accent); color: var(--accent-foreground);">
             <i class="ph-bold ph-shield-check"></i> Verifying Order Details
           </div>
-          <h2 class="state-title">Retrieving Order Record...</h2>
-          <p class="state-desc">
-            Securely querying VoltEdge Order Details API to verify your order and fulfillment status.
+          <h2 class="state-title" id="loading-title">Retrieving Order Record...</h2>
+          <p class="state-desc" id="loading-desc">
+            Waiting for webhook response. Verifying order details with fulfillment service...
           </p>
+          <div id="loading-timer-pill"
+            style="display: inline-flex; align-items: center; gap: 0.5rem; background: #f0fdf4; border: 1px solid #bbf7d0; color: #166534; padding: 0.5rem 1.15rem; border-radius: var(--radius-full); font-size: 0.88rem; font-weight: 700; margin-top: 0.5rem; max-width: 100%; box-sizing: border-box; flex-wrap: wrap; justify-content: center;">
+            <i class="ph-bold ph-hourglass-medium spin-anim" style="color: var(--primary); font-size: 1.05rem;"></i>
+            <span>Waiting for webhook response (<span id="loading-countdown-text">60s</span> remaining)...</span>
+          </div>
         </div>
 
         <!-- 2. ORDER NOT FOUND / MISSING PARAMETERS STATE -->
@@ -672,18 +914,21 @@
           </div>
           <h2 class="state-title">No Matching Order Located</h2>
           <p class="state-desc" id="not-found-msg">
-            We could not locate an active order matching the provided reference ID or security token. Please verify your link or enter your tracking code below.
+            We could not locate an active order matching the provided reference ID or security token. Please verify your
+            link or enter your tracking code below.
           </p>
 
           <form class="state-lookup-form" id="manual-lookup-form">
-            <input type="text" id="manual-order-id" class="form-control state-lookup-input" placeholder="e.g. VE-20261028-1234" required>
+            <input type="text" id="manual-order-id" class="form-control state-lookup-input"
+              placeholder="e.g. VE-20261028-1234" required>
             <button type="submit" class="btn btn-primary" style="padding: 0.75rem 1.4rem;">
               <i class="ph-bold ph-magnifying-glass"></i> Track
             </button>
           </form>
 
           <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
-            <a href="https://wa.me/2347047922403?text=Hello%20VoltEdge%20Team%2C%20I%20need%20help%20locating%20my%20order." target="_blank" rel="noopener noreferrer" class="btn-wa-action">
+            <a href="https://wa.me/2347047922403?text=Hello%20VoltEdge%20Team%2C%20I%20need%20help%20locating%20my%20order."
+              target="_blank" rel="noopener noreferrer" class="btn-wa-action">
               <i class="ph-fill ph-whatsapp-logo"></i> Help on WhatsApp
             </a>
             <a href="index.html" class="btn-shop-action">
@@ -694,29 +939,34 @@
 
         <!-- 3. ERROR / SERVICE UNAVAILABLE STATE -->
         <div class="state-view" id="state-error" style="display: none;">
-          <div class="state-icon-wrap" style="background: #fffbeb; color: #d97706;">
+          <div class="state-icon-wrap" style="background: #fffbeb; color: #d97706;" id="error-icon-wrap">
             <i class="ph-bold ph-warning-circle"></i>
           </div>
-          <div class="state-badge" style="background: #fef3c7; color: #92400e;">
+          <div class="state-badge" style="background: #fef3c7; color: #92400e;" id="error-badge">
             Verification Temporarily Unavailable
           </div>
-          <h2 class="state-title">Could Not Verify Order</h2>
+          <h2 class="state-title" id="error-title">Could Not Verify Order</h2>
           <p class="state-desc" id="error-msg-text">
-            There was a connection issue communicating with our fulfillment service. Never worry—your order data is safe.
+            There was a connection issue communicating with our fulfillment service.
           </p>
+          <div id="error-technical-box"
+            style="display: none; max-width: 580px; margin: 0 auto 1.5rem; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: var(--radius-md); padding: 0.85rem 1.15rem; font-size: 0.82rem; color: #475569; text-align: left; font-family: monospace; white-space: pre-wrap; word-break: break-all;">
+          </div>
           <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
-            <button type="button" class="btn btn-primary" id="btn-retry-fetch" style="padding: 0.85rem 1.6rem; border-radius: var(--radius-full);">
+            <button type="button" class="btn btn-primary" id="btn-retry-fetch"
+              style="padding: 0.85rem 1.6rem; border-radius: var(--radius-full);">
               <i class="ph-bold ph-arrows-clockwise"></i> Retry Verification
             </button>
-            <a href="https://wa.me/2347047922403" id="error-wa-link" target="_blank" rel="noopener noreferrer" class="btn-wa-action">
-              <i class="ph-fill ph-whatsapp-logo"></i> WhatsApp Concierge
+            <a href="https://wa.me/2347047922403" id="error-wa-link" target="_blank" rel="noopener noreferrer"
+              class="btn-wa-action">
+              <i class="ph-fill ph-whatsapp-logo"></i> Chat with us
             </a>
           </div>
         </div>
 
         <!-- 4. VERIFIED ORDER DETAILS VIEW (Rendered dynamically) -->
         <div id="state-success-content" style="display: none;">
-          
+
           <!-- Hero Confirmation Header -->
           <div class="success-hero-header">
             <div class="success-anim-icon">
@@ -724,19 +974,20 @@
             </div>
 
             <div class="success-status-pill" id="disp-status-pill">
-              <i class="ph-bold ph-sparkle"></i> <span id="disp-status-text">Order Logged & Queued for Processing</span>
+              <i class="ph-bold ph-sparkle"></i> <span id="disp-status-text">ORDER LOGGED & IN FULFILLMENT WAVE</span>
             </div>
 
             <h1 class="success-main-title" id="disp-hero-title">Thank You for Your Order!</h1>
-            
+
             <p class="success-main-desc" id="disp-hero-desc">
-              We have registered your order in our fulfillment wave. Our dispatch logistics team is now packing your hardware and verifying logistics.
+              We have registered your order in our fulfillment wave. Our dispatch logistics team is now packing your
+              hardware and verifying logistics.
             </p>
 
             <!-- Tracking Code Banner -->
             <div class="tracking-code-banner">
               <div class="tracking-label-wrap">
-                <span class="tracking-sub">Reference Tracking Code</span>
+                <span class="tracking-sub">REFERENCE TRACKING CODE</span>
                 <div class="tracking-code-value" id="disp-tracking-code">—</div>
               </div>
               <button type="button" class="btn-copy-code" id="btn-copy-tracking">
@@ -750,14 +1001,14 @@
           <section class="fulfillment-timeline" aria-label="Order Progress">
             <div class="timeline-title">Fulfillment Progress Wave</div>
             <div class="timeline-steps">
-              
-              <div class="timeline-step" id="step-placed">
+
+              <div class="timeline-step completed" id="step-placed">
                 <div class="step-marker"><i class="ph-bold ph-check"></i></div>
                 <span class="step-name">Order Placed</span>
                 <span class="step-status-tag" id="step-placed-tag">Logged</span>
               </div>
 
-              <div class="timeline-step" id="step-warehouse">
+              <div class="timeline-step active" id="step-warehouse">
                 <div class="step-marker"><i class="ph-bold ph-package"></i></div>
                 <span class="step-name">Warehouse Wave</span>
                 <span class="step-status-tag" id="step-warehouse-tag">Packaging</span>
@@ -779,8 +1030,8 @@
           </section>
 
           <!-- Order Summary & Shipping Details -->
-          <div class="order-details-grid">
-            
+          <div class="order-details-grid" id="order-details-grid">
+
             <!-- Item & Invoice Details -->
             <div class="detail-card-panel">
               <h3 class="detail-card-title">
@@ -861,13 +1112,28 @@
 
           </div>
 
+          <!-- Highly Visible Email Receipt Notice -->
+          <div class="email-receipt-banner" id="email-receipt-banner">
+            <div class="email-receipt-icon">
+              <i class="ph-fill ph-envelope-open"></i>
+            </div>
+            <div class="email-receipt-content">
+              <h3 class="email-receipt-title">Check Your Email for Your Receipt</h3>
+              <p class="email-receipt-desc">
+                Your official payment receipt and complete order confirmation have been sent to your email address.
+                Please check your inbox (and your spam or promotions folder) for your full receipt and order records.
+              </p>
+            </div>
+          </div>
+
           <!-- Next Steps Callout -->
           <div class="dispatch-notice-box" id="disp-notice-box">
             <i class="ph-fill ph-info"></i>
             <div>
               <strong id="disp-notice-title">What Happens Next?</strong>
               <p id="disp-notice-desc">
-                Our dispatch officer will contact you via WhatsApp / phone call to confirm your delivery address and schedule the delivery window. Orders placed before 2:00 PM are dispatched same-day in Lagos!
+                Our dispatch officer will contact you via WhatsApp / phone call to confirm your delivery address and
+                schedule the delivery window. Orders placed before 2:00 PM are dispatched same-day in Lagos!
               </p>
             </div>
           </div>
@@ -878,11 +1144,6 @@
               <i class="ph-fill ph-whatsapp-logo" style="font-size: 1.25rem;"></i>
               <span>Chat Dispatch Team on WhatsApp</span>
             </a>
-
-            <button type="button" class="btn-print-action" onclick="window.print();">
-              <i class="ph-bold ph-printer"></i>
-              <span>Print Receipt</span>
-            </button>
 
             <a href="index.html" class="btn-shop-action">
               <i class="ph-bold ph-arrow-left"></i>
@@ -902,7 +1163,8 @@
       <div class="footer-top">
         <div>
           <a href="index.html" class="brand-logo footer-brand-logo">
-            <div class="logo-icon" style="background: rgba(255, 255, 255, 0.18); border: 1px solid rgba(255, 255, 255, 0.3);">
+            <div class="logo-icon"
+              style="background: rgba(255, 255, 255, 0.18); border: 1px solid rgba(255, 255, 255, 0.3);">
               <i class="ph-fill ph-lightning" style="color: #ffffff;"></i>
             </div>
             <div class="logo-text" style="color: #ffffff; font-weight: 800;">
@@ -911,7 +1173,8 @@
             </div>
           </a>
           <p class="footer-brand-desc" style="color: rgba(255, 255, 255, 0.88); font-weight: 500;">
-            Powering productive workspaces with reliable technology accessories. Laptop power banks, router UPS backups, and ergonomic gear built for modern Nigerian professionals.
+            Powering productive workspaces with reliable technology accessories. Laptop power banks, router UPS backups,
+            and ergonomic gear built for modern Nigerian professionals.
           </p>
         </div>
 
@@ -929,7 +1192,8 @@
           <h4 class="footer-col-title">Customer Support</h4>
           <div class="footer-contact-item">
             <i class="ph-fill ph-whatsapp-logo" style="color: #25D366; font-size: 1.25rem;"></i>
-            <a href="https://wa.me/2347047922403" target="_blank" rel="noopener noreferrer" class="footer-link" style="color: #ffffff; font-weight: 700;">
+            <a href="https://wa.me/2347047922403" target="_blank" rel="noopener noreferrer" class="footer-link"
+              style="color: #ffffff; font-weight: 700;">
               Chat with us on WhatsApp
             </a>
           </div>
@@ -945,10 +1209,12 @@
       </div>
 
       <div class="footer-bottom">
-        <div style="color: rgba(255, 255, 255, 0.85); font-weight: 600;">&copy; 2026 VoltEdge Tech & Accessories. All rights reserved.</div>
+        <div style="color: rgba(255, 255, 255, 0.85); font-weight: 600;">&copy; 2026 VoltEdge Tech & Accessories. All
+          rights reserved.</div>
         <div style="display: flex; gap: 1.5rem;">
           <a href="index.html" class="footer-link" style="color: #ffffff; font-weight: 700;">Return to Home &uarr;</a>
-          <a href="index.html#catalogue" class="footer-link" style="color: #ffffff; font-weight: 700;">Priced in ₦ Naira</a>
+          <a href="index.html#catalogue" class="footer-link" style="color: #ffffff; font-weight: 700;">Priced in ₦
+            Naira</a>
         </div>
       </div>
     </div>
@@ -957,11 +1223,10 @@
   <!-- Products Catalog Data -->
   <script src="js/products.js"></script>
 
-  <!-- Real-Time Order Verification & Details Fetch Script -->
+  <!-- Order Tracking & Confirmation Script -->
   <script>
-    (function() {
-      // Configuration for n8n Order Details Webhook API
-      const N8N_DETAILS_ENDPOINT = 'https://ucy00zep.rpcld.net/webhook-test/voltedge-order-details';
+    (function () {
+      const IS_SUBDIR = window.location.pathname.includes('/order-success/');
 
       // UI State Elements
       const stateLoading = document.getElementById('state-loading');
@@ -970,9 +1235,6 @@
       const stateSuccess = document.getElementById('state-success-content');
 
       const notFoundMsg = document.getElementById('not-found-msg');
-      const errorMsgText = document.getElementById('error-msg-text');
-      const errorWaLink = document.getElementById('error-wa-link');
-      const btnRetry = document.getElementById('btn-retry-fetch');
       const manualForm = document.getElementById('manual-lookup-form');
       const manualInput = document.getElementById('manual-order-id');
 
@@ -988,272 +1250,458 @@
         return '₦' + Number(amount).toLocaleString('en-NG');
       }
 
-      // Read query parameters
+      // Detect dummy/placeholder values originating from mock webhook responses or uninitialized templates
+      function isDummyValue(v) {
+        if (v === undefined || v === null) return true;
+        const s = String(v).trim().toLowerCase();
+        return (
+          s === '' ||
+          s === '—' ||
+          s === '-' ||
+          s === 'null' ||
+          s === 'undefined' ||
+          s === 'customer' ||
+          s === 'actual customer' ||
+          s === 'customer@example.com' ||
+          s === 'example@example.com' ||
+          s === '+234 701 234 5678' ||
+          s === '+2347012345678' ||
+          s === '+234 7012345678' ||
+          s === 'delivery address, lagos' ||
+          s === 'delivery address' ||
+          s === 'call upon arrival'
+        );
+      }
+
+      function pick(...vals) {
+        // Pass 1: Prioritize genuine, non-dummy customer/order data
+        for (const v of vals) {
+          if (!isDummyValue(v)) {
+            return String(v).trim();
+          }
+        }
+        // Pass 2: Fallback to non-empty string if nothing else is available
+        for (const v of vals) {
+          if (v !== undefined && v !== null && String(v).trim() !== '' && String(v).trim() !== '—') {
+            return String(v).trim();
+          }
+        }
+        return '';
+      }
+
+      function pickNum(...vals) {
+        for (const v of vals) {
+          const n = Number(v);
+          if (!isNaN(n) && n > 0) {
+            return n;
+          }
+        }
+        return 0;
+      }
+
+      // Read query parameters with broad payment gateway support (Bachs, Paystack, etc.)
       function getQueryParams() {
         const params = new URLSearchParams(window.location.search);
-        const orderId = params.get('orderId') || params.get('order_id') || params.get('id') || '';
-        const token = params.get('token') || params.get('t') || '';
+        let orderId = params.get('orderId') || params.get('order_id') || params.get('reference') || params.get('trxref') || params.get('checkout_id') || params.get('ref') || params.get('id') || '';
+        let token = params.get('token') || params.get('t') || '';
+
+        // Check hash parameters if present
+        if (!orderId && window.location.hash) {
+          const hashParams = new URLSearchParams(window.location.hash.replace(/^#\/?/, ''));
+          orderId = hashParams.get('orderId') || hashParams.get('order_id') || hashParams.get('reference') || hashParams.get('trxref') || hashParams.get('checkout_id') || hashParams.get('ref') || hashParams.get('id') || '';
+          if (!token) token = hashParams.get('token') || hashParams.get('t') || '';
+        }
+
+        // If not in URL, recover from cached last order in localStorage
+        if (!orderId) {
+          try {
+            const cached = JSON.parse(localStorage.getItem('voltedge_last_order') || '{}');
+            orderId = cached.order_id || cached.orderId || cached.trackingCode || '';
+            if (!token) token = cached.lookup_token || cached.token || '';
+          } catch { }
+        }
+
         return { orderId: orderId.trim(), token: token.trim() };
       }
 
-      // Fetch verified order from n8n endpoint
-      async function fetchOrderDetails(orderId, token) {
-        const queryUrl = new URL(N8N_DETAILS_ENDPOINT);
-        queryUrl.searchParams.set('orderId', orderId);
-        if (token) queryUrl.searchParams.set('token', token);
-
-        const securityHeaders = {
-          'Accept': 'application/json, text/plain, */*'
-        };
-        if (token) {
-          securityHeaders['X-Order-Token'] = token;
-          securityHeaders['Authorization'] = `Bearer ${token}`;
-        }
-
-        // 1. Try GET request
+      // Find cached order matching orderId from localStorage
+      function findCachedOrder(orderId) {
         try {
-          console.log(`[VoltEdge API] Requesting order details for "${orderId}" via GET...`);
-          const getRes = await fetch(queryUrl.toString(), {
-            method: 'GET',
-            headers: securityHeaders
-          });
+          const cleanId = (orderId || '').trim().toLowerCase();
 
-          if (getRes.ok) {
-            const rawData = await getRes.json();
-            return extractOrder(rawData);
+          // 1. Check voltedge_last_order
+          const last = JSON.parse(localStorage.getItem('voltedge_last_order') || '{}');
+          if (last && typeof last === 'object') {
+            const lId = String(last.order_id || last.orderId || last.trackingCode || '').trim().toLowerCase();
+            const matches = !cleanId || !lId || lId === cleanId;
+            if (matches && (last.customer_name || last.customerName || (last.customer && last.customer.fullName) || last.fullName)) {
+              return last;
+            }
           }
 
-          // If n8n node is configured as POST or returned 404/405
-          if (getRes.status === 404 || getRes.status === 405) {
-            console.log(`[VoltEdge API] GET returned ${getRes.status}, falling back to POST...`);
-            const postRes = await fetch(N8N_DETAILS_ENDPOINT, {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                ...securityHeaders
-              },
-              body: JSON.stringify({ orderId, token })
+          // 2. Check voltedge_orders array
+          const list = JSON.parse(localStorage.getItem('voltedge_orders') || '[]');
+          if (Array.isArray(list)) {
+            const found = list.find(o => {
+              if (!o || typeof o !== 'object') return false;
+              const oId = String(o.order_id || o.orderId || o.trackingCode || '').trim().toLowerCase();
+              return oId === cleanId || !cleanId;
             });
-
-            if (postRes.ok) {
-              const postData = await postRes.json();
-              return extractOrder(postData);
+            if (found && (found.customer_name || found.customerName || (found.customer && found.customer.fullName) || found.fullName)) {
+              return found;
             }
-
-            if (postRes.status === 404) {
-              return { notFound: true };
-            }
-
-            return { error: true, status: postRes.status };
           }
-
-          return { error: true, status: getRes.status };
-        } catch (getErr) {
-          console.warn('[VoltEdge API] GET request failed, attempting POST:', getErr);
-          // Try POST fallback
-          try {
-            const postRes = await fetch(N8N_DETAILS_ENDPOINT, {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                ...securityHeaders
-              },
-              body: JSON.stringify({ orderId, token })
-            });
-
-            if (postRes.ok) {
-              const postData = await postRes.json();
-              return extractOrder(postData);
-            }
-
-            if (postRes.status === 404) {
-              return { notFound: true };
-            }
-
-            return { error: true, status: postRes.status };
-          } catch (postErr) {
-            console.error('[VoltEdge API] Network error on both GET and POST:', postErr);
-            throw postErr;
-          }
+        } catch (e) {
+          console.warn('[VoltEdge] Error reading cached orders:', e);
         }
+        return null;
       }
 
-      function extractOrder(data) {
-        if (!data) return null;
-        if (Array.isArray(data)) {
-          data = data[0] || {};
-        }
-        const order = data.order || data.data || data;
-        if (!order || (!order.orderId && !order.order_id && !order.trackingCode && !order.customer && !order.product && !order.fullName)) {
-          return null;
-        }
-        return order;
-      }
+      // Populate full customer and order details in UI
+      function populateOrderUI(order, fallbackId) {
+        if (!order) order = {};
+        const cached = findCachedOrder(fallbackId) || {};
+        const cust = order.customer || cached.customer || {};
 
-      // Render verified order into existing UI
-      function renderOrder(order) {
-        const orderCode = order.orderId || order.order_id || order.trackingCode || '—';
-        document.getElementById('disp-tracking-code').textContent = orderCode;
+        // 1. Order Code & Tracking
+        const orderCode = pick(order.order_id, order.orderId, order.trackingCode, cached.order_id, cached.orderId, fallbackId) || '—';
+        const dispTracking = document.getElementById('disp-tracking-code');
+        if (dispTracking) dispTracking.textContent = orderCode;
+
+        const breadcrumbCurrent = document.getElementById('breadcrumb-current');
+        if (breadcrumbCurrent) breadcrumbCurrent.textContent = `Order ${orderCode}`;
 
         // Copy button setup
         const copyBtn = document.getElementById('btn-copy-tracking');
         const copyBtnText = document.getElementById('copy-btn-text');
-        copyBtn.onclick = function() {
-          navigator.clipboard.writeText(orderCode).then(() => {
-            copyBtnText.textContent = 'Copied!';
-            copyBtn.style.color = '#15803d';
-            copyBtn.style.borderColor = '#15803d';
-            setTimeout(() => {
-              copyBtnText.textContent = 'Copy Code';
-              copyBtn.style.color = '';
-              copyBtn.style.borderColor = '';
-            }, 2500);
-          }).catch(() => {
-            prompt('Copy order tracking reference:', orderCode);
-          });
-        };
-
-        // Extract Customer info
-        const cust = order.customer || {};
-        const cName = cust.fullName || cust.name || order.fullName || order.customerName || 'Customer';
-        const cPhone = cust.fullPhone || cust.phone || order.phone || order.customerPhone || '—';
-        const cEmail = cust.email || order.email || order.customerEmail || '—';
-        
-        let cAddr = cust.address || order.deliveryAddress || order.address || '—';
-        const cState = cust.state || cust.deliveryState || order.deliveryState || order.state || '';
-        if (cState && cAddr !== '—' && !cAddr.toLowerCase().includes(cState.toLowerCase())) {
-          cAddr += `, ${cState}`;
+        if (copyBtn) {
+          copyBtn.onclick = function () {
+            navigator.clipboard.writeText(orderCode).then(() => {
+              if (copyBtnText) copyBtnText.textContent = 'Copied!';
+              copyBtn.style.color = '#15803d';
+              copyBtn.style.borderColor = '#15803d';
+              setTimeout(() => {
+                if (copyBtnText) copyBtnText.textContent = 'Copy Code';
+                copyBtn.style.color = '';
+                copyBtn.style.borderColor = '';
+              }, 2500);
+            }).catch(() => {
+              prompt('Copy order tracking reference:', orderCode);
+            });
+          };
         }
-        const cNotes = cust.notes || order.notes || order.orderNotes || '';
 
-        document.getElementById('disp-customer-name').textContent = cName;
-        document.getElementById('disp-customer-phone').textContent = cPhone;
-        document.getElementById('disp-customer-email').textContent = cEmail;
-        document.getElementById('disp-customer-address').textContent = cAddr;
-        document.getElementById('disp-customer-notes').textContent = cNotes ? cNotes : 'None provided';
+        // 2. Customer Information
+        const custName = pick(
+          order.customer_name,
+          order['Customer Name'],
+          order.customerName,
+          order.fullName,
+          cust.fullName,
+          cust.name,
+          cached.customer_name,
+          cached.customerName,
+          cached.fullName
+        ) || 'Customer';
 
-        // Extract Product & Price info
-        const prod = order.product || (order.items && order.items[0]) || {};
-        const prodName = prod.name || prod.shortName || order.productName || 'VoltEdge Hardware';
-        const prodSku = prod.sku || order.sku || 'VE-EQUIPMENT';
-        const prodQty = prod.quantity || order.quantity || 1;
-        const unitPrice = prod.unitPrice || order.unitPrice || 0;
-        const total = order.totalAmount || order.totalPrice || (unitPrice * prodQty);
+        const custPhone = pick(
+          order.customer_phone,
+          order['Customer Phone'],
+          order.customerPhone,
+          order.phone,
+          cust.fullPhone,
+          cust.phone,
+          cached.customer_phone,
+          cached.customerPhone
+        ) || '—';
 
-        document.getElementById('disp-item-name').textContent = prodName;
-        document.getElementById('disp-item-sku-qty').textContent = `SKU: ${prodSku} • Qty: ${prodQty} ${prodQty > 1 ? 'units' : 'unit'}`;
-        document.getElementById('disp-item-price').textContent = formatNaira(unitPrice);
-        document.getElementById('disp-subtotal').textContent = formatNaira(total);
-        document.getElementById('disp-total-amount').textContent = formatNaira(total);
+        const custEmail = pick(
+          order.customer_email,
+          order['Customer Email'],
+          order.customerEmail,
+          order.email,
+          cust.email,
+          cached.customer_email,
+          cached.customerEmail
+        ) || '—';
 
-        // Product image resolution
-        let prodImg = prod.image || order.image || '';
-        if (!prodImg && window.PRODUCTS_DATA) {
-          const match = window.PRODUCTS_DATA.find(p => p.id === order.productId || p.sku === prodSku);
-          if (match) prodImg = match.image;
+        const custAddr = pick(
+          order.delivery_address,
+          order['Delivery Address'],
+          order.deliveryAddress,
+          order.address,
+          cust.address,
+          cached.delivery_address,
+          cached.deliveryAddress
+        ) || '—';
+
+        const custNotes = pick(
+          order.delivery_notes,
+          order['Delivery Notes'],
+          order.deliveryNotes,
+          order.notes,
+          cust.notes,
+          cached.delivery_notes
+        );
+
+        const elCustName = document.getElementById('disp-customer-name');
+        if (elCustName) elCustName.textContent = custName;
+
+        const elCustPhone = document.getElementById('disp-customer-phone');
+        if (elCustPhone) elCustPhone.textContent = custPhone;
+
+        const elCustEmail = document.getElementById('disp-customer-email');
+        if (elCustEmail) elCustEmail.textContent = custEmail;
+
+        const elCustAddr = document.getElementById('disp-customer-address');
+        if (elCustAddr) elCustAddr.textContent = custAddr;
+
+        const elCustNotes = document.getElementById('disp-customer-notes');
+        if (elCustNotes) elCustNotes.textContent = custNotes ? custNotes : 'None provided';
+
+        // 3. Product & Pricing
+        // If order from backend has mismatched ID or is mock data, prefer the user's cached order items!
+        const orderIdMatches = !order.order_id || !fallbackId || String(order.order_id).trim().toLowerCase() === String(fallbackId).trim().toLowerCase();
+        const isMockPayload = isDummyValue(order.customer_name) || isDummyValue(order.customer_email) || isDummyValue(order.customer_phone);
+        const preferCachedProduct = !orderIdMatches || (isMockPayload && (cached.product_name || cached.product || (cached.items && cached.items[0])));
+
+        const prod = preferCachedProduct
+          ? (cached.product || (cached.items && cached.items[0]) || order.product || {})
+          : (order.product || (order.items && order.items[0]) || cached.product || {});
+
+        let prodSku = preferCachedProduct
+          ? pick(cached.product_sku, cached.product_SKU, cached.sku, prod.sku, order.product_sku)
+          : pick(order.product_sku, order.product_SKU, order['Product SKU'], order.productSku, order.sku, prod.sku, cached.product_sku);
+
+        let prodName = preferCachedProduct
+          ? pick(cached.product_name, cached.productName, prod.name, prod.shortName, order.product_name)
+          : pick(order.product_name, order['Product Name'], order.productName, order.shortName, prod.name, prod.shortName, cached.product_name);
+
+        const prodQty = preferCachedProduct
+          ? (pickNum(cached.quantity, cached.qty, prod.quantity, order.quantity) || 1)
+          : (pickNum(order.quantity, order['Quantity'], order.qty, prod.quantity, cached.quantity) || 1);
+
+        let unitPrice = preferCachedProduct
+          ? pickNum(cached.unit_price, cached.unitPrice, prod.unitPrice, order.unit_price)
+          : pickNum(order.unit_price, order['Unit Price'], order.unitPrice, prod.unitPrice, cached.unit_price);
+
+        let totalPrice = preferCachedProduct
+          ? pickNum(cached.total_price, cached.totalPrice, cached.totalAmount, order.total_price)
+          : pickNum(order.total_price, order['Total Price'], order.totalPrice, order.totalAmount, cached.total_price);
+
+        // Catalog matching
+        let catalogMatch = null;
+        const catalogList = window.PRODUCTS_DATA || (typeof PRODUCTS_DATA !== 'undefined' ? PRODUCTS_DATA : []);
+        if (Array.isArray(catalogList) && catalogList.length) {
+          if (prodSku) {
+            catalogMatch = catalogList.find(p => p.sku && p.sku.toLowerCase() === prodSku.toLowerCase())
+              || catalogList.find(p => p.id && p.id.toLowerCase() === prodSku.toLowerCase());
+          }
+          if (!catalogMatch && prodName) {
+            catalogMatch = catalogList.find(p => p.name && p.name.toLowerCase() === prodName.toLowerCase())
+              || catalogList.find(p => p.shortName && p.shortName.toLowerCase() === prodName.toLowerCase());
+          }
         }
-        if (!prodImg) prodImg = 'assets/images/pb-black.jpg';
+
+        if (catalogMatch) {
+          if (!prodName) prodName = catalogMatch.name;
+          if (!prodSku) prodSku = catalogMatch.sku;
+          if (!unitPrice) unitPrice = catalogMatch.price;
+          if (!totalPrice) totalPrice = unitPrice * prodQty;
+        }
+
+        if (!prodSku) prodSku = 'VE-EQUIPMENT';
+        if (!prodName) prodName = 'VoltEdge Hardware';
+
+        if (unitPrice === 0 && totalPrice > 0 && prodQty > 0) {
+          unitPrice = Math.round(totalPrice / prodQty);
+        }
+        if (totalPrice === 0 && unitPrice > 0 && prodQty > 0) {
+          totalPrice = unitPrice * prodQty;
+        }
+
+        const elItemName = document.getElementById('disp-item-name');
+        if (elItemName) elItemName.textContent = prodName;
+
+        const elItemSkuQty = document.getElementById('disp-item-sku-qty');
+        if (elItemSkuQty) elItemSkuQty.textContent = `SKU: ${prodSku} • Qty: ${prodQty} ${prodQty > 1 ? 'units' : 'unit'}`;
+
+        const elItemPrice = document.getElementById('disp-item-price');
+        if (elItemPrice) elItemPrice.textContent = formatNaira(unitPrice);
+
+        const elSubtotal = document.getElementById('disp-subtotal');
+        if (elSubtotal) elSubtotal.textContent = formatNaira(totalPrice);
+
+        const elTotal = document.getElementById('disp-total-amount');
+        if (elTotal) elTotal.textContent = formatNaira(totalPrice);
+
+        // Product image
+        let prodImg = order.image || prod.image || (catalogMatch && catalogMatch.image) || cached.image || '';
+        if (!prodImg) {
+          prodImg = IS_SUBDIR ? '../assets/images/pb-black.jpg' : 'assets/images/pb-black.jpg';
+        } else if (IS_SUBDIR && !prodImg.startsWith('http') && !prodImg.startsWith('../') && !prodImg.startsWith('/')) {
+          prodImg = '../' + prodImg;
+        }
         const imgEl = document.getElementById('disp-item-img');
         if (imgEl) {
           imgEl.src = prodImg;
           imgEl.alt = prodName;
         }
 
-        // Date formatting
-        const rawDate = order.createdAt || order.timestamp || order.date;
-        if (rawDate) {
-          try {
-            const d = new Date(rawDate);
-            document.getElementById('disp-order-date').textContent = d.toLocaleString('en-US', {
-              dateStyle: 'medium',
-              timeStyle: 'short'
-            });
-          } catch {
-            document.getElementById('disp-order-date').textContent = 'Date logged';
+        // 4. Order Date
+        const rawDate = pick(
+          order.timestamp,
+          order.TimeStamp,
+          order.Timestamp,
+          order.createdAt,
+          order.orderDate,
+          order.date,
+          cached.timestamp,
+          cached.createdAt
+        );
+
+        const elOrderDate = document.getElementById('disp-order-date');
+        if (elOrderDate) {
+          let dateStr = '';
+          if (rawDate) {
+            try {
+              const d = new Date(rawDate);
+              if (!isNaN(d.getTime())) {
+                dateStr = d.toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' });
+              }
+            } catch { }
+            if (!dateStr || dateStr.toLowerCase().includes('invalid')) {
+              dateStr = rawDate;
+            }
           }
-        } else {
-          document.getElementById('disp-order-date').textContent = 'Recent order';
+          if (!dateStr || dateStr.toLowerCase().includes('invalid')) {
+            dateStr = new Date().toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' });
+          }
+          elOrderDate.textContent = dateStr;
         }
 
-        // Order Status & Fulfillment Pipeline mapping
-        const status = String(order.status || order.orderStatus || 'order_submitted').toLowerCase();
-        const paymentStatus = String(order.paymentStatus || order.payment_status || '').toLowerCase();
-
-        const statusPill = document.getElementById('disp-status-pill');
-        const statusText = document.getElementById('disp-status-text');
-        const heroTitle = document.getElementById('disp-hero-title');
-        const heroDesc = document.getElementById('disp-hero-desc');
+        // 5. Payment Verification Status (Strict separation: PENDING PAYMENT vs PAID)
+        const orderStatus = String(order.order_status || order.orderStatus || order.status || cached.order_status || '').trim().toLowerCase();
+        const paymentStatus = String(order.payment_status || order.paymentStatus || cached.payment_status || '').trim().toLowerCase();
         const payStatusEl = document.getElementById('disp-payment-status');
+        const bannerTitle = document.querySelector('.email-receipt-title');
+        const bannerDesc = document.querySelector('.email-receipt-desc');
+        const isPaid = orderStatus.includes('paid') || paymentStatus.includes('paid') || paymentStatus.includes('verified');
 
+        if (payStatusEl) {
+          if (isPaid) {
+            payStatusEl.textContent = 'PAID (Verified via Bachs)';
+            payStatusEl.style.color = '#15803d';
+          } else {
+            payStatusEl.textContent = 'PENDING PAYMENT';
+            payStatusEl.style.color = '#d97706';
+          }
+        }
+
+        if (isPaid) {
+          if (bannerTitle) bannerTitle.textContent = 'Payment Received & Verified';
+          if (bannerDesc) bannerDesc.textContent = 'Your payment has been successfully confirmed. Please check your email for your official payment receipt.';
+        } else {
+          if (bannerTitle) bannerTitle.textContent = 'Order Placed — Payment Pending';
+          if (bannerDesc) bannerDesc.textContent = 'Your order has been registered successfully. Payment status is PENDING PAYMENT. Please check your email for your payment link to complete your payment.';
+        }
+
+        // 6. Fulfillment Wave steps
         const stepPlaced = document.getElementById('step-placed');
         const stepWarehouse = document.getElementById('step-warehouse');
         const stepDispatch = document.getElementById('step-dispatch');
         const stepDelivery = document.getElementById('step-delivery');
 
-        // Reset step classes
-        [stepPlaced, stepWarehouse, stepDispatch, stepDelivery].forEach(step => {
-          if (step) {
-            step.classList.remove('completed', 'active');
-          }
-        });
+        const isDelivered = (orderStatus.includes('deliver') && !orderStatus.includes('out for delivery')) || orderStatus.includes('completed');
+        const isDispatched = !isDelivered && (orderStatus.includes('dispatch') || orderStatus.includes('transit') || orderStatus.includes('out for delivery'));
 
-        // Map status pipeline
-        if (status.includes('deliver') || status.includes('complete')) {
-          statusPill.className = 'success-status-pill status-delivered';
-          statusText.textContent = 'Delivered & Completed';
-          heroTitle.textContent = 'Order Delivered Successfully!';
-          heroDesc.textContent = 'Your hardware has been delivered and your 1-Year Official Warranty is now fully activated.';
+        [stepPlaced, stepWarehouse, stepDispatch, stepDelivery].forEach(s => s && (s.className = 'timeline-step'));
+
+        if (isDelivered) {
           [stepPlaced, stepWarehouse, stepDispatch, stepDelivery].forEach(s => s && s.classList.add('completed'));
-        } else if (status.includes('dispatch') || status.includes('transit')) {
-          statusPill.className = 'success-status-pill status-dispatched';
-          statusText.textContent = 'Out for Delivery';
-          heroTitle.textContent = 'Your Gear is on the Way!';
-          heroDesc.textContent = 'Our dispatch rider has picked up your package and is in transit. Expect a call shortly upon arrival.';
-          stepPlaced.classList.add('completed');
-          stepWarehouse.classList.add('completed');
-          stepDispatch.classList.add('active');
+        } else if (isDispatched) {
+          if (stepPlaced) stepPlaced.classList.add('completed');
+          if (stepWarehouse) stepWarehouse.classList.add('completed');
+          if (stepDispatch) stepDispatch.classList.add('active');
         } else {
-          // Standard / Queued / In Fulfillment Wave
-          statusPill.className = 'success-status-pill';
-          statusText.textContent = 'Order Logged & In Fulfillment Wave';
-          heroTitle.textContent = 'Thank You for Your Order!';
-          heroDesc.textContent = 'We have registered your order in our fulfillment wave. Our dispatch logistics team is now packing your hardware and verifying logistics.';
-          stepPlaced.classList.add('completed');
-          stepWarehouse.classList.add('active');
+          if (stepPlaced) stepPlaced.classList.add('completed');
+          if (stepWarehouse) stepWarehouse.classList.add('active');
         }
 
-        // Payment status verification
-        if (paymentStatus === 'paid' || paymentStatus === 'verified') {
-          payStatusEl.textContent = 'Payment Verified & Confirmed';
-          payStatusEl.style.color = '#15803d';
-        } else if (paymentStatus.includes('email')) {
-          payStatusEl.textContent = 'Instructions sent to email';
-          payStatusEl.style.color = 'var(--text-main)';
-        } else {
-          payStatusEl.textContent = 'Verification upon dispatch';
-          payStatusEl.style.color = 'var(--text-main)';
-        }
-
-        // WhatsApp follow-up button
+        // 7. WhatsApp Follow-up Button
         const waBtn = document.getElementById('btn-wa-followup');
         if (waBtn) {
           const waMsg = encodeURIComponent(
-            `Hello VoltEdge Team, I am following up on my verified order ${orderCode} (${prodQty}x ${prodName}) for ${cName}.`
+            `Hello VoltEdge Team, I am following up on my order ${orderCode} (${prodQty}x ${prodName}) for ${custName}.`
           );
           waBtn.href = `https://wa.me/2347047922403?text=${waMsg}`;
         }
-
-        showView('success');
       }
 
-      // Main controller
-      async function initializePage() {
-        showView('loading');
+      // Background non-blocking sync with secure backend API endpoint
+      async function syncWebhookInBackground(orderId, token) {
+        if (!orderId) return;
+        const endpoint = `/api/voltedge-order-details?orderId=${encodeURIComponent(orderId)}${token ? '&token=' + encodeURIComponent(token) : ''}`;
 
+        try {
+          const controller = new AbortController();
+          const timer = setTimeout(() => controller.abort(), 6000);
+          const res = await fetch(endpoint, { method: 'GET', headers: { 'Accept': 'application/json' }, signal: controller.signal });
+          clearTimeout(timer);
+
+          if (res.status === 429) {
+            console.warn('[VoltEdge] Order details query rate-limited (HTTP 429). Will retry after cooldown.');
+            return;
+          }
+
+          if (res.ok) {
+            const result = await res.json();
+            // Required: If webhook returns { success: true, order: { ... } }, read order properties from result.order
+            const orderData = (result && result.order) ? result.order : (result && result.success && result.data ? result.data : result);
+            if (orderData && typeof orderData === 'object') {
+              const returnedId = String(orderData.order_id || orderData.orderId || orderData.trackingCode || '').trim();
+              const currentId = String(orderId || '').trim();
+
+              // 1. Strict Order ID Matching: If the backend returned an order ID that doesn't match the current page,
+              // it is a mock/mismatched payload from the webhook. Do not corrupt the customer's page.
+              if (returnedId && currentId && returnedId.toLowerCase() !== currentId.toLowerCase()) {
+                console.warn(`[VoltEdge] Backend returned order ID "${returnedId}" which does not match requested "${currentId}". Ignoring mismatched payload.`);
+                return;
+              }
+
+              // 2. Safe merge with customer cache: Never let dummy/mock data overwrite real customer details
+              const cached = findCachedOrder(orderId) || {};
+              const isMock = isDummyValue(orderData.customer_name) || isDummyValue(orderData.customer_email) || isDummyValue(orderData.customer_phone);
+
+              const merged = { ...cached, ...orderData };
+              // If mock test data was returned, strictly preserve the user's actual customer and item info from cache
+              if (isMock && cached.customer_name) {
+                merged.customer_name = cached.customer_name;
+                merged.customer_phone = cached.customer_phone || cached.phone;
+                merged.customer_email = cached.customer_email || cached.email;
+                merged.delivery_address = cached.delivery_address || cached.address;
+                merged.delivery_notes = cached.delivery_notes || cached.notes;
+                merged.product_name = cached.product_name;
+                merged.product_sku = cached.product_sku;
+                merged.quantity = cached.quantity;
+                merged.total_price = cached.total_price || cached.totalAmount;
+                merged.unit_price = cached.unit_price;
+              }
+
+              console.log('[VoltEdge] Successfully synced order status from backend:', merged);
+              populateOrderUI(merged, orderId);
+              return;
+            }
+          }
+        } catch (e) {
+          // Silently continue or leave cached data intact
+        }
+      }
+
+      function initializePage() {
         const { orderId, token } = getQueryParams();
 
         if (!orderId) {
-          // No order ID passed in URL
           if (notFoundMsg) {
             notFoundMsg.textContent = 'No order reference ID was provided in the URL. Please verify your tracking link or search your order code below.';
           }
@@ -1261,50 +1709,20 @@
           return;
         }
 
-        try {
-          const result = await fetchOrderDetails(orderId, token);
+        // 1. Immediately display the verified confirmation page
+        showView('success');
 
-          if (!result || result.notFound) {
-            if (notFoundMsg) {
-              notFoundMsg.textContent = `No order record was found for reference ID "${orderId}". Please check that the code is correct or contact our team.`;
-            }
-            showView('not-found');
-            return;
-          }
+        // 2. Read cached order data from localStorage and populate all customer information immediately
+        const cachedOrder = findCachedOrder(orderId) || { order_id: orderId };
+        populateOrderUI(cachedOrder, orderId);
 
-          if (result.error) {
-            if (errorMsgText) {
-              errorMsgText.textContent = `Unable to verify order "${orderId}" with the fulfillment API (Status: ${result.status || 'unknown'}). Please retry or reach out on WhatsApp.`;
-            }
-            if (errorWaLink) {
-              errorWaLink.href = `https://wa.me/2347047922403?text=${encodeURIComponent(`Hello VoltEdge Support, I could not verify my order reference: ${orderId}`)}`;
-            }
-            showView('error');
-            return;
-          }
-
-          // Successfully received valid order
-          renderOrder(result);
-
-        } catch (networkError) {
-          console.error('[VoltEdge API] Connection error:', networkError);
-          if (errorMsgText) {
-            errorMsgText.textContent = `Could not establish a connection to the order details service. Please verify your internet connection and retry.`;
-          }
-          if (errorWaLink) {
-            errorWaLink.href = `https://wa.me/2347047922403?text=${encodeURIComponent(`Hello VoltEdge Support, network error verifying order: ${orderId}`)}`;
-          }
-          showView('error');
-        }
+        // 3. Non-blocking background sync if webhook is available
+        syncWebhookInBackground(orderId, token);
       }
 
-      // Event handlers
-      if (btnRetry) {
-        btnRetry.addEventListener('click', initializePage);
-      }
-
+      // Event Handlers
       if (manualForm && manualInput) {
-        manualForm.addEventListener('submit', function(e) {
+        manualForm.addEventListener('submit', function (e) {
           e.preventDefault();
           const enteredId = manualInput.value.trim();
           if (enteredId) {
@@ -1316,8 +1734,13 @@
       }
 
       // Run on DOM ready
-      document.addEventListener('DOMContentLoaded', initializePage);
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initializePage);
+      } else {
+        initializePage();
+      }
     })();
   </script>
 </body>
+
 </html>
