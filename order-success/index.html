@@ -126,7 +126,8 @@
       border-color: #bfdbfe;
     }
 
-    .success-status-pill.status-delivered {
+    .success-status-pill.status-delivered,
+    .success-status-pill.status-paid {
       background: #dcfce7;
       color: #15803d;
       border-color: #86efac;
@@ -1321,7 +1322,27 @@
           } catch { }
         }
 
-        return { orderId: orderId.trim(), token: token.trim() };
+        // Check if payment success flag is present from Bachs redirect or return page
+        const isPaidFromUrl = params.get('payment') === 'success' ||
+                              params.get('status') === 'successful' ||
+                              params.get('status') === 'paid' ||
+                              params.get('payment_status') === 'paid' ||
+                              params.get('paid') === 'true' ||
+                              Boolean(params.get('checkout_id') || params.get('checkoutId') || params.get('trxref'));
+
+        if (isPaidFromUrl) {
+          window._voltedge_is_paid_url = true;
+          try {
+            const cached = JSON.parse(localStorage.getItem('voltedge_last_order') || '{}');
+            if (cached && (cached.order_id === orderId || cached.orderId === orderId || !cached.order_id)) {
+              cached.payment_status = 'PAID';
+              cached.order_status = 'Payment Confirmed — Ready to Pack';
+              localStorage.setItem('voltedge_last_order', JSON.stringify(cached));
+            }
+          } catch {}
+        }
+
+        return { orderId: orderId.trim(), token: token.trim(), isPaidFromUrl };
       }
 
       // Find cached order matching orderId from localStorage
@@ -1580,17 +1601,42 @@
           elOrderDate.textContent = dateStr;
         }
 
-        // 5. Payment Verification Status (Strict separation: PENDING PAYMENT vs PAID)
+        // 5. Payment Verification Status (Strict separation: PENDING PAYMENT vs PAYMENT CONFIRMED — READY TO PACK)
         const orderStatus = String(order.order_status || order.orderStatus || order.status || cached.order_status || '').trim().toLowerCase();
         const paymentStatus = String(order.payment_status || order.paymentStatus || cached.payment_status || '').trim().toLowerCase();
         const payStatusEl = document.getElementById('disp-payment-status');
+        const statusPill = document.getElementById('disp-status-pill');
+        const heroDesc = document.getElementById('disp-hero-desc');
         const bannerTitle = document.querySelector('.email-receipt-title');
         const bannerDesc = document.querySelector('.email-receipt-desc');
-        const isPaid = orderStatus.includes('paid') || paymentStatus.includes('paid') || paymentStatus.includes('verified');
+        const isPaid = (window._voltedge_is_paid_url === true) ||
+                       orderStatus.includes('paid') ||
+                       paymentStatus.includes('paid') ||
+                       paymentStatus.includes('verified') ||
+                       orderStatus.includes('ready to pack') ||
+                       orderStatus.includes('pack');
+
+        if (statusPill) {
+          if (isPaid) {
+            statusPill.className = 'success-status-pill status-paid';
+            statusPill.innerHTML = '<i class="ph-bold ph-package"></i> <span id="disp-status-text">PAYMENT CONFIRMED — READY TO PACK</span>';
+          } else {
+            statusPill.className = 'success-status-pill status-pending';
+            statusPill.innerHTML = '<i class="ph-bold ph-clock"></i> <span id="disp-status-text">ORDER LOGGED — PAYMENT PENDING</span>';
+          }
+        }
+
+        if (heroDesc) {
+          if (isPaid) {
+            heroDesc.textContent = 'Payment received and verified. Our dispatch logistics team is now packing your hardware and verifying logistics.';
+          } else {
+            heroDesc.textContent = 'We have registered your order in our fulfillment wave. Our dispatch logistics team is now packing your hardware and verifying logistics.';
+          }
+        }
 
         if (payStatusEl) {
           if (isPaid) {
-            payStatusEl.textContent = 'PAID (Verified via Bachs)';
+            payStatusEl.textContent = 'Payment Confirmed — Ready to Pack';
             payStatusEl.style.color = '#15803d';
           } else {
             payStatusEl.textContent = 'PENDING PAYMENT';
@@ -1599,8 +1645,8 @@
         }
 
         if (isPaid) {
-          if (bannerTitle) bannerTitle.textContent = 'Payment Received & Verified';
-          if (bannerDesc) bannerDesc.textContent = 'Your payment has been successfully confirmed. Please check your email for your official payment receipt.';
+          if (bannerTitle) bannerTitle.textContent = 'Payment Confirmed — Ready to Pack';
+          if (bannerDesc) bannerDesc.textContent = 'Your payment has been successfully confirmed. Our logistics warehouse team is now packing your order for dispatch.';
         } else {
           if (bannerTitle) bannerTitle.textContent = 'Order Placed — Payment Pending';
           if (bannerDesc) bannerDesc.textContent = 'Your order has been registered successfully. Payment status is PENDING PAYMENT. Please check your email for your payment link to complete your payment.';
@@ -1609,6 +1655,7 @@
         // 6. Fulfillment Wave steps
         const stepPlaced = document.getElementById('step-placed');
         const stepWarehouse = document.getElementById('step-warehouse');
+        const stepWarehouseTag = document.getElementById('step-warehouse-tag');
         const stepDispatch = document.getElementById('step-dispatch');
         const stepDelivery = document.getElementById('step-delivery');
 
@@ -1625,7 +1672,12 @@
           if (stepDispatch) stepDispatch.classList.add('active');
         } else {
           if (stepPlaced) stepPlaced.classList.add('completed');
-          if (stepWarehouse) stepWarehouse.classList.add('active');
+          if (stepWarehouse) {
+            stepWarehouse.classList.add('active');
+            if (isPaid && stepWarehouseTag) {
+              stepWarehouseTag.textContent = 'Ready to Pack';
+            }
+          }
         }
 
         // 7. WhatsApp Follow-up Button

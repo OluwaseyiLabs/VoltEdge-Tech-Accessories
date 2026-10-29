@@ -519,7 +519,7 @@
         const { orderId, checkoutId, token } = getReturnParams();
 
         if (btnViewStatus) {
-          btnViewStatus.href = `order-success.html?orderId=${encodeURIComponent(orderId || '')}${token ? '&token=' + encodeURIComponent(token) : ''}`;
+          btnViewStatus.href = `order-success.html?orderId=${encodeURIComponent(orderId || '')}&payment=success${token ? '&token=' + encodeURIComponent(token) : ''}`;
         }
 
         if (btnWaSupport) {
@@ -553,7 +553,7 @@
           const cached = JSON.parse(localStorage.getItem('voltedge_last_order') || '{}');
           if (cached && (cached.order_id === orderId || cached.orderId === orderId || !cached.order_id)) {
             cached.payment_status = 'PAID';
-            cached.order_status = 'PAID';
+            cached.order_status = 'Payment Confirmed — Ready to Pack';
             if (checkoutId) cached.transaction_id = checkoutId;
             localStorage.setItem('voltedge_last_order', JSON.stringify(cached));
           }
