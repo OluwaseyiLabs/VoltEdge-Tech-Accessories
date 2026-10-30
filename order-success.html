@@ -1346,27 +1346,28 @@
       }
 
       // Find cached order matching orderId from localStorage
+      // STRICT: Must match orderId exactly. Never falls back to unrelated orders.
       function findCachedOrder(orderId) {
         try {
           const cleanId = (orderId || '').trim().toLowerCase();
+          if (!cleanId || cleanId === 've-20261029-5826') return null;
 
-          // 1. Check voltedge_last_order
+          // 1. Check voltedge_last_order ONLY if exact match
           const last = JSON.parse(localStorage.getItem('voltedge_last_order') || '{}');
           if (last && typeof last === 'object') {
             const lId = String(last.order_id || last.orderId || last.trackingCode || '').trim().toLowerCase();
-            const matches = !cleanId || !lId || lId === cleanId;
-            if (matches && (last.customer_name || last.customerName || (last.customer && last.customer.fullName) || last.fullName)) {
+            if (lId === cleanId && (last.customer_name || last.customerName || (last.customer && last.customer.fullName) || last.fullName)) {
               return last;
             }
           }
 
-          // 2. Check voltedge_orders array
+          // 2. Check voltedge_orders array ONLY if exact match
           const list = JSON.parse(localStorage.getItem('voltedge_orders') || '[]');
           if (Array.isArray(list)) {
             const found = list.find(o => {
               if (!o || typeof o !== 'object') return false;
               const oId = String(o.order_id || o.orderId || o.trackingCode || '').trim().toLowerCase();
-              return oId === cleanId || !cleanId;
+              return oId === cleanId;
             });
             if (found && (found.customer_name || found.customerName || (found.customer && found.customer.fullName) || found.fullName)) {
               return found;
@@ -1750,26 +1751,69 @@
         }
       }
 
-      function initializePage() {
+      async function initializePage() {
         const { orderId, token } = getQueryParams();
 
-        if (!orderId) {
+        if (!orderId || orderId.toLowerCase() === 've-20261029-5826') {
           if (notFoundMsg) {
-            notFoundMsg.textContent = 'No order reference ID was provided in the URL. Please verify your tracking link or search your order code below.';
+            notFoundMsg.textContent = 'No valid order reference ID was provided in the URL. Please verify your tracking link or search your order code below.';
           }
           showView('not-found');
           return;
         }
 
-        // 1. Immediately display the verified confirmation page
-        showView('success');
+        // 1. Show loading view while querying backend
+        showView('loading');
 
-        // 2. Read cached order data from localStorage and populate all customer information immediately
-        const cachedOrder = findCachedOrder(orderId) || { order_id: orderId };
-        populateOrderUI(cachedOrder, orderId);
+        // 2. Query authoritative backend endpoint
+        try {
+          const endpoint = `/api/voltedge-order-details?orderId=${encodeURIComponent(orderId)}${token ? '&token=' + encodeURIComponent(token) : ''}`;
+          const controller = new AbortController();
+          const timer = setTimeout(() => controller.abort(), 8000);
+          const res = await fetch(endpoint, {
+            method: 'GET',
+            headers: { 'Accept': 'application/json' },
+            signal: controller.signal
+          });
+          clearTimeout(timer);
 
-        // 3. Non-blocking background sync if webhook is available
-        syncWebhookInBackground(orderId, token);
+          if (res.status === 403) {
+            if (notFoundMsg) {
+              notFoundMsg.textContent = 'Security token verification failed for this order. Please use the secure link provided in your order email.';
+            }
+            showView('not-found');
+            return;
+          }
+
+          if (res.ok) {
+            const result = await res.json();
+            const orderData = (result && result.order) ? result.order : (result && result.data ? result.data : result);
+            if (orderData && typeof orderData === 'object') {
+              const returnedId = String(orderData.order_id || orderData.orderId || orderData.trackingCode || '').trim();
+              if (returnedId && returnedId.toLowerCase() === orderId.toLowerCase() && returnedId.toLowerCase() !== 've-20261029-5826') {
+                populateOrderUI(orderData, orderId);
+                showView('success');
+                return;
+              }
+            }
+          }
+        } catch (err) {
+          console.warn('[VoltEdge Order Success] Backend lookup network error:', err.message);
+        }
+
+        // 3. Fallback ONLY to an exact match in local cache for offline/transient checkout flow
+        const cached = findCachedOrder(orderId);
+        if (cached && String(cached.order_id || cached.orderId || '').trim().toLowerCase() === orderId.toLowerCase()) {
+          populateOrderUI(cached, orderId);
+          showView('success');
+          return;
+        }
+
+        // 4. If neither backend nor local exact cache matches, display not found
+        if (notFoundMsg) {
+          notFoundMsg.textContent = `No order record matching reference "${orderId}" could be found. Please check your code or contact support.`;
+        }
+        showView('not-found');
       }
 
       // Event Handlers

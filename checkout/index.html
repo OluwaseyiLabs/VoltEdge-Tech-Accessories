@@ -1194,10 +1194,10 @@
           timeStamp: now.toISOString(),
 
           // Bachs Payment Return URLs (directing to dedicated payment-return page)
-          return_url: `${window.location.origin}/payment-return.html?orderId=${encodeURIComponent(trackingCode)}`,
-          redirect_url: `${window.location.origin}/payment-return.html?orderId=${encodeURIComponent(trackingCode)}`,
-          callback_url: `${window.location.origin}/payment-return.html?orderId=${encodeURIComponent(trackingCode)}`,
-          success_url: `${window.location.origin}/payment-return.html?orderId=${encodeURIComponent(trackingCode)}`,
+          return_url: `${window.location.origin}/payment-return.html?orderId=${encodeURIComponent(trackingCode)}&token=${encodeURIComponent(lookupToken)}`,
+          redirect_url: `${window.location.origin}/payment-return.html?orderId=${encodeURIComponent(trackingCode)}&token=${encodeURIComponent(lookupToken)}`,
+          callback_url: `${window.location.origin}/payment-return.html?orderId=${encodeURIComponent(trackingCode)}&token=${encodeURIComponent(lookupToken)}`,
+          success_url: `${window.location.origin}/payment-return.html?orderId=${encodeURIComponent(trackingCode)}&token=${encodeURIComponent(lookupToken)}`,
 
           // Direct Google Sheets & n8n snake_case mappings
           customer_name: name,
