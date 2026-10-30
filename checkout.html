@@ -13,6 +13,7 @@
 
   <!-- Stylesheet -->
   <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/cart.css">
 
   <!-- Phosphor Icons -->
   <script src="https://unpkg.com/@phosphor-icons/web" async></script>
@@ -490,6 +491,11 @@
 
       <!-- Nav Actions -->
       <div class="nav-actions">
+        <button class="nav-cart-btn" id="nav-cart-btn" onclick="VoltEdgeCart.openDrawer()" aria-label="Shopping Cart">
+          <i class="ph-bold ph-shopping-bag"></i>
+          <span class="cart-badge-count" id="nav-cart-count">0</span>
+        </button>
+
         <a href="https://wa.me/2347047922403?text=Hello%20VoltEdge%2C%20I%20have%20a%20question%20before%20placing%20my%20order." target="_blank" rel="noopener noreferrer" class="btn btn-whatsapp" style="padding: 0.65rem 1.15rem; font-size: 0.88rem;">
           <i class="ph-fill ph-whatsapp-logo"></i> Chat with us
         </a>
@@ -592,43 +598,38 @@
         <div class="checkout-main-card">
           <form id="checkout-form" novalidate>
 
-            <!-- Step 1: Gear Selection -->
+            <!-- Step 1: Equipment Selection (Multi-Product Shopping Cart) -->
             <section class="step-section">
               <div class="step-title">
                 <span class="step-num">1</span>
-                <span>Select Your Equipment & Quantity</span>
+                <span>Your Selected Equipment (<span id="chk-cart-count-badge">0 items</span>)</span>
               </div>
 
-              <div class="form-group">
-                <label for="checkout-product-select" class="form-label">Selected Hardware *</label>
-                <select id="checkout-product-select" class="form-control" required>
+              <!-- Multi-Product Cart Items Container -->
+              <div id="checkout-cart-items-container" class="checkout-cart-table">
+                <!-- Dynamically populated from VoltEdgeCart -->
+              </div>
+
+              <!-- Empty Cart Alert -->
+              <div id="checkout-cart-empty-alert" style="display: none; padding: 1.5rem; text-align: center; background: #f8fafc; border: 1.5px dashed var(--border); border-radius: var(--radius-md); margin-bottom: 1.25rem;">
+                <div style="font-size: 2.25rem; color: var(--text-dim); margin-bottom: 0.5rem;">
+                  <i class="ph ph-shopping-bag"></i>
+                </div>
+                <h4 style="font-size: 1.05rem; font-weight: 800; color: var(--text-main); margin: 0 0 0.35rem;">Your shopping cart is empty</h4>
+                <p style="font-size: 0.88rem; color: var(--text-muted); margin: 0 0 1rem;">Please add equipment from our catalogue to proceed with your order.</p>
+                <a href="index.html#catalogue" class="btn btn-primary btn-sm">
+                  <i class="ph-bold ph-lightning"></i> Browse Equipment Catalogue
+                </a>
+              </div>
+
+              <!-- Add More Equipment Row -->
+              <div class="checkout-add-more-row" id="checkout-add-more-row">
+                <select id="checkout-add-product-select" class="checkout-add-select" aria-label="Add more equipment">
                   <!-- Populated dynamically from PRODUCTS_DATA -->
                 </select>
-              </div>
-
-              <!-- Product Preview Card -->
-              <div class="product-select-card" id="product-card-preview">
-                <div class="product-thumb-wrap">
-                  <img src="assets/images/pb-black.jpg" alt="Selected Product" id="checkout-preview-img">
-                </div>
-                <div class="product-card-info">
-                  <span class="product-card-sku" id="checkout-preview-sku">VE-PB-30K-BLK</span>
-                  <div class="product-card-title" id="checkout-preview-name">30,000mAh Laptop Power Bank (Black)</div>
-                  <div class="product-card-price" id="checkout-preview-price">₦65,000</div>
-                </div>
-              </div>
-
-              <!-- Quantity Selector -->
-              <div class="form-group" style="margin-top: 1.25rem;">
-                <label for="checkout-qty-input" class="form-label">
-                  <span>Quantity Units</span>
-                  <span class="form-label-desc">Max 50 units per order</span>
-                </label>
-                <div class="qty-stepper">
-                  <button type="button" class="qty-btn" id="chk-qty-minus" aria-label="Decrease quantity">&minus;</button>
-                  <input type="number" id="checkout-qty-input" class="qty-input" value="1" min="1" max="50">
-                  <button type="button" class="qty-btn" id="chk-qty-plus" aria-label="Increase quantity">&#43;</button>
-                </div>
+                <button type="button" class="btn-add-more-product" id="btn-add-more-product">
+                  <i class="ph-bold ph-plus"></i> <span>Add to Order</span>
+                </button>
               </div>
             </section>
 
@@ -692,15 +693,44 @@
                 <div class="form-group">
                   <label for="checkout-state" class="form-label">State / Region *</label>
                   <select id="checkout-state" class="form-control" required>
-                    <option value="Lagos (Island / Lekki / VI)">Lagos (Island / Lekki / VI)</option>
-                    <option value="Lagos (Mainland / Ikeja / Surulere)">Lagos (Mainland / Ikeja / Surulere)</option>
-                    <option value="Abuja (FCT)">Abuja (FCT)</option>
-                    <option value="Port Harcourt (Rivers)">Port Harcourt (Rivers)</option>
-                    <option value="Ibadan (Oyo)">Ibadan (Oyo)</option>
-                    <option value="Enugu (Enugu)">Enugu (Enugu)</option>
-                    <option value="Asaba / Warri (Delta)">Asaba / Warri (Delta)</option>
-                    <option value="Benin City (Edo)">Benin City (Edo)</option>
-                    <option value="Other Nigerian State (Nationwide Dispatch)">Other Nigerian State (Nationwide Dispatch)</option>
+                    <option value="" disabled selected>Select Delivery State / FCT *</option>
+                    <option value="Abia">Abia</option>
+                    <option value="Adamawa">Adamawa</option>
+                    <option value="Akwa Ibom">Akwa Ibom</option>
+                    <option value="Anambra">Anambra</option>
+                    <option value="Bauchi">Bauchi</option>
+                    <option value="Bayelsa">Bayelsa</option>
+                    <option value="Benue">Benue</option>
+                    <option value="Borno">Borno</option>
+                    <option value="Cross River">Cross River</option>
+                    <option value="Delta">Delta</option>
+                    <option value="Ebonyi">Ebonyi</option>
+                    <option value="Edo">Edo</option>
+                    <option value="Ekiti">Ekiti</option>
+                    <option value="Enugu">Enugu</option>
+                    <option value="Federal Capital Territory (Abuja)">Federal Capital Territory (Abuja)</option>
+                    <option value="Gombe">Gombe</option>
+                    <option value="Imo">Imo</option>
+                    <option value="Jigawa">Jigawa</option>
+                    <option value="Kaduna">Kaduna</option>
+                    <option value="Kano">Kano</option>
+                    <option value="Katsina">Katsina</option>
+                    <option value="Kebbi">Kebbi</option>
+                    <option value="Kogi">Kogi</option>
+                    <option value="Kwara">Kwara</option>
+                    <option value="Lagos">Lagos</option>
+                    <option value="Nasarawa">Nasarawa</option>
+                    <option value="Niger">Niger</option>
+                    <option value="Ogun">Ogun</option>
+                    <option value="Ondo">Ondo</option>
+                    <option value="Osun">Osun</option>
+                    <option value="Oyo">Oyo</option>
+                    <option value="Plateau">Plateau</option>
+                    <option value="Rivers">Rivers</option>
+                    <option value="Sokoto">Sokoto</option>
+                    <option value="Taraba">Taraba</option>
+                    <option value="Yobe">Yobe</option>
+                    <option value="Zamfara">Zamfara</option>
                   </select>
                 </div>
 
@@ -737,21 +767,17 @@
             </div>
 
             <div class="summary-calc">
-              <div class="calc-line">
-                <span>Selected Item:</span>
-                <strong id="summary-prod-name">30,000mAh Power Bank</strong>
+              <!-- Itemized line items list -->
+              <div id="summary-cart-items-list" style="display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 0.85rem; padding-bottom: 0.85rem; border-bottom: 1px dashed var(--border);">
+                <!-- Populated dynamically from cart -->
               </div>
               <div class="calc-line">
-                <span>Unit Price:</span>
-                <strong id="summary-unit-price">₦65,000</strong>
+                <span>Total Quantity:</span>
+                <strong id="summary-qty-count">0 units</strong>
               </div>
               <div class="calc-line">
-                <span>Quantity:</span>
-                <strong id="summary-qty-count">1 unit</strong>
-              </div>
-              <div class="calc-line">
-                <span>Subtotal:</span>
-                <strong id="summary-subtotal">₦65,000</strong>
+                <span>Merchandise Subtotal:</span>
+                <strong id="summary-subtotal">₦0</strong>
               </div>
               <div class="calc-line">
                 <span>Logistics / Delivery:</span>
@@ -764,7 +790,7 @@
 
               <div class="calc-line total-line">
                 <span>Total Amount:</span>
-                <span class="grand-total" id="summary-grand-total">₦65,000</span>
+                <span class="grand-total" id="summary-grand-total">₦0</span>
               </div>
             </div>
 
@@ -870,6 +896,7 @@
 
   <!-- Products Catalog Data -->
   <script src="js/products.js"></script>
+  <script src="js/cart.js"></script>
 
   <!-- Checkout Interaction Script -->
   <script>
@@ -943,27 +970,7 @@
         };
       }
 
-      // State
-      let selectedProduct = null;
-      let selectedQuantity = 1;
-
-      // Elements
-      const productSelect = document.getElementById('checkout-product-select');
-      const qtyInput = document.getElementById('checkout-qty-input');
-      const qtyMinusBtn = document.getElementById('chk-qty-minus');
-      const qtyPlusBtn = document.getElementById('chk-qty-plus');
-      
-      const previewImg = document.getElementById('checkout-preview-img');
-      const previewSku = document.getElementById('checkout-preview-sku');
-      const previewName = document.getElementById('checkout-preview-name');
-      const previewPrice = document.getElementById('checkout-preview-price');
-
-      const summaryProdName = document.getElementById('summary-prod-name');
-      const summaryUnitPrice = document.getElementById('summary-unit-price');
-      const summaryQtyCount = document.getElementById('summary-qty-count');
-      const summarySubtotal = document.getElementById('summary-subtotal');
-      const summaryGrandTotal = document.getElementById('summary-grand-total');
-
+      // Form and UI Elements
       const form = document.getElementById('checkout-form');
       const submitBtn = document.getElementById('btn-submit-checkout');
       const sidebarSubmitBtn = document.getElementById('btn-sidebar-submit');
@@ -983,7 +990,7 @@
         return '₦' + Number(amount).toLocaleString('en-NG');
       }
 
-      // Initialize Products Dropdown
+      // Initialize Multi-Product Cart and Add More Equipment selector
       function initProducts() {
         const prodList = window.PRODUCTS_DATA || (typeof PRODUCTS_DATA !== 'undefined' ? PRODUCTS_DATA : []);
         if (!prodList || !prodList.length) {
@@ -991,105 +998,143 @@
           return;
         }
 
-        if (productSelect) {
-          productSelect.innerHTML = '';
-          prodList.forEach(prod => {
-            const opt = document.createElement('option');
-            opt.value = prod.id;
-            opt.textContent = `${prod.name} — ${formatNaira(prod.price)}`;
-            productSelect.appendChild(opt);
-          });
-        }
-
-        // Determine preselected product from query params or localStorage
+        // Check URL parameters (e.g. from direct product clicks)
         const params = new URLSearchParams(window.location.search);
         const paramId = params.get('productId') || params.get('product') || params.get('id');
         const paramQty = parseInt(params.get('qty') || params.get('quantity') || '1', 10);
 
-        if (!isNaN(paramQty) && paramQty >= 1 && paramQty <= 50) {
-          selectedQuantity = paramQty;
-          if (qtyInput) qtyInput.value = selectedQuantity;
-        }
+        let currentCart = VoltEdgeCart.getCart();
 
-        let target = null;
-        if (paramId) {
-          target = prodList.find(p => p.id.toLowerCase() === paramId.toLowerCase());
-        }
-
-        if (!target) {
-          const cachedId = localStorage.getItem('voltedge_selected_product_id');
-          if (cachedId) {
-            target = prodList.find(p => p.id === cachedId);
+        // If cart is empty, check query params or stored selection
+        if (currentCart.length === 0) {
+          if (paramId) {
+            VoltEdgeCart.addItem(paramId, !isNaN(paramQty) && paramQty > 0 ? paramQty : 1, false);
+          } else {
+            const cachedId = localStorage.getItem('voltedge_selected_product_id');
+            const targetId = cachedId || (prodList.length ? prodList[0].id : null);
+            if (targetId) {
+              VoltEdgeCart.addItem(targetId, 1, false);
+            }
+          }
+        } else if (paramId) {
+          const exists = currentCart.find(i => i.id === paramId || i.sku === paramId);
+          if (!exists) {
+            VoltEdgeCart.addItem(paramId, !isNaN(paramQty) && paramQty > 0 ? paramQty : 1, false);
           }
         }
 
-        if (!target) {
-          target = prodList[0];
+        // Populate "Add More Equipment" dropdown
+        const addSelect = document.getElementById('checkout-add-product-select');
+        if (addSelect && prodList.length) {
+          addSelect.innerHTML = '';
+          prodList.forEach(prod => {
+            const opt = document.createElement('option');
+            opt.value = prod.id;
+            opt.textContent = `${prod.name} — ${formatNaira(prod.price)}`;
+            addSelect.appendChild(opt);
+          });
         }
 
-        selectedProduct = target;
-        if (productSelect && target) {
-          productSelect.value = target.id;
+        const btnAddMore = document.getElementById('btn-add-more-product');
+        if (btnAddMore && addSelect) {
+          btnAddMore.onclick = function() {
+            const selId = addSelect.value;
+            if (selId) {
+              VoltEdgeCart.addItem(selId, 1, false);
+              renderCheckoutDisplay();
+            }
+          };
         }
-        updateDisplay();
+
+        renderCheckoutDisplay();
       }
 
-      // Update Live UI Display
-      function updateDisplay() {
-        if (!selectedProduct) return;
+      // Render Multi-Product Cart and Order Summary Display
+      function renderCheckoutDisplay() {
+        const cart = VoltEdgeCart.getCart();
+        const container = document.getElementById('checkout-cart-items-container');
+        const emptyAlert = document.getElementById('checkout-cart-empty-alert');
+        const addRow = document.getElementById('checkout-add-more-row');
+        const countBadge = document.getElementById('chk-cart-count-badge');
+        const summaryList = document.getElementById('summary-cart-items-list');
+        const summaryQty = document.getElementById('summary-qty-count');
+        const summarySub = document.getElementById('summary-subtotal');
+        const summaryTotal = document.getElementById('summary-grand-total');
 
-        const totalAmount = selectedProduct.price * selectedQuantity;
+        const totalCount = VoltEdgeCart.getTotalCount();
+        const subtotal = VoltEdgeCart.getSubtotal();
 
-        // Update product preview card
-        if (previewImg) previewImg.src = selectedProduct.image;
-        if (previewSku) previewSku.textContent = selectedProduct.sku || selectedProduct.id;
-        if (previewName) previewName.textContent = selectedProduct.name;
-        if (previewPrice) previewPrice.textContent = formatNaira(selectedProduct.price);
+        if (countBadge) {
+          countBadge.textContent = `${totalCount} ${totalCount === 1 ? 'unit' : 'units'}`;
+        }
 
-        // Update summary pane
-        if (summaryProdName) summaryProdName.textContent = selectedProduct.shortName || selectedProduct.name;
-        if (summaryUnitPrice) summaryUnitPrice.textContent = formatNaira(selectedProduct.price);
-        if (summaryQtyCount) summaryQtyCount.textContent = `${selectedQuantity} ${selectedQuantity > 1 ? 'units' : 'unit'}`;
-        if (summarySubtotal) summarySubtotal.textContent = formatNaira(totalAmount);
-        if (summaryGrandTotal) summaryGrandTotal.textContent = formatNaira(totalAmount);
+        if (cart.length === 0) {
+          if (container) container.style.display = 'none';
+          if (addRow) addRow.style.display = 'none';
+          if (emptyAlert) emptyAlert.style.display = 'block';
+          if (summaryList) summaryList.innerHTML = '<span style="color: var(--text-dim); font-size: 0.85rem;">No items in cart</span>';
+          if (summaryQty) summaryQty.textContent = '0 units';
+          if (summarySub) summarySub.textContent = formatNaira(0);
+          if (summaryTotal) summaryTotal.textContent = formatNaira(0);
+          return;
+        }
+
+        if (container) container.style.display = 'flex';
+        if (addRow) addRow.style.display = 'flex';
+        if (emptyAlert) emptyAlert.style.display = 'none';
+
+        // Render Step 1 items list
+        if (container) {
+          container.innerHTML = cart.map(item => {
+            const lineTotal = item.price * item.quantity;
+            let imgSrc = item.image || 'assets/images/pb-black.jpg';
+            if (false && !imgSrc.startsWith('http') && !imgSrc.startsWith('../')) {
+              imgSrc = '../' + imgSrc;
+            }
+            return `
+              <div class="checkout-cart-item" data-sku="${item.sku}">
+                <div class="checkout-cart-item-left">
+                  <img src="${imgSrc}" alt="${item.name}" class="checkout-cart-item-img">
+                  <div class="checkout-cart-item-details">
+                    <div class="checkout-cart-item-name">${item.name}</div>
+                    <div class="checkout-cart-item-sku">SKU: ${item.sku} &bull; ${formatNaira(item.price)} each</div>
+                  </div>
+                </div>
+                <div class="checkout-cart-item-right">
+                  <div class="cart-qty-stepper">
+                    <button type="button" class="cart-qty-btn" onclick="VoltEdgeCart.updateQuantity('${item.sku}', ${item.quantity - 1}); renderCheckoutDisplay();" aria-label="Decrease">&minus;</button>
+                    <span class="cart-qty-num">${item.quantity}</span>
+                    <button type="button" class="cart-qty-btn" onclick="VoltEdgeCart.updateQuantity('${item.sku}', ${item.quantity + 1}); renderCheckoutDisplay();" aria-label="Increase">&#43;</button>
+                  </div>
+                  <div class="checkout-cart-item-price">${formatNaira(lineTotal)}</div>
+                  <button type="button" class="cart-item-remove" onclick="VoltEdgeCart.removeItem('${item.sku}'); renderCheckoutDisplay();" aria-label="Remove item" title="Remove item">
+                    <i class="ph ph-trash"></i>
+                  </button>
+                </div>
+              </div>
+            `;
+          }).join('');
+        }
+
+        // Render summary sidebar list
+        if (summaryList) {
+          summaryList.innerHTML = cart.map(item => `
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 0.5rem; font-size: 0.85rem;">
+              <span style="color: var(--text-main); font-weight: 600; line-height: 1.35; flex: 1;">${item.shortName || item.name} <strong style="color: var(--primary);">x${item.quantity}</strong></span>
+              <span style="color: var(--text-muted); font-weight: 700; flex-shrink: 0;">${formatNaira(item.price * item.quantity)}</span>
+            </div>
+          `).join('');
+        }
+
+        if (summaryQty) summaryQty.textContent = `${totalCount} ${totalCount === 1 ? 'unit' : 'units'}`;
+        if (summarySub) summarySub.textContent = formatNaira(subtotal);
+        if (summaryTotal) summaryTotal.textContent = formatNaira(subtotal);
       }
 
-      // Event Listeners for Product and Quantity
-      if (productSelect) {
-        productSelect.addEventListener('change', function() {
-          const prodList = window.PRODUCTS_DATA || (typeof PRODUCTS_DATA !== 'undefined' ? PRODUCTS_DATA : []);
-          const prod = prodList.find(p => p.id === this.value);
-          if (prod) {
-            selectedProduct = prod;
-            localStorage.setItem('voltedge_selected_product_id', prod.id);
-            updateDisplay();
-          }
-        });
-      }
+      window.renderCheckoutDisplay = renderCheckoutDisplay;
 
-      qtyMinusBtn.addEventListener('click', function() {
-        if (selectedQuantity > 1) {
-          selectedQuantity--;
-          qtyInput.value = selectedQuantity;
-          updateDisplay();
-        }
-      });
-
-      qtyPlusBtn.addEventListener('click', function() {
-        if (selectedQuantity < 50) {
-          selectedQuantity++;
-          qtyInput.value = selectedQuantity;
-          updateDisplay();
-        }
-      });
-
-      qtyInput.addEventListener('input', function() {
-        let val = parseInt(this.value, 10);
-        if (isNaN(val) || val < 1) val = 1;
-        if (val > 50) val = 50;
-        selectedQuantity = val;
-        this.value = val;
-        updateDisplay();
+      window.addEventListener('voltedge:cart-updated', () => {
+        renderCheckoutDisplay();
       });
 
       // Notes Character Counter
@@ -1171,6 +1216,16 @@
         const trackingCode = `VE-${year}${month}${day}-${randomSuffix}`;
         const lookupToken = 've_tok_' + Math.random().toString(36).substring(2, 10);
 
+        const cart = VoltEdgeCart.getCart();
+        if (!cart.length) {
+          alert('Your shopping cart is empty. Please select at least one item.');
+          isCheckoutSubmitting = false;
+          return;
+        }
+
+        const payloadData = VoltEdgeCart.getOrderPayloadData();
+        const totalAmount = payloadData.total_price;
+
         const name = nameInput.value.trim();
         const email = emailInput.value.trim();
         const countryCode = countryCodeSelect.value;
@@ -1179,9 +1234,8 @@
         const state = stateSelect.value;
         const address = addressInput.value.trim();
         const notes = notesInput ? notesInput.value.trim() : '';
-        const totalAmount = selectedProduct.price * selectedQuantity;
 
-        // Comprehensive Payload matching VoltEdge standard schema
+        // Comprehensive Payload matching VoltEdge standard multi-product schema
         const orderDetails = {
           orderId: trackingCode,
           order_id: trackingCode,
@@ -1199,17 +1253,22 @@
           callback_url: `${window.location.origin}/payment-return.html?orderId=${encodeURIComponent(trackingCode)}&token=${encodeURIComponent(lookupToken)}`,
           success_url: `${window.location.origin}/payment-return.html?orderId=${encodeURIComponent(trackingCode)}&token=${encodeURIComponent(lookupToken)}`,
 
+          // Multi-product structured representation
+          products: payloadData.products,
+          products_json: payloadData.products_json,
+
           // Direct Google Sheets & n8n snake_case mappings
           customer_name: name,
           customer_phone: fullPhone,
           customer_email: email,
-          product_sku: selectedProduct.sku || selectedProduct.id,
-          product_SKU: selectedProduct.sku || selectedProduct.id,
-          product_name: selectedProduct.name,
-          unit_price: selectedProduct.price,
-          quantity: selectedQuantity,
+          product_sku: payloadData.product_sku,
+          product_SKU: payloadData.product_SKU,
+          product_name: payloadData.product_name,
+          unit_price: payloadData.unit_price,
+          quantity: payloadData.quantity,
           total_price: totalAmount,
-          delivery_address: address,
+          delivery_state: state,
+          delivery_address: `${address}, ${state}`,
           delivery_notes: notes,
           payment_link: '',
           order_status: 'order_submitted',
@@ -1474,8 +1533,11 @@
           const btnCopyCode = document.getElementById('chk-btn-copy-code');
           const copyCodeText = document.getElementById('chk-copy-code-text');
 
+          // Clear cart on successful order confirmation
+          try { VoltEdgeCart.clearCart(); } catch(e) {}
+
           if (confCodeEl) confCodeEl.textContent = finalOrderId;
-          if (confProdEl) confProdEl.textContent = `${selectedQuantity}x ${selectedProduct.name} (${formatNaira(totalAmount)})`;
+          if (confProdEl) confProdEl.textContent = `${payloadData.product_name} (${formatNaira(totalAmount)})`;
           if (confRecipEl) confRecipEl.textContent = name;
           if (confEmailEl) confEmailEl.textContent = email;
           if (confPhoneEl) confPhoneEl.textContent = fullPhone;

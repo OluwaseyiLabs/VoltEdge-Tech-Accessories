@@ -1039,6 +1039,7 @@
                 <i class="ph-bold ph-receipt"></i> Purchased Equipment
               </h3>
 
+              <div id="disp-items-container">
               <div class="item-row">
                 <img src="assets/images/pb-black.jpg" alt="Hardware Ordered" id="disp-item-img">
                 <div class="item-meta">
@@ -1046,7 +1047,8 @@
                   <div class="item-sku-qty" id="disp-item-sku-qty">—</div>
                   <div class="item-price" id="disp-item-price">—</div>
                 </div>
-              </div>
+              
+              </div></div>
 
               <div class="receipt-lines">
                 <div class="line">
@@ -1535,11 +1537,80 @@
         if (!prodSku) prodSku = 'VE-EQUIPMENT';
         if (!prodName) prodName = 'VoltEdge Hardware';
 
+        // Multi-Product Cart Support: parse products array or products_json if available
+        let orderProducts = [];
+        if (Array.isArray(order.products) && order.products.length > 0) {
+          orderProducts = order.products;
+        } else if (order.products_json && typeof order.products_json === 'string') {
+          try {
+            const parsed = JSON.parse(order.products_json);
+            if (Array.isArray(parsed) && parsed.length > 0) orderProducts = parsed;
+          } catch(e) {}
+        } else if (Array.isArray(cached.products) && cached.products.length > 0) {
+          orderProducts = cached.products;
+        }
+
+        if (orderProducts.length > 1 && (!totalPrice || totalPrice === 0)) {
+          totalPrice = orderProducts.reduce((sum, p) => {
+            const lTotal = pickNum(p.line_total, p.lineTotal);
+            if (lTotal) return sum + lTotal;
+            const uPrice = pickNum(p.unit_price, p.price, p.unitPrice) || 0;
+            const q = pickNum(p.quantity, p.qty) || 1;
+            return sum + (uPrice * q);
+          }, 0);
+        }
+
         if (unitPrice === 0 && totalPrice > 0 && prodQty > 0) {
           unitPrice = Math.round(totalPrice / prodQty);
         }
         if (totalPrice === 0 && unitPrice > 0 && prodQty > 0) {
           totalPrice = unitPrice * prodQty;
+        }
+
+        const itemsContainer = document.getElementById('disp-items-container');
+        if (itemsContainer && orderProducts.length > 1) {
+          itemsContainer.innerHTML = orderProducts.map((p, idx) => {
+            const iSku = pickNonDummy(p.product_sku, p.sku, p.productSku) || 'VE-EQUIPMENT';
+            let iName = pickNonDummy(p.product_name, p.name, p.shortName) || 'VoltEdge Hardware';
+            const iQty = pickNum(p.quantity, p.qty) || 1;
+            let iPrice = pickNum(p.unit_price, p.unitPrice, p.price);
+            let iLineTotal = pickNum(p.line_total, p.lineTotal);
+
+            let catMatch = null;
+            if (Array.isArray(catalogList) && catalogList.length) {
+              catMatch = catalogList.find(c => (c.sku && c.sku.toLowerCase() === iSku.toLowerCase()) || (c.id && c.id.toLowerCase() === iSku.toLowerCase()))
+                      || catalogList.find(c => c.name && c.name.toLowerCase() === iName.toLowerCase())
+                      || catalogList.find(c => c.shortName && c.shortName.toLowerCase() === iName.toLowerCase());
+            }
+
+            if (catMatch) {
+              if (!iName || iName === 'VoltEdge Hardware' || isDummyValue(iName)) iName = catMatch.name;
+              if (!iPrice) iPrice = catMatch.price;
+            }
+            if (!iLineTotal) iLineTotal = (iPrice || 0) * iQty;
+            if (!iPrice && iLineTotal > 0 && iQty > 0) iPrice = Math.round(iLineTotal / iQty);
+
+            let iImg = p.image || (catMatch && catMatch.image) || '';
+            if (!iImg) {
+              iImg = IS_SUBDIR ? '../assets/images/pb-black.jpg' : 'assets/images/pb-black.jpg';
+            } else if (IS_SUBDIR && !iImg.startsWith('http') && !iImg.startsWith('../') && !iImg.startsWith('/')) {
+              iImg = '../' + iImg;
+            }
+
+            const isLast = idx === orderProducts.length - 1;
+            const borderStyle = isLast ? '' : 'border-bottom: 1px dashed rgba(0,0,0,0.09); margin-bottom: 0.85rem; padding-bottom: 0.85rem;';
+
+            return `
+              <div class="item-row" style="display: flex; align-items: center; gap: 0.85rem; ${borderStyle}">
+                <img src="${iImg}" alt="${iName}" style="width: 58px; height: 58px; border-radius: 8px; object-fit: cover; border: 1px solid #e2e8f0; flex-shrink: 0; background: #fff;">
+                <div class="item-meta" style="flex: 1; min-width: 0;">
+                  <div class="item-title" style="font-weight: 700; color: var(--text-main); font-size: 0.95rem; line-height: 1.35; margin-bottom: 0.2rem;">${iName}</div>
+                  <div class="item-sku-qty" style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.25rem;">SKU: ${iSku} • Qty: ${iQty} ${iQty > 1 ? 'units' : 'unit'}</div>
+                  <div class="item-price" style="font-weight: 700; color: var(--primary); font-size: 0.92rem;">${formatNaira(iLineTotal)} <span style="font-size: 0.75rem; font-weight: 400; color: var(--text-muted);">(${formatNaira(iPrice)} ea)</span></div>
+                </div>
+              </div>
+            `;
+          }).join('');
         }
 
         const elItemName = document.getElementById('disp-item-name');
@@ -1698,7 +1769,7 @@
 
         try {
           const controller = new AbortController();
-          const timer = setTimeout(() => controller.abort(), 6000);
+          const timer = setTimeout(() => controller.abort(), 35000);
           const res = await fetch(endpoint, { method: 'GET', headers: { 'Accept': 'application/json' }, signal: controller.signal });
           clearTimeout(timer);
 
@@ -1769,7 +1840,7 @@
         try {
           const endpoint = `/api/voltedge-order-details?orderId=${encodeURIComponent(orderId)}${token ? '&token=' + encodeURIComponent(token) : ''}`;
           const controller = new AbortController();
-          const timer = setTimeout(() => controller.abort(), 8000);
+          const timer = setTimeout(() => controller.abort(), 35000);
           const res = await fetch(endpoint, {
             method: 'GET',
             headers: { 'Accept': 'application/json' },

@@ -73,6 +73,66 @@ def normalize_order(data):
     unit_price = int(data.get('unit_price') or data.get('unitPrice') or prod.get('unitPrice') or prod.get('price') or 0)
     total_price = int(data.get('total_price') or data.get('totalPrice') or data.get('totalAmount') or prod.get('totalAmount') or prod.get('totalPrice') or (unit_price * quantity))
 
+    # Multi-product list
+    products = []
+    if isinstance(data.get('products'), list) and len(data['products']) > 0:
+        for p in data['products']:
+            if isinstance(p, dict):
+                up = int(p.get('unit_price') or p.get('unitPrice') or p.get('price') or 0)
+                q = int(p.get('quantity') or p.get('qty') or 1)
+                lt = int(p.get('line_total') or p.get('lineTotal') or (up * q))
+                products.append({
+                    'product_sku': str(p.get('product_sku') or p.get('productSku') or p.get('sku') or 'VE-EQUIPMENT').strip(),
+                    'product_name': str(p.get('product_name') or p.get('productName') or p.get('name') or 'VoltEdge Hardware').strip(),
+                    'unit_price': up,
+                    'quantity': q,
+                    'line_total': lt
+                })
+    elif isinstance(data.get('products_json'), str) and data['products_json'].strip():
+        try:
+            parsed = json.loads(data['products_json'])
+            if isinstance(parsed, list):
+                for p in parsed:
+                    if isinstance(p, dict):
+                        up = int(p.get('unit_price') or p.get('unitPrice') or p.get('price') or 0)
+                        q = int(p.get('quantity') or p.get('qty') or 1)
+                        lt = int(p.get('line_total') or p.get('lineTotal') or (up * q))
+                        products.append({
+                            'product_sku': str(p.get('product_sku') or p.get('productSku') or p.get('sku') or 'VE-EQUIPMENT').strip(),
+                            'product_name': str(p.get('product_name') or p.get('productName') or p.get('name') or 'VoltEdge Hardware').strip(),
+                            'unit_price': up,
+                            'quantity': q,
+                            'line_total': lt
+                        })
+        except Exception:
+            pass
+
+    if len(products) > 0:
+        if not total_price or total_price == 0:
+            total_price = sum(p['line_total'] for p in products)
+        derived_units = sum(p['quantity'] for p in products)
+        if derived_units > 0:
+            quantity = derived_units
+        if len(products) > 1:
+            product_sku = 'MULTIPLE'
+            if not data.get('product_name'):
+                product_name = '; '.join(f"{p['product_name']} x{p['quantity']}" for p in products)
+            unit_price = total_price
+        elif len(products) == 1:
+            product_sku = products[0]['product_sku']
+            product_name = products[0]['product_name']
+            unit_price = products[0]['unit_price']
+    else:
+        products = [{
+            'product_sku': product_sku,
+            'product_name': product_name,
+            'unit_price': unit_price or total_price,
+            'quantity': quantity,
+            'line_total': total_price or (unit_price * quantity)
+        }]
+
+    products_json = data.get('products_json') if (isinstance(data.get('products_json'), str) and data.get('products_json').strip()) else json.dumps(products)
+
     return {
         'order_id': order_id,
         'token': token,
@@ -83,6 +143,8 @@ def normalize_order(data):
         'delivery_address': delivery_address,
         'delivery_state': delivery_state,
         'delivery_notes': delivery_notes,
+        'products': products,
+        'products_json': products_json,
         'product_name': product_name,
         'product_sku': product_sku,
         'quantity': quantity,
@@ -250,18 +312,20 @@ class DevHandler(http.server.SimpleHTTPRequestHandler):
 
             candidate_urls = [
                 ORDER_WEBHOOK,
-                'https://ucy00zep.rpcld.net/webhook-test/voltedge-order'
+                'https://ucy00zep.rpcld.net/webhook/voltedge-order'
             ]
             last_err_content = None
             last_status = 502
             for target_url in candidate_urls:
                 try:
+                    parsed_host = urllib.parse.urlparse(target_url).netloc
                     req = urllib.request.Request(target_url, data=post_body, headers={
                         'Content-Type': 'application/json',
+                        'Host': parsed_host,
                         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
                         'Origin': 'https://voltedge-tech-accessories.vercel.app'
                     }, method='POST')
-                    with urllib.request.urlopen(req, timeout=15) as resp:
+                    with urllib.request.urlopen(req, timeout=60) as resp:
                         content = resp.read()
                         if order_id and resp.status == 200:
                             idempotency_store[order_id] = {
@@ -288,19 +352,11 @@ class DevHandler(http.server.SimpleHTTPRequestHandler):
                 except urllib.error.HTTPError as e:
                     last_status = e.code
                     last_err_content = e.read()
-                    if e.code == 404:
-                        continue
-                    self.send_response(e.code)
-                    self.send_header('Content-Type', 'application/json')
-                    self.send_header('X-RateLimit-Limit', str(rl['limit']))
-                    self.send_header('X-RateLimit-Remaining', str(rl['remaining']))
-                    self.send_header('X-RateLimit-Reset', str(rl['reset_sec']))
-                    self.send_header('X-RateLimit-Store', 'dev-memory')
-                    self.end_headers()
-                    self.wfile.write(last_err_content)
-                    return
+                    print(f"[VoltEdge DevServer] Target {target_url} returned HTTP {e.code}")
+                    continue
                 except Exception as e:
                     last_err_content = json.dumps({'success': False, 'message': str(e)}).encode()
+                    print(f"[VoltEdge DevServer] Target {target_url} error: {e}")
                     continue
 
             # Fallback to local authoritative order store in dev mode if external webhooks are offline
@@ -380,7 +436,47 @@ class DevHandler(http.server.SimpleHTTPRequestHandler):
                 }).encode())
                 return
 
-            # Check local authoritative order store first
+            # Always query live webhook first and wait for response
+            candidate_urls = [
+                f'{ORDER_DETAILS_WEBHOOK}?{parsed.query}'
+            ]
+            for target_url in candidate_urls:
+                try:
+                    parsed_host = urllib.parse.urlparse(target_url).netloc
+                    req = urllib.request.Request(target_url, headers={
+                        'Host': parsed_host,
+                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                        'Origin': 'https://voltedge-tech-accessories.vercel.app'
+                    })
+                    with urllib.request.urlopen(req, timeout=30) as resp:
+                        content = resp.read()
+                        try:
+                            resp_json = json.loads(content.decode('utf-8'))
+                            extracted = resp_json.get('order') or resp_json.get('data') or resp_json
+                            if isinstance(extracted, dict):
+                                ret_id = str(extracted.get('order_id') or extracted.get('orderId') or extracted.get('trackingCode') or '').strip()
+                                if ret_id and ret_id.lower() == order_id.lower() and ret_id.lower() != 've-20261029-5826':
+                                    norm = normalize_order(extracted)
+                                    if norm:
+                                        if token and not norm.get('token'):
+                                            norm['token'] = token
+                                            norm['lookup_token'] = token
+                                        order_store[order_id.lower()] = norm
+                                        self.send_response(resp.status)
+                                        self.send_header('Content-Type', resp.headers.get('Content-Type', 'application/json'))
+                                        self.send_header('X-RateLimit-Limit', str(rl['limit']))
+                                        self.send_header('X-RateLimit-Remaining', str(rl['remaining']))
+                                        self.send_header('X-RateLimit-Reset', str(rl['reset_sec']))
+                                        self.send_header('X-RateLimit-Store', 'dev-memory')
+                                        self.end_headers()
+                                        self.wfile.write(content)
+                                        return
+                        except Exception as e:
+                            print('[VoltEdge DevServer] Error parsing webhook response:', e)
+                except Exception as e:
+                    print(f"[VoltEdge DevServer] Webhook query {target_url} failed:", e)
+
+            # Check local authoritative order store (fallback if webhook offline)
             if order_id.lower() in order_store:
                 rec = order_store[order_id.lower()]
                 rec_token = rec.get('token') or rec.get('lookup_token') or ''
@@ -407,53 +503,6 @@ class DevHandler(http.server.SimpleHTTPRequestHandler):
                     'order': rec
                 }).encode())
                 return
-
-            candidate_urls = [
-                f'{ORDER_DETAILS_WEBHOOK}?{parsed.query}',
-                f'https://ucy00zep.rpcld.net/webhook-test/voltedge-order-details?{parsed.query}'
-            ]
-            last_err_content = None
-            last_status = 502
-            for target_url in candidate_urls:
-                try:
-                    req = urllib.request.Request(target_url, headers={
-                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-                        'Origin': 'https://voltedge-tech-accessories.vercel.app'
-                    })
-                    with urllib.request.urlopen(req, timeout=12) as resp:
-                        content = resp.read()
-                        try:
-                            resp_json = json.loads(content.decode('utf-8'))
-                            extracted = resp_json.get('order') or resp_json.get('data') or resp_json
-                            ret_id = str(extracted.get('order_id') or extracted.get('orderId') or extracted.get('trackingCode') or '').strip()
-                            if ret_id and ret_id.lower() == order_id.lower() and ret_id.lower() != 've-20261029-5826':
-                                norm = normalize_order(extracted)
-                                if norm:
-                                    order_store[order_id.lower()] = norm
-                                self.send_response(resp.status)
-                                self.send_header('Content-Type', resp.headers.get('Content-Type', 'application/json'))
-                                self.send_header('X-RateLimit-Limit', str(rl['limit']))
-                                self.send_header('X-RateLimit-Remaining', str(rl['remaining']))
-                                self.send_header('X-RateLimit-Reset', str(rl['reset_sec']))
-                                self.send_header('X-RateLimit-Store', 'dev-memory')
-                                self.end_headers()
-                                self.wfile.write(content)
-                                return
-                        except Exception:
-                            pass
-                except urllib.error.HTTPError as e:
-                    last_status = e.code
-                    last_err_content = e.read()
-                    if e.code == 404:
-                        continue
-                    self.send_response(e.code)
-                    self.send_header('Content-Type', 'application/json')
-                    self.end_headers()
-                    self.wfile.write(last_err_content)
-                    return
-                except Exception as e:
-                    last_err_content = json.dumps({'success': False, 'message': str(e)}).encode()
-                    continue
 
             self.send_response(404)
             self.send_header('Content-Type', 'application/json')

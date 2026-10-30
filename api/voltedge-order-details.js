@@ -62,7 +62,7 @@ module.exports = async function handler(req, res) {
     }
 
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 4000);
+    const timeout = setTimeout(() => controller.abort(), 30000);
 
     const response = await fetch(targetUrl, {
       method: 'GET',

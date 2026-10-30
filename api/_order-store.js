@@ -46,20 +46,89 @@ function normalizeOrderRecord(data) {
 
   // Product & pricing details
   const prod = data.product || (data.items && data.items[0]) || {};
-  const productName = String(
+  let productName = String(
     data.product_name || data.productName || prod.name || prod.shortName || 'VoltEdge Hardware'
   ).trim();
 
-  const productSku = String(
+  let productSku = String(
     data.product_sku || data.productSku || data.sku || prod.sku || prod.id || 'VE-EQUIPMENT'
   ).trim();
 
-  const quantity = Number(data.quantity || data.qty || prod.quantity || 1) || 1;
-  const unitPrice = Number(data.unit_price || data.unitPrice || prod.unitPrice || prod.price || 0) || 0;
+  let quantity = Number(data.quantity || data.qty || prod.quantity || 1) || 1;
+  let unitPrice = Number(data.unit_price || data.unitPrice || prod.unitPrice || prod.price || 0) || 0;
   let totalPrice = Number(data.total_price || data.totalPrice || data.totalAmount || prod.totalAmount || prod.totalPrice || 0);
-  if (totalPrice === 0 && unitPrice > 0) {
-    totalPrice = unitPrice * quantity;
+
+  // Multi-product structured list
+  let products = [];
+  if (Array.isArray(data.products) && data.products.length > 0) {
+    products = data.products.map(p => {
+      const uPrice = Number(p.unit_price || p.unitPrice || p.price || 0);
+      const qty = Number(p.quantity || p.qty || 1);
+      const lTotal = Number(p.line_total || p.lineTotal || (uPrice * qty));
+      return {
+        product_sku: String(p.product_sku || p.productSku || p.sku || 'VE-EQUIPMENT').trim(),
+        product_name: String(p.product_name || p.productName || p.name || 'VoltEdge Hardware').trim(),
+        unit_price: uPrice,
+        quantity: qty,
+        line_total: lTotal
+      };
+    });
+  } else if (typeof data.products_json === 'string' && data.products_json.trim()) {
+    try {
+      const parsed = JSON.parse(data.products_json);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        products = parsed.map(p => {
+          const uPrice = Number(p.unit_price || p.unitPrice || p.price || 0);
+          const qty = Number(p.quantity || p.qty || 1);
+          const lTotal = Number(p.line_total || p.lineTotal || (uPrice * qty));
+          return {
+            product_sku: String(p.product_sku || p.productSku || p.sku || 'VE-EQUIPMENT').trim(),
+            product_name: String(p.product_name || p.productName || p.name || 'VoltEdge Hardware').trim(),
+            unit_price: uPrice,
+            quantity: qty,
+            line_total: lTotal
+          };
+        });
+      }
+    } catch {}
   }
+
+  if (products.length > 0) {
+    if (!totalPrice || totalPrice === 0) {
+      totalPrice = products.reduce((sum, p) => sum + p.line_total, 0);
+    }
+    const derivedUnits = products.reduce((sum, p) => sum + p.quantity, 0);
+    if (derivedUnits > 0) {
+      quantity = derivedUnits;
+    }
+    if (products.length > 1) {
+      productSku = 'MULTIPLE';
+      if (!data.product_name) {
+        productName = products.map(p => `${p.product_name} x${p.quantity}`).join('; ');
+      }
+      unitPrice = totalPrice; // Combined merchandise subtotal for backward compatibility
+    } else if (products.length === 1) {
+      productSku = products[0].product_sku;
+      productName = products[0].product_name;
+      unitPrice = products[0].unit_price;
+    }
+  } else {
+    // Single product fallback
+    if (totalPrice === 0 && unitPrice > 0) {
+      totalPrice = unitPrice * quantity;
+    }
+    products = [{
+      product_sku: productSku,
+      product_name: productName,
+      unit_price: unitPrice || totalPrice,
+      quantity: quantity,
+      line_total: totalPrice || (unitPrice * quantity)
+    }];
+  }
+
+  const productsJson = typeof data.products_json === 'string' && data.products_json.trim()
+    ? data.products_json
+    : JSON.stringify(products);
 
   const orderStatus = String(data.order_status || data.orderStatus || data.status || 'PENDING_PAYMENT').trim();
   const paymentStatus = String(data.payment_status || data.paymentStatus || 'PENDING').trim();
@@ -77,6 +146,8 @@ function normalizeOrderRecord(data) {
     delivery_address: deliveryAddress,
     delivery_state: deliveryState,
     delivery_notes: deliveryNotes,
+    products: products,
+    products_json: productsJson,
     product_name: productName,
     product_sku: productSku,
     quantity: quantity,
@@ -265,3 +336,4 @@ module.exports = {
   resetOrderStore,
   orderStore
 };
+

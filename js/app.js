@@ -252,8 +252,8 @@ function renderProducts(filter = currentCatalogCategory, searchQuery = currentCa
               <span class="price-label">Price in Naira</span>
               <span class="price-amount">${formatNaira(product.price)}</span>
             </div>
-            <button class="btn btn-volt btn-sm" onclick="selectForOrder('${product.id}')">
-              <i class="ph ph-shopping-cart-simple"></i> Order Now
+            <button class="btn btn-volt btn-sm" onclick="VoltEdgeCart.addItem('${product.id}', 1, true)" aria-label="Add ${product.name} to Cart">
+              <i class="ph-bold ph-shopping-bag"></i> Add to Cart
             </button>
           </div>
         </div>
@@ -736,22 +736,8 @@ function updateOrderCalculations() {
 
 // Global function to trigger order selection from cards
 window.selectForOrder = function(productId) {
-  const catalog = getProductCatalogData();
-  const prod = catalog.find(p => p.id === productId);
-  if (!prod) return;
-
-  currentSelectedProduct = prod;
-  const select = document.getElementById('order-product-select');
-  if (select) select.value = productId;
-
-  updateOrderCalculations();
-  validateOrderForm();
-
-  // Smooth scroll to order section
-  const orderSection = document.getElementById('order-form-section');
-  if (orderSection) {
-    orderSection.scrollIntoView({ behavior: 'smooth' });
-    showToast(`Selected "${prod.shortName}" for your order`, 'info');
+  if (typeof VoltEdgeCart !== 'undefined' && VoltEdgeCart.addItem) {
+    VoltEdgeCart.addItem(productId, 1, true);
   }
 };
 
@@ -882,7 +868,7 @@ async function sendOrderToN8n(orderDetails, onProgress) {
     }
 
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), Math.min(8000, remainingTime));
+    const timeoutId = setTimeout(() => controller.abort(), Math.min(35000, remainingTime));
 
     try {
       console.log(`[VoltEdge Automation] Attempt ${attempt} (${remainingSec}s left): POST to ${webhookUrl}...`);
@@ -1080,6 +1066,30 @@ async function handleOrderSubmit(e) {
     redirect_url: `${window.location.origin}/payment-return.html?orderId=${encodeURIComponent(trackingCode)}&token=${encodeURIComponent(lookupToken)}`,
     callback_url: `${window.location.origin}/payment-return.html?orderId=${encodeURIComponent(trackingCode)}&token=${encodeURIComponent(lookupToken)}`,
     success_url: `${window.location.origin}/payment-return.html?orderId=${encodeURIComponent(trackingCode)}&token=${encodeURIComponent(lookupToken)}`,
+
+    // Structured products array for multi-product cart support
+    products: [{
+      product_sku: currentSelectedProduct.sku || currentSelectedProduct.id,
+      sku: currentSelectedProduct.sku || currentSelectedProduct.id,
+      product_name: currentSelectedProduct.name,
+      name: currentSelectedProduct.name,
+      unit_price: currentSelectedProduct.price,
+      price: currentSelectedProduct.price,
+      quantity: currentQuantity,
+      line_total: totalAmount,
+      image: currentSelectedProduct.image || ''
+    }],
+    products_json: JSON.stringify([{
+      product_sku: currentSelectedProduct.sku || currentSelectedProduct.id,
+      sku: currentSelectedProduct.sku || currentSelectedProduct.id,
+      product_name: currentSelectedProduct.name,
+      name: currentSelectedProduct.name,
+      unit_price: currentSelectedProduct.price,
+      price: currentSelectedProduct.price,
+      quantity: currentQuantity,
+      line_total: totalAmount,
+      image: currentSelectedProduct.image || ''
+    }]),
 
     // Direct Google Sheets & n8n snake_case mappings
     customer_name: name,
@@ -1484,9 +1494,12 @@ window.openQuickView = function(productId) {
           </tbody>
         </table>
 
-        <div style="display: flex; gap: 0.75rem; margin-top: auto; padding-top: 1rem;">
-          <button class="btn btn-primary" style="flex: 1;" onclick="modalSelectOrder('${product.id}')">
-            Order This Gear
+        <div style="display: flex; gap: 0.75rem; margin-top: auto; padding-top: 1rem; flex-wrap: wrap;">
+          <button class="btn btn-volt" style="flex: 1; min-width: 140px;" onclick="VoltEdgeCart.addItem('${product.id}', 1, true)">
+            <i class="ph-bold ph-shopping-bag"></i> Add to Cart
+          </button>
+          <button class="btn btn-primary" style="flex: 1; min-width: 140px;" onclick="modalSelectOrder('${product.id}')">
+            Order Directly
           </button>
           <a href="https://wa.me/2347047922403?text=${encodeURIComponent('Hello VoltEdge, I have questions regarding the ' + product.name + ' (' + product.sku + ').')}" target="_blank" class="btn btn-ghost">
             Enquire on WhatsApp

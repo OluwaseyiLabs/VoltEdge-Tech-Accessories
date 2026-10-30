@@ -58,8 +58,28 @@ module.exports = async function handler(req, res) {
       bodyObj.token = 've_tok_' + Math.random().toString(36).substring(2, 10);
       bodyObj.lookup_token = bodyObj.token;
     }
+
+    // Ensure products_json is stringified for Google Sheets compatibility
+    if (Array.isArray(bodyObj.products) && bodyObj.products.length > 0) {
+      bodyObj.products_json = JSON.stringify(bodyObj.products);
+      if (!bodyObj.quantity || bodyObj.quantity === 1) {
+        bodyObj.quantity = bodyObj.products.reduce((sum, p) => sum + (Number(p.quantity) || 1), 0);
+      }
+      if (bodyObj.products.length > 1) {
+        bodyObj.product_sku = 'MULTIPLE';
+        bodyObj.product_SKU = 'MULTIPLE';
+        if (!bodyObj.product_name) {
+          bodyObj.product_name = bodyObj.products.map(p => `${p.product_name} x${p.quantity}`).join('; ');
+        }
+      }
+    }
+
     try {
-      await saveOrder(bodyObj);
+      const saved = await saveOrder(bodyObj);
+      if (saved) {
+        bodyObj.products = saved.products;
+        bodyObj.products_json = saved.products_json;
+      }
     } catch (saveErr) {
       console.warn('[VoltEdge Order API] Failed to persist initial order to backend store:', saveErr.message);
     }
@@ -80,11 +100,15 @@ module.exports = async function handler(req, res) {
     }
 
     const payload = JSON.stringify(bodyObj);
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 60000); // Always wait up to 60s for webhook
     const response = await fetch(targetWebhookUrl, {
       method: 'POST',
       headers,
-      body: payload
+      body: payload,
+      signal: controller.signal
     });
+    clearTimeout(timeout);
 
     const contentType = response.headers.get('content-type') || '';
     if (contentType.includes('application/json')) {
