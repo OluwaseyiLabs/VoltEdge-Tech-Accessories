@@ -1,4 +1,4 @@
-// VoltEdge Tech & Accessories - Modular Multi-Product Shopping Cart System
+﻿// VoltEdge Tech & Accessories - Modular Multi-Product Shopping Cart System
 // Provides client-side cart management, live persistence in localStorage,
 // price validation against trusted catalogue, drawer UI rendering, inline customer delivery form,
 // and direct webhook order submission from within the Add to Cart panel.
@@ -598,8 +598,14 @@
         const data = await resp.json().catch(() => ({}));
 
         if (!resp.ok) {
-          const errMsg = data.message || data.error || FRIENDLY_ERROR_PLAIN;
-          throw new Error(errMsg);
+          const rawErrMsg = data.message || data.error || FRIENDLY_ERROR_PLAIN;
+          throw new Error(formatFriendlyErrorMessage(rawErrMsg) === FRIENDLY_ERROR_HTML ? FRIENDLY_ERROR_PLAIN : rawErrMsg);
+        }
+        // Also catch workflow errors that arrive on a 200 response
+        if (data && (data.message || data.error)) {
+          const rawMsg = String(data.message || data.error || '').toLowerCase();
+          const isWorkflowErr = rawMsg.includes('workflow') || rawMsg.includes('error in') || rawMsg.includes('n8n');
+          if (isWorkflowErr) throw new Error(FRIENDLY_ERROR_PLAIN);
         }
 
         // Backend confirmed order!

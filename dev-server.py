@@ -1,4 +1,4 @@
-import http.server
+﻿import http.server
 import socketserver
 import urllib.request
 import urllib.parse
@@ -382,10 +382,19 @@ class DevHandler(http.server.SimpleHTTPRequestHandler):
                         # Check for workflow error or technical error inside response body
                         is_workflow_err = False
                         try:
-                            resp_json = json.loads(content.decode('utf-8'))
-                            msg_str = str(resp_json.get('message') or resp_json.get('error') or '')
-                            if 'workflow' in msg_str.lower() or 'error in' in msg_str.lower():
-                                is_workflow_err = True
+                            decoded_content = content.decode('utf-8')
+                            try:
+                                resp_json = json.loads(decoded_content)
+                                msg_str = str(resp_json.get('message') or resp_json.get('error') or '')
+                                if 'workflow' in msg_str.lower() or 'error in' in msg_str.lower():
+                                    is_workflow_err = True
+                            except Exception:
+                                # Not JSON - check raw text for workflow error strings
+                                text_lower = decoded_content.lower()
+                                if ('workflow' in text_lower or 'error in' in text_lower or
+                                        'n8n' in text_lower or 'internal error' in text_lower or
+                                        'server error' in text_lower):
+                                    is_workflow_err = True
                         except Exception:
                             pass
 

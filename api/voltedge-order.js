@@ -1,4 +1,4 @@
-// Vercel Serverless Function: Secure Order Submission Proxy
+﻿// Vercel Serverless Function: Secure Order Submission Proxy
 // Enforces 5 requests / 1 minute rate limit, order idempotency protection,
 // and authoritative backend order persistence for cross-device retrieval.
 
@@ -192,9 +192,17 @@ module.exports = async function handler(req, res) {
       return res.status(200).json(data);
     } else {
       const text = await response.text();
-      if (!response.ok && orderId) {
-        clearIdempotency(orderId);
-        return res.status(response.status).json({
+      const textLower = text.toLowerCase();
+      const isTextWorkflowError =
+        textLower.includes('workflow') ||
+        textLower.includes('error in') ||
+        textLower.includes('n8n') ||
+        textLower.includes('internal error') ||
+        textLower.includes('server error');
+
+      if (!response.ok || isTextWorkflowError) {
+        if (orderId) clearIdempotency(orderId);
+        return res.status(isTextWorkflowError && response.ok ? 502 : response.status).json({
           success: false,
           error: 'OrderProcessingError',
           message: FRIENDLY_ERROR_MSG
