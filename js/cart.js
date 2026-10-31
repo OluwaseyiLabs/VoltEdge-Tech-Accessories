@@ -24,6 +24,66 @@
     return '₦' + Number(amount).toLocaleString('en-NG');
   }
 
+  // Input Sanitization Utilities
+  function sanitizeInput(str, maxLen = 255) {
+    if (typeof str !== 'string') return '';
+    return str
+      .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '')
+      .replace(/<[^>]*>?/gm, '')
+      .replace(/javascript:/gi, '')
+      .replace(/\bon\w+\s*=/gi, '')
+      .trim()
+      .slice(0, maxLen);
+  }
+
+  function sanitizeEmail(str) {
+    if (typeof str !== 'string') return '';
+    return str
+      .replace(/<[^>]*>?/gm, '')
+      .replace(/[\s"'\\]/g, '')
+      .trim()
+      .slice(0, 120);
+  }
+
+  function sanitizePhone(str) {
+    if (typeof str !== 'string') return '';
+    return str
+      .replace(/[^0-9+\s-]/g, '')
+      .replace(/\s+/g, ' ')
+      .trim()
+      .slice(0, 25);
+  }
+
+  const FRIENDLY_ERROR_HTML = 'An error occurred, please try again later or <a href="https://wa.me/2347047922403" target="_blank" rel="noopener noreferrer" style="color: inherit; text-decoration: underline; font-weight: 700;">contact us on WhatsApp</a>.';
+  const FRIENDLY_ERROR_PLAIN = 'An error occurred, please try again later or contact us on WhatsApp.';
+
+  function formatFriendlyErrorMessage(rawMsg) {
+    if (!rawMsg || typeof rawMsg !== 'string') return FRIENDLY_ERROR_HTML;
+    const lower = rawMsg.toLowerCase();
+    if (
+      lower.includes('workflow') ||
+      lower.includes('n8n') ||
+      lower.includes('node') ||
+      lower.includes('gateway') ||
+      lower.includes('proxy') ||
+      lower.includes('server error') ||
+      lower.includes('internal error') ||
+      lower.includes('aborted') ||
+      lower.includes('failed to fetch') ||
+      lower.includes('network') ||
+      lower.includes('500') ||
+      lower.includes('502') ||
+      lower.includes('503') ||
+      lower.includes('504') ||
+      lower.includes('error in') ||
+      lower.includes('loading') ||
+      lower === 'error'
+    ) {
+      return FRIENDLY_ERROR_HTML;
+    }
+    return rawMsg;
+  }
+
   const VoltEdgeCart = {
     isSubmitting: false,
 
@@ -383,12 +443,13 @@
       const btnIcon = document.getElementById('cart-checkout-btn-icon');
 
       function showError(msg, targetInput, isTerms = false) {
+        const friendlyMsg = formatFriendlyErrorMessage(msg);
         if (statusBanner) {
           statusBanner.style.display = 'block';
           statusBanner.innerHTML = `
             <div style="background: #fef2f2; border: 1.5px solid #fca5a5; color: #991b1b; padding: 0.65rem 0.85rem; border-radius: 8px; font-size: 0.82rem; line-height: 1.4; display: flex; align-items: flex-start; gap: 0.45rem;">
               <i class="ph-bold ph-warning-circle" style="font-size: 1.15rem; color: #dc2626; flex-shrink: 0; margin-top: 0.1rem;"></i>
-              <div>${msg}</div>
+              <div>${friendlyMsg}</div>
             </div>`;
           statusBanner.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         }
@@ -400,7 +461,8 @@
           targetInput.focus();
         }
         if (typeof window.showToast === 'function') {
-          window.showToast(msg, 'error');
+          const plainToastMsg = (friendlyMsg === FRIENDLY_ERROR_HTML) ? FRIENDLY_ERROR_PLAIN : msg;
+          window.showToast(plainToastMsg, 'error');
         }
       }
 
@@ -409,30 +471,30 @@
         statusBanner.innerHTML = '';
       }
 
-      const name = nameInput ? nameInput.value.trim() : '';
+      const name = sanitizeInput(nameInput ? nameInput.value : '', 100);
       if (!name || name.length < 2) {
         return showError('Please enter your full name.', nameInput);
       }
 
-      const rawPhone = phoneInput ? phoneInput.value.trim() : '';
+      const rawPhone = sanitizePhone(phoneInput ? phoneInput.value : '');
       const digitsOnly = rawPhone.replace(/\D/g, '');
       if (!digitsOnly || digitsOnly.length < 7) {
         return showError('Please enter a valid phone or WhatsApp number.', phoneInput);
       }
       const fullPhone = `+234 ${rawPhone.replace(/^\+?234/, '').trim()}`;
 
-      const email = emailInput ? emailInput.value.trim() : '';
+      const email = sanitizeEmail(emailInput ? emailInput.value : '');
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!email || !emailRegex.test(email)) {
         return showError('Please enter a valid email address.', emailInput);
       }
 
-      const state = stateSelect ? stateSelect.value.trim() : '';
+      const state = sanitizeInput(stateSelect ? stateSelect.value : '', 60);
       if (!state) {
         return showError('Please select your delivery state / FCT.', stateSelect);
       }
 
-      const address = addressInput ? addressInput.value.trim() : '';
+      const address = sanitizeInput(addressInput ? addressInput.value : '', 255);
       if (!address || address.length < 5) {
         return showError('Please enter your complete delivery street address.', addressInput);
       }
@@ -442,7 +504,7 @@
         return showError('Please check the box to agree to the Terms and Conditions and Privacy Policy to proceed.', termsCheckbox, true);
       }
 
-      const notes = notesInput ? notesInput.value.trim() : '';
+      const notes = sanitizeInput(notesInput ? notesInput.value : '', 500);
 
       // Save customer details locally for convenience in future sessions
       try {
@@ -519,7 +581,7 @@
       // Set Loading State on Button
       this.isSubmitting = true;
       if (checkoutBtn) checkoutBtn.disabled = true;
-      if (btnText) btnText.textContent = 'Submitting Order...';
+      if (btnText) btnText.textContent = 'Please wait a moment...';
       if (btnIcon) btnIcon.className = 'ph-bold ph-spinner spin-anim';
 
       try {
@@ -536,7 +598,7 @@
         const data = await resp.json().catch(() => ({}));
 
         if (!resp.ok) {
-          const errMsg = data.message || data.error || 'Order processing could not be completed. Please try again.';
+          const errMsg = data.message || data.error || FRIENDLY_ERROR_PLAIN;
           throw new Error(errMsg);
         }
 
@@ -607,7 +669,7 @@
         }
       } catch (err) {
         console.error('[VoltEdge Cart] Order submission error:', err);
-        showError(err.message || 'An error occurred while submitting your order. Please retry.');
+        showError(err.message || FRIENDLY_ERROR_PLAIN);
       } finally {
         this.isSubmitting = false;
         if (checkoutBtn) checkoutBtn.disabled = false;

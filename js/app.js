@@ -1,5 +1,35 @@
 // VoltEdge Tech & Accessories - Interactive Web Application Logic
 
+// Input Sanitization Utilities
+function sanitizeInput(str, maxLen = 255) {
+  if (typeof str !== 'string') return '';
+  return str
+    .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '')
+    .replace(/<[^>]*>?/gm, '')
+    .replace(/javascript:/gi, '')
+    .replace(/\bon\w+\s*=/gi, '')
+    .trim()
+    .slice(0, maxLen);
+}
+
+function sanitizeEmail(str) {
+  if (typeof str !== 'string') return '';
+  return str
+    .replace(/<[^>]*>?/gm, '')
+    .replace(/[\s"'\\]/g, '')
+    .trim()
+    .slice(0, 120);
+}
+
+function sanitizePhone(str) {
+  if (typeof str !== 'string') return '';
+  return str
+    .replace(/[^0-9+\s-]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .slice(0, 25);
+}
+
 // Safe helper to obtain product catalog data across global, window, and module scopes
 function getProductCatalogData() {
   if (typeof window !== 'undefined' && Array.isArray(window.PRODUCTS_DATA) && window.PRODUCTS_DATA.length) {
@@ -965,7 +995,7 @@ async function sendOrderToN8n(orderDetails, onProgress) {
   return {
     success: false,
     url: webhookUrl,
-    error: 'An error occurred. Please try again or contact the team on WhatsApp.'
+    error: 'An error occurred, please try again later or contact us on WhatsApp.'
   };
 }
 
@@ -1030,14 +1060,14 @@ async function handleOrderSubmit(e) {
     }
   }
 
-  const name = nameInput.value.trim();
-  const email = emailInput ? emailInput.value.trim() : '';
+  const name = sanitizeInput(nameInput.value, 100);
+  const email = sanitizeEmail(emailInput ? emailInput.value : '');
   const countryCode = countryCodeSelect ? countryCodeSelect.value : '+234';
-  const phone = phoneInput.value.trim();
+  const phone = sanitizePhone(phoneInput.value);
   const fullPhone = `${countryCode} ${phone}`;
-  const address = addressInput.value.trim();
-  const state = stateInput.value;
-  const notes = notesInput ? notesInput.value.trim() : '';
+  const address = sanitizeInput(addressInput.value, 255);
+  const state = sanitizeInput(stateInput.value, 60);
+  const notes = sanitizeInput(notesInput ? notesInput.value : '', 500);
 
   // Order ID format: VE-YYYYMMDD-XXXX (VE-yearmonthdate-randomnumber, e.g. VE-20261021-3405)
   const now = new Date();
@@ -1180,7 +1210,7 @@ async function handleOrderSubmit(e) {
   if (submitBtn) {
     submitBtn.disabled = true;
     submitBtn.setAttribute('disabled', 'disabled');
-    submitBtn.innerHTML = '<i class="ph-bold ph-spinner spin-anim"></i> <span>Submitting... (60s)</span>';
+    submitBtn.innerHTML = '<i class="ph-bold ph-spinner spin-anim"></i> <span>Please wait a moment...</span>';
   }
   // User instruction: Do NOT show placeholder or banner when loading
   if (statusBanner) {
@@ -1190,7 +1220,7 @@ async function handleOrderSubmit(e) {
   // Dispatch to n8n Webhook with 60s wait loop & progress callback
   const result = await sendOrderToN8n(orderDetails, (remainingSec, attempt) => {
     if (submitBtn) {
-      submitBtn.innerHTML = `<i class="ph-bold ph-spinner spin-anim"></i> <span>Submitting... (${remainingSec}s)</span>`;
+      submitBtn.innerHTML = `<i class="ph-bold ph-spinner spin-anim"></i> <span>Please wait a moment...</span>`;
     }
     if (statusBanner) {
       statusBanner.style.display = 'none';
@@ -1212,7 +1242,7 @@ async function handleOrderSubmit(e) {
     const isRateLimited = result.rateLimited || (result.error && (result.error.toLowerCase().includes('too quickly') || result.error.toLowerCase().includes('rate limit')));
     const failureMsg = isRateLimited
       ? `<i class="ph-bold ph-warning-circle"></i> <strong>Please slow down.</strong> ${result.error}`
-      : '<i class="ph-bold ph-warning-circle"></i> <strong>An error occurred.</strong> Please try again or <a href="https://wa.me/2347047922403" target="_blank" rel="noopener noreferrer" style="color: inherit; text-decoration: underline; font-weight: 700;">contact the team on WhatsApp</a>.';
+      : '<i class="ph-bold ph-warning-circle"></i> <strong>An error occurred.</strong> Please try again later or <a href="https://wa.me/2347047922403" target="_blank" rel="noopener noreferrer" style="color: inherit; text-decoration: underline; font-weight: 700;">contact us on WhatsApp</a>.';
     setStatusBanner('error', failureMsg);
     showToast(result.error || 'An error occurred. Please try again.', 'error');
 

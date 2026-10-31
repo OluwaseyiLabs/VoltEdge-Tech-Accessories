@@ -5,6 +5,38 @@
 const { rateLimitMiddleware, checkOrderDuplicate, recordOrderResponse, clearIdempotency } = require('./_rate-limiter');
 const { saveOrder, updateOrderStatus } = require('./_order-store');
 
+// Input Sanitization Utilities
+function sanitizeStr(val, maxLen = 255) {
+  if (typeof val !== 'string') return '';
+  return val
+    .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '')
+    .replace(/<[^>]*>?/gm, '')
+    .replace(/javascript:/gi, '')
+    .replace(/\bon\w+\s*=/gi, '')
+    .trim()
+    .slice(0, maxLen);
+}
+
+function sanitizeEmail(val) {
+  if (typeof val !== 'string') return '';
+  return val
+    .replace(/<[^>]*>?/gm, '')
+    .replace(/[\s"'\\]/g, '')
+    .trim()
+    .slice(0, 120);
+}
+
+function sanitizePhone(val) {
+  if (typeof val !== 'string') return '';
+  return val
+    .replace(/[^0-9+\s-]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .slice(0, 25);
+}
+
+const FRIENDLY_ERROR_MSG = 'An error occurred, please try again later or contact us on WhatsApp.';
+
 module.exports = async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
@@ -31,6 +63,28 @@ module.exports = async function handler(req, res) {
   } catch {
     bodyObj = {};
   }
+
+  // Server-side input sanitization
+  if (bodyObj && typeof bodyObj === 'object') {
+    if (bodyObj.customer_name) bodyObj.customer_name = sanitizeStr(bodyObj.customer_name, 100);
+    if (bodyObj.customer_email) bodyObj.customer_email = sanitizeEmail(bodyObj.customer_email);
+    if (bodyObj.customer_phone) bodyObj.customer_phone = sanitizePhone(bodyObj.customer_phone);
+    if (bodyObj.delivery_address) bodyObj.delivery_address = sanitizeStr(bodyObj.delivery_address, 255);
+    if (bodyObj.delivery_state) bodyObj.delivery_state = sanitizeStr(bodyObj.delivery_state, 60);
+    if (bodyObj.delivery_notes) bodyObj.delivery_notes = sanitizeStr(bodyObj.delivery_notes, 500);
+    if (bodyObj.customer && typeof bodyObj.customer === 'object') {
+      const cObj = bodyObj.customer;
+      if (cObj.name) cObj.name = sanitizeStr(cObj.name, 100);
+      if (cObj.fullName) cObj.fullName = sanitizeStr(cObj.fullName, 100);
+      if (cObj.email) cObj.email = sanitizeEmail(cObj.email);
+      if (cObj.phone) cObj.phone = sanitizePhone(cObj.phone);
+      if (cObj.fullPhone) cObj.fullPhone = sanitizePhone(cObj.fullPhone);
+      if (cObj.address) cObj.address = sanitizeStr(cObj.address, 255);
+      if (cObj.state) cObj.state = sanitizeStr(cObj.state, 60);
+      if (cObj.notes) cObj.notes = sanitizeStr(cObj.notes, 500);
+    }
+  }
+
   const orderId = bodyObj.orderId || bodyObj.order_id || bodyObj.trackingCode;
 
   // Protect against duplicate order creation / duplicate emails
@@ -113,6 +167,18 @@ module.exports = async function handler(req, res) {
     const contentType = response.headers.get('content-type') || '';
     if (contentType.includes('application/json')) {
       const data = await response.json();
+      const msgStr = String((data && (data.message || data.error)) || '').toLowerCase();
+      const isWorkflowError = msgStr.includes('workflow') || msgStr.includes('error in');
+
+      if (!response.ok || isWorkflowError) {
+        if (orderId) clearIdempotency(orderId);
+        return res.status(response.ok ? 502 : response.status).json({
+          success: false,
+          error: 'OrderProcessingError',
+          message: FRIENDLY_ERROR_MSG
+        });
+      }
+
       if (response.ok && orderId) {
         recordOrderResponse(orderId, data);
         // If webhook returned payment_link or updated status, persist it in authoritative store
@@ -122,14 +188,17 @@ module.exports = async function handler(req, res) {
             await updateOrderStatus(orderId, { payment_link: paymentLink });
           }
         }
-      } else if (!response.ok && orderId) {
-        clearIdempotency(orderId);
       }
-      return res.status(response.status).json(data);
+      return res.status(200).json(data);
     } else {
       const text = await response.text();
       if (!response.ok && orderId) {
         clearIdempotency(orderId);
+        return res.status(response.status).json({
+          success: false,
+          error: 'OrderProcessingError',
+          message: FRIENDLY_ERROR_MSG
+        });
       }
       return res.status(response.status).send(text);
     }
@@ -138,7 +207,8 @@ module.exports = async function handler(req, res) {
     console.error('[VoltEdge API Proxy Error - Order Submission]:', err);
     return res.status(502).json({
       success: false,
-      message: 'Fulfillment gateway error. Please try again or contact WhatsApp support.'
+      error: 'OrderProcessingError',
+      message: FRIENDLY_ERROR_MSG
     });
   }
 };

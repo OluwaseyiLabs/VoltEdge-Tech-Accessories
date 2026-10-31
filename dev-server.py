@@ -8,6 +8,37 @@ import os
 import time
 import datetime
 import hashlib
+import re
+
+# Sanitization Utilities
+def sanitize_str(val, max_len=255):
+    if not isinstance(val, str):
+        return ''
+    clean = re.sub(r'[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]', '', val)
+    clean = re.sub(r'<[^>]*>', '', clean)
+    clean = re.sub(r'(?i)javascript:', '', clean)
+    clean = re.sub(r'(?i)\bon\w+\s*=', '', clean)
+    return clean.strip()[:max_len]
+
+def sanitize_email(val):
+    if not isinstance(val, str):
+        return ''
+    clean = re.sub(r'<[^>]*>', '', val)
+    clean = re.sub(r"""[\s"'\\]""", "", clean)
+    return clean.strip()[:120]
+
+def sanitize_phone(val):
+    if not isinstance(val, str):
+        return ''
+    clean = re.sub(r'[^0-9+\s-]', '', val)
+    clean = re.sub(r'\s+', ' ', clean)
+    return clean.strip()[:25]
+
+FRIENDLY_ERROR_JSON = {
+    'success': False,
+    'error': 'OrderProcessingError',
+    'message': 'An error occurred, please try again later or contact us on WhatsApp.'
+}
 
 # Load configuration from .env file if present
 def load_env():
@@ -59,12 +90,12 @@ def normalize_order(data):
         return None
     token = str(data.get('token') or data.get('lookup_token') or data.get('lookupToken') or '').strip()
     cust = data.get('customer') if isinstance(data.get('customer'), dict) else {}
-    customer_name = str(data.get('customer_name') or data.get('customerName') or data.get('fullName') or cust.get('fullName') or cust.get('name') or '').strip()
-    customer_email = str(data.get('customer_email') or data.get('customerEmail') or data.get('email') or cust.get('email') or '').strip()
-    customer_phone = str(data.get('customer_phone') or data.get('customerPhone') or data.get('phone') or data.get('fullPhone') or cust.get('fullPhone') or cust.get('phone') or '').strip()
-    delivery_address = str(data.get('delivery_address') or data.get('deliveryAddress') or data.get('address') or cust.get('address') or '').strip()
-    delivery_state = str(data.get('delivery_state') or data.get('deliveryState') or data.get('state') or cust.get('state') or cust.get('deliveryState') or '').strip()
-    delivery_notes = str(data.get('delivery_notes') or data.get('deliveryNotes') or data.get('orderNotes') or data.get('notes') or cust.get('notes') or 'None provided').strip()
+    customer_name = sanitize_str(data.get('customer_name') or data.get('customerName') or data.get('fullName') or cust.get('fullName') or cust.get('name') or '', 100)
+    customer_email = sanitize_email(data.get('customer_email') or data.get('customerEmail') or data.get('email') or cust.get('email') or '')
+    customer_phone = sanitize_phone(data.get('customer_phone') or data.get('customerPhone') or data.get('phone') or data.get('fullPhone') or cust.get('fullPhone') or cust.get('phone') or '')
+    delivery_address = sanitize_str(data.get('delivery_address') or data.get('deliveryAddress') or data.get('address') or cust.get('address') or '', 255)
+    delivery_state = sanitize_str(data.get('delivery_state') or data.get('deliveryState') or data.get('state') or cust.get('state') or cust.get('deliveryState') or '', 60)
+    delivery_notes = sanitize_str(data.get('delivery_notes') or data.get('deliveryNotes') or data.get('orderNotes') or data.get('notes') or cust.get('notes') or 'None provided', 500)
 
     prod = data.get('product') if isinstance(data.get('product'), dict) else ((data.get('items') or [{}])[0] if isinstance(data.get('items'), list) else {})
     product_name = str(data.get('product_name') or data.get('productName') or prod.get('name') or prod.get('shortName') or 'VoltEdge Hardware').strip()
@@ -286,6 +317,26 @@ class DevHandler(http.server.SimpleHTTPRequestHandler):
             token = None
             try:
                 body_data = json.loads(post_body.decode('utf-8'))
+                # Server-side input sanitization
+                if isinstance(body_data, dict):
+                    if 'customer_name' in body_data: body_data['customer_name'] = sanitize_str(body_data['customer_name'], 100)
+                    if 'customer_email' in body_data: body_data['customer_email'] = sanitize_email(body_data['customer_email'])
+                    if 'customer_phone' in body_data: body_data['customer_phone'] = sanitize_phone(body_data['customer_phone'])
+                    if 'delivery_address' in body_data: body_data['delivery_address'] = sanitize_str(body_data['delivery_address'], 255)
+                    if 'delivery_state' in body_data: body_data['delivery_state'] = sanitize_str(body_data['delivery_state'], 60)
+                    if 'delivery_notes' in body_data: body_data['delivery_notes'] = sanitize_str(body_data['delivery_notes'], 500)
+                    if isinstance(body_data.get('customer'), dict):
+                        c_dict = body_data['customer']
+                        if 'name' in c_dict: c_dict['name'] = sanitize_str(c_dict['name'], 100)
+                        if 'fullName' in c_dict: c_dict['fullName'] = sanitize_str(c_dict['fullName'], 100)
+                        if 'email' in c_dict: c_dict['email'] = sanitize_email(c_dict['email'])
+                        if 'phone' in c_dict: c_dict['phone'] = sanitize_phone(c_dict['phone'])
+                        if 'fullPhone' in c_dict: c_dict['fullPhone'] = sanitize_phone(c_dict['fullPhone'])
+                        if 'address' in c_dict: c_dict['address'] = sanitize_str(c_dict['address'], 255)
+                        if 'state' in c_dict: c_dict['state'] = sanitize_str(c_dict['state'], 60)
+                        if 'notes' in c_dict: c_dict['notes'] = sanitize_str(c_dict['notes'], 500)
+                    post_body = json.dumps(body_data).encode('utf-8')
+
                 order_id = body_data.get('orderId') or body_data.get('order_id') or body_data.get('trackingCode')
                 if order_id:
                     token = body_data.get('token') or body_data.get('lookup_token') or body_data.get('lookupToken') or ('ve_tok_' + os.urandom(4).hex())
@@ -314,7 +365,7 @@ class DevHandler(http.server.SimpleHTTPRequestHandler):
                 ORDER_WEBHOOK,
                 'https://ucy00zep.rpcld.net/webhook/voltedge-order'
             ]
-            last_err_content = None
+            last_err_content = json.dumps(FRIENDLY_ERROR_JSON).encode('utf-8')
             last_status = 502
             for target_url in candidate_urls:
                 try:
@@ -327,6 +378,23 @@ class DevHandler(http.server.SimpleHTTPRequestHandler):
                     }, method='POST')
                     with urllib.request.urlopen(req, timeout=60) as resp:
                         content = resp.read()
+
+                        # Check for workflow error or technical error inside response body
+                        is_workflow_err = False
+                        try:
+                            resp_json = json.loads(content.decode('utf-8'))
+                            msg_str = str(resp_json.get('message') or resp_json.get('error') or '')
+                            if 'workflow' in msg_str.lower() or 'error in' in msg_str.lower():
+                                is_workflow_err = True
+                        except Exception:
+                            pass
+
+                        if is_workflow_err or resp.status != 200:
+                            content = json.dumps(FRIENDLY_ERROR_JSON).encode('utf-8')
+                            last_status = 502
+                            last_err_content = content
+                            continue
+
                         if order_id and resp.status == 200:
                             idempotency_store[order_id] = {
                                 'timestamp': time.time(),
@@ -340,8 +408,8 @@ class DevHandler(http.server.SimpleHTTPRequestHandler):
                                     order_store[order_id.lower()]['payment_link'] = plink
                             except Exception:
                                 pass
-                        self.send_response(resp.status)
-                        self.send_header('Content-Type', resp.headers.get('Content-Type', 'application/json'))
+                        self.send_response(200)
+                        self.send_header('Content-Type', 'application/json')
                         self.send_header('X-RateLimit-Limit', str(rl['limit']))
                         self.send_header('X-RateLimit-Remaining', str(rl['remaining']))
                         self.send_header('X-RateLimit-Reset', str(rl['reset_sec']))
@@ -351,11 +419,11 @@ class DevHandler(http.server.SimpleHTTPRequestHandler):
                         return
                 except urllib.error.HTTPError as e:
                     last_status = e.code
-                    last_err_content = e.read()
+                    last_err_content = json.dumps(FRIENDLY_ERROR_JSON).encode('utf-8')
                     print(f"[VoltEdge DevServer] Target {target_url} returned HTTP {e.code}")
                     continue
                 except Exception as e:
-                    last_err_content = json.dumps({'success': False, 'message': str(e)}).encode()
+                    last_err_content = json.dumps(FRIENDLY_ERROR_JSON).encode('utf-8')
                     print(f"[VoltEdge DevServer] Target {target_url} error: {e}")
                     continue
 
@@ -379,7 +447,7 @@ class DevHandler(http.server.SimpleHTTPRequestHandler):
             self.send_response(last_status)
             self.send_header('Content-Type', 'application/json')
             self.end_headers()
-            self.wfile.write(last_err_content if last_err_content else b'{"error":"not found"}')
+            self.wfile.write(last_err_content if last_err_content else json.dumps(FRIENDLY_ERROR_JSON).encode('utf-8'))
             return
 
         self.send_response(404)

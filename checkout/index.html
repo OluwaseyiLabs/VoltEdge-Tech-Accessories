@@ -901,6 +901,36 @@
   <!-- Checkout Interaction Script -->
   <script>
     (function() {
+      // Input Sanitization Utilities
+      function sanitizeInput(str, maxLen = 255) {
+        if (typeof str !== 'string') return '';
+        return str
+          .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '')
+          .replace(/<[^>]*>?/gm, '')
+          .replace(/javascript:/gi, '')
+          .replace(/\bon\w+\s*=/gi, '')
+          .trim()
+          .slice(0, maxLen);
+      }
+
+      function sanitizeEmail(str) {
+        if (typeof str !== 'string') return '';
+        return str
+          .replace(/<[^>]*>?/gm, '')
+          .replace(/[\s"'\\]/g, '')
+          .trim()
+          .slice(0, 120);
+      }
+
+      function sanitizePhone(str) {
+        if (typeof str !== 'string') return '';
+        return str
+          .replace(/[^0-9+\s-]/g, '')
+          .replace(/\s+/g, ' ')
+          .trim()
+          .slice(0, 25);
+      }
+
       // Secure Backend API Endpoint (backend webhook URL and keys are hidden server-side)
       const N8N_CONFIG = {
         workflowName: 'Voltedge Order Processing Automation',
@@ -1226,14 +1256,14 @@
         const payloadData = VoltEdgeCart.getOrderPayloadData();
         const totalAmount = payloadData.total_price;
 
-        const name = nameInput.value.trim();
-        const email = emailInput.value.trim();
-        const countryCode = countryCodeSelect.value;
-        const phone = phoneInput.value.trim();
+        const name = sanitizeInput(nameInput.value, 100);
+        const email = sanitizeEmail(emailInput.value);
+        const countryCode = countryCodeSelect.value || '+234';
+        const phone = sanitizePhone(phoneInput.value);
         const fullPhone = `${countryCode} ${phone}`;
-        const state = stateSelect.value;
-        const address = addressInput.value.trim();
-        const notes = notesInput ? notesInput.value.trim() : '';
+        const state = sanitizeInput(stateSelect.value, 60);
+        const address = sanitizeInput(addressInput.value, 255);
+        const notes = sanitizeInput(notesInput ? notesInput.value : '', 500);
 
         // Comprehensive Payload matching VoltEdge standard multi-product schema
         const orderDetails = {
@@ -1388,17 +1418,15 @@
         let webhookConfirmed = false;
         let lastErrorDetails = '';
 
-        // Live countdown timer: wait up to 1 minute for webhook response
-        // User instruction: ONLY show active countdown number in the submit button!
-        const initialBtnHTML = `<i class="ph-bold ph-spinner spin-anim"></i> <span>Submitting... (60s)</span>`;
+        // Submission loading state
+        const initialBtnHTML = `<i class="ph-bold ph-spinner spin-anim"></i> <span>Please wait a moment...</span>`;
         submitBtn.innerHTML = initialBtnHTML;
         if (sidebarSubmitBtn) sidebarSubmitBtn.innerHTML = initialBtnHTML;
         if (statusMsgEl) statusMsgEl.style.display = 'none';
         if (sidebarStatusMsgEl) sidebarStatusMsgEl.style.display = 'none';
 
         const countdownTimer = setInterval(() => {
-          const remainingSec = Math.max(0, Math.ceil((MAX_WAIT_MS - (Date.now() - startTime)) / 1000));
-          const btnText = `<i class="ph-bold ph-spinner spin-anim"></i> <span>Submitting... (${remainingSec}s)</span>`;
+          const btnText = `<i class="ph-bold ph-spinner spin-anim"></i> <span>Please wait a moment...</span>`;
           submitBtn.innerHTML = btnText;
           if (sidebarSubmitBtn) sidebarSubmitBtn.innerHTML = btnText;
         }, 1000);
@@ -1575,7 +1603,7 @@
           const isRateLimited = lastErrorDetails && (lastErrorDetails.toLowerCase().includes('too quickly') || lastErrorDetails.toLowerCase().includes('rate limit'));
           const errorMsg = isRateLimited
             ? `<i class="ph-bold ph-warning-circle"></i> <strong>Please slow down.</strong> ${lastErrorDetails}`
-            : '<i class="ph-bold ph-warning-circle"></i> <strong>An error occurred.</strong> Please try again or <a href="https://wa.me/2347047922403" target="_blank" rel="noopener noreferrer" style="color: inherit; text-decoration: underline; font-weight: 700;">contact the team on WhatsApp</a>.';
+            : '<i class="ph-bold ph-warning-circle"></i> <strong>An error occurred.</strong> Please try again later or <a href="https://wa.me/2347047922403" target="_blank" rel="noopener noreferrer" style="color: inherit; text-decoration: underline; font-weight: 700;">contact us on WhatsApp</a>.';
           
           setStatus('error', errorMsg);
           
