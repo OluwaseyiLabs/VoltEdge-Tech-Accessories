@@ -1234,12 +1234,39 @@
         toggleError('error-checkout-terms', !termsCheckbox.checked);
       });
 
+      // Status message helper
+      const statusMsgEl = document.getElementById('checkout-status-msg');
+      const sidebarStatusMsgEl = document.getElementById('checkout-sidebar-status-msg');
+
+      function setStatus(type, msg) {
+        [statusMsgEl, sidebarStatusMsgEl].forEach(el => {
+          if (!el) return;
+          if (type === 'loading') {
+            el.style.display = 'none';
+            return;
+          }
+          el.style.display = 'block';
+          el.innerHTML = msg;
+          if (type === 'error') {
+            el.style.background = '#fef2f2';
+            el.style.color = '#991b1b';
+            el.style.border = '1px solid #fecaca';
+          } else if (type === 'success') {
+            el.style.background = '#dcfce7';
+            el.style.color = '#15803d';
+            el.style.border = '1px solid #86efac';
+          }
+        });
+      }
+
       // Prevent duplicate submissions and race conditions
       let isCheckoutSubmitting = false;
 
-      // Form Submission
-      form.addEventListener('submit', async function(e) {
-        e.preventDefault();
+      // Authoritative Form & Button Submission Handler
+      async function handleCheckoutSubmit(e) {
+        if (e && typeof e.preventDefault === 'function') {
+          e.preventDefault();
+        }
 
         if (isCheckoutSubmitting) {
           console.warn('[VoltEdge Checkout] Submission already in progress. Ignoring duplicate click.');
@@ -1251,6 +1278,7 @@
           if (firstError) {
             firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
           }
+          setStatus('error', '<i class="ph-bold ph-warning-circle"></i> Please fill in all required delivery details and accept the terms to complete your order.');
           return;
         }
 
@@ -1274,6 +1302,28 @@
         const payloadData = VoltEdgeCart.getOrderPayloadData();
         const totalAmount = payloadData.total_price;
 
+        // Authoritative product and item definitions
+        const firstItem = cart[0] || {};
+        const selectedProduct = {
+          id: firstItem.id || firstItem.sku || 'VE-EQUIPMENT',
+          name: firstItem.name || payloadData.product_name || 'VoltEdge Hardware',
+          shortName: firstItem.shortName || firstItem.name || 'VoltEdge Hardware',
+          sku: firstItem.sku || firstItem.id || payloadData.product_sku || 'VE-EQUIPMENT',
+          price: firstItem.price || totalAmount,
+          image: firstItem.image || ''
+        };
+        const selectedQuantity = firstItem.quantity || payloadData.quantity || 1;
+        const items = cart.map(item => ({
+          id: item.id || item.sku,
+          name: item.name,
+          shortName: item.shortName || item.name,
+          sku: item.sku || item.id,
+          unitPrice: item.price,
+          quantity: item.quantity,
+          totalPrice: item.price * item.quantity,
+          image: item.image || ''
+        }));
+
         const name = sanitizeInput(nameInput.value, 100);
         const email = sanitizeEmail(emailInput.value);
         const countryCode = countryCodeSelect.value || '+234';
@@ -1282,6 +1332,17 @@
         const state = sanitizeInput(stateSelect.value, 60);
         const address = sanitizeInput(addressInput.value, 255);
         const notes = sanitizeInput(notesInput ? notesInput.value : '', 500);
+
+        // Save customer details locally for future session ease
+        try {
+          localStorage.setItem('voltedge_last_customer', JSON.stringify({
+            fullName: name,
+            phone: phone,
+            email: email,
+            state: state,
+            address: address
+          }));
+        } catch (e) {}
 
         // Comprehensive Payload matching VoltEdge standard multi-product schema
         const orderDetails = {
@@ -1348,18 +1409,7 @@
             image: selectedProduct.image
           },
 
-          items: [
-            {
-              id: selectedProduct.id,
-              name: selectedProduct.name,
-              shortName: selectedProduct.shortName,
-              sku: selectedProduct.sku || selectedProduct.id,
-              unitPrice: selectedProduct.price,
-              quantity: selectedQuantity,
-              totalPrice: totalAmount,
-              image: selectedProduct.image
-            }
-          ],
+          items: items,
 
           fullName: name,
           customerName: name,
@@ -1402,33 +1452,8 @@
         }
 
         // Visual loading state & status elements
-        submitBtn.disabled = true;
+        if (submitBtn) submitBtn.disabled = true;
         if (sidebarSubmitBtn) sidebarSubmitBtn.disabled = true;
-
-        const statusMsgEl = document.getElementById('checkout-status-msg');
-        const sidebarStatusMsgEl = document.getElementById('checkout-sidebar-status-msg');
-
-        function setStatus(type, msg) {
-          [statusMsgEl, sidebarStatusMsgEl].forEach(el => {
-            if (!el) return;
-            if (type === 'loading') {
-              // User instruction: Do NOT show placeholder or text banner when loading
-              el.style.display = 'none';
-              return;
-            }
-            el.style.display = 'block';
-            el.innerHTML = msg;
-            if (type === 'error') {
-              el.style.background = '#fef2f2';
-              el.style.color = '#991b1b';
-              el.style.border = '1px solid #fecaca';
-            } else if (type === 'success') {
-              el.style.background = '#dcfce7';
-              el.style.color = '#15803d';
-              el.style.border = '1px solid #86efac';
-            }
-          });
-        }
 
         const startTime = Date.now();
         const MAX_WAIT_MS = 60000; // 1 minute
@@ -1438,14 +1463,13 @@
 
         // Submission loading state
         const initialBtnHTML = `<i class="ph-bold ph-spinner spin-anim"></i> <span>Please wait a moment...</span>`;
-        submitBtn.innerHTML = initialBtnHTML;
+        if (submitBtn) submitBtn.innerHTML = initialBtnHTML;
         if (sidebarSubmitBtn) sidebarSubmitBtn.innerHTML = initialBtnHTML;
-        if (statusMsgEl) statusMsgEl.style.display = 'none';
-        if (sidebarStatusMsgEl) sidebarStatusMsgEl.style.display = 'none';
+        setStatus('loading', '');
 
         const countdownTimer = setInterval(() => {
           const btnText = `<i class="ph-bold ph-spinner spin-anim"></i> <span>Please wait a moment...</span>`;
-          submitBtn.innerHTML = btnText;
+          if (submitBtn) submitBtn.innerHTML = btnText;
           if (sidebarSubmitBtn) sidebarSubmitBtn.innerHTML = btnText;
         }, 1000);
 
@@ -1457,7 +1481,7 @@
           attempt++;
           const remainingTime = Math.max(1000, MAX_WAIT_MS - (Date.now() - startTime));
           const controller = new AbortController();
-          const timeoutId = setTimeout(() => controller.abort(), Math.min(10000, remainingTime));
+          const timeoutId = setTimeout(() => controller.abort(), Math.min(60000, remainingTime));
 
           try {
             console.log(`[VoltEdge Automation] Attempt ${attempt}: POST ${targetWebhookUrl}...`);
@@ -1625,13 +1649,35 @@
           
           setStatus('error', errorMsg);
           
-          submitBtn.disabled = false;
-          if (sidebarSubmitBtn) sidebarSubmitBtn.disabled = false;
-          const retryHTML = '<i class="ph-bold ph-arrows-clockwise"></i> <span>Try Again</span>';
-          submitBtn.innerHTML = retryHTML;
-          if (sidebarSubmitBtn) sidebarSubmitBtn.innerHTML = retryHTML;
+          if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<i class="ph-bold ph-arrows-clockwise"></i> <span>Complete Order & Request Dispatch</span>';
+          }
+          if (sidebarSubmitBtn) {
+            sidebarSubmitBtn.disabled = false;
+            sidebarSubmitBtn.innerHTML = '<i class="ph-bold ph-arrows-clockwise"></i> <span>Complete Order & Request Dispatch</span>';
+          }
         }
-      });
+      }
+
+      // Attach Event Listeners to Form and Submit Buttons
+      if (form) {
+        form.addEventListener('submit', handleCheckoutSubmit);
+      }
+
+      if (submitBtn) {
+        submitBtn.addEventListener('click', function(e) {
+          e.preventDefault();
+          handleCheckoutSubmit(e);
+        });
+      }
+
+      if (sidebarSubmitBtn) {
+        sidebarSubmitBtn.addEventListener('click', function(e) {
+          e.preventDefault();
+          handleCheckoutSubmit(e);
+        });
+      }
 
       // Start on load
       if (document.readyState === 'loading') {
