@@ -72,6 +72,10 @@ RATE_LIMITS = {
     'feedback': {
         'limit': int(os.getenv('RATE_LIMIT_FEEDBACK_MAX', 5)),
         'window_sec': int(os.getenv('RATE_LIMIT_FEEDBACK_WINDOW_SEC', 60))
+    },
+    'admin_login': {
+        'limit': int(os.getenv('RATE_LIMIT_LOGIN_MAX', 5)),
+        'window_sec': int(os.getenv('RATE_LIMIT_LOGIN_WINDOW_SEC', 60))
     }
 }
 
@@ -251,6 +255,220 @@ class DevHandler(http.server.SimpleHTTPRequestHandler):
 
     def do_POST(self):
         client_ip = get_client_ip(self)
+
+        # 0. Admin Login Endpoint (IP Rate Limiting + Account Lockout)
+        if self.path.startswith('/api/admin-login'):
+            rl = check_rate_limit('admin_login', client_ip)
+
+            if not rl['allowed']:
+                self.send_response(429)
+                self.send_header('Content-Type', 'application/json')
+                self.send_header('X-RateLimit-Limit', str(rl['limit']))
+                self.send_header('X-RateLimit-Remaining', str(rl['remaining']))
+                self.send_header('X-RateLimit-Reset', str(rl['reset_sec']))
+                self.send_header('X-RateLimit-Store', 'dev-memory')
+                self.send_header('Retry-After', str(rl['retry_after']))
+                self.end_headers()
+                self.wfile.write(json.dumps({
+                    'success': False,
+                    'error': 'TooManyRequests',
+                    'message': "Too many login attempts from this network. Please wait a moment before trying again.",
+                    'retryAfter': rl['retry_after']
+                }).encode('utf-8'))
+                return
+
+            content_length = int(self.headers.get('Content-Length', 0))
+            post_body = self.rfile.read(content_length)
+
+            try:
+                body_obj = json.loads(post_body.decode('utf-8') or '{}')
+            except:
+                body_obj = {}
+
+            email = sanitize_email(body_obj.get('email', '')).lower()
+            password = str(body_obj.get('password', ''))
+
+            if not email or not password:
+                self.send_response(400)
+                self.send_header('Content-Type', 'application/json')
+                self.end_headers()
+                self.wfile.write(json.dumps({
+                    'success': False,
+                    'error': 'BadRequest',
+                    'message': 'Both email and password are required.'
+                }).encode('utf-8'))
+                return
+
+            supabase_url = os.getenv('SUPABASE_URL', '').rstrip('/')
+            supabase_anon_key = os.getenv('SUPABASE_ANON_KEY', '')
+
+            is_locked = False
+            lockout_info = {}
+            try:
+                check_req = urllib.request.Request(
+                    f"{supabase_url}/rest/v1/rpc/check_admin_lockout",
+                    data=json.dumps({'p_email': email}).encode('utf-8'),
+                    headers={
+                        'apikey': supabase_anon_key,
+                        'Authorization': f"Bearer {supabase_anon_key}",
+                        'Content-Type': 'application/json'
+                    },
+                    method='POST'
+                )
+                with urllib.request.urlopen(check_req, timeout=10) as c_resp:
+                    lockout_info = json.loads(c_resp.read().decode('utf-8'))
+                    if lockout_info and lockout_info.get('is_locked'):
+                        is_locked = True
+            except Exception as e:
+                print('[VoltEdge DevServer] Error checking lockout:', e)
+
+            if is_locked:
+                rem_sec = lockout_info.get('remaining_seconds', 900)
+                rem_min = max(1, (rem_sec + 59) // 60)
+                self.send_response(423)
+                self.send_header('Content-Type', 'application/json')
+                self.send_header('Retry-After', str(rem_sec))
+                self.end_headers()
+                self.wfile.write(json.dumps({
+                    'success': False,
+                    'error': 'AccountLocked',
+                    'message': f"This account is temporarily locked due to multiple consecutive failed login attempts. Please wait {rem_min} minute(s) or click 'Forgot Password?' to reset your password.",
+                    'lockedUntil': lockout_info.get('locked_until'),
+                    'remainingSeconds': rem_sec,
+                    'canResetPassword': True
+                }).encode('utf-8'))
+                return
+
+            auth_success = False
+            auth_data = {}
+            try:
+                auth_req = urllib.request.Request(
+                    f"{supabase_url}/auth/v1/token?grant_type=password",
+                    data=json.dumps({'email': email, 'password': password}).encode('utf-8'),
+                    headers={
+                        'apikey': supabase_anon_key,
+                        'Content-Type': 'application/json'
+                    },
+                    method='POST'
+                )
+                with urllib.request.urlopen(auth_req, timeout=15) as a_resp:
+                    auth_data = json.loads(a_resp.read().decode('utf-8'))
+                    auth_success = True
+            except urllib.error.HTTPError as e:
+                auth_success = False
+            except Exception as e:
+                print('[VoltEdge DevServer] Auth connection error:', e)
+                auth_success = False
+
+            if not auth_success:
+                fail_info = {'is_locked': False, 'failed_attempts': 1, 'remaining_attempts': 4}
+                try:
+                    fail_req = urllib.request.Request(
+                        f"{supabase_url}/rest/v1/rpc/record_admin_login_failure",
+                        data=json.dumps({'p_email': email, 'p_max_attempts': 5, 'p_lockout_minutes': 15}).encode('utf-8'),
+                        headers={
+                            'apikey': supabase_anon_key,
+                            'Authorization': f"Bearer {supabase_anon_key}",
+                            'Content-Type': 'application/json'
+                        },
+                        method='POST'
+                    )
+                    with urllib.request.urlopen(fail_req, timeout=10) as f_resp:
+                        fail_info = json.loads(f_resp.read().decode('utf-8'))
+                except Exception as e:
+                    print('[VoltEdge DevServer] Error recording login failure:', e)
+
+                if fail_info.get('is_locked'):
+                    rem_sec = fail_info.get('remaining_seconds', 900)
+                    self.send_response(423)
+                    self.send_header('Content-Type', 'application/json')
+                    self.send_header('Retry-After', str(rem_sec))
+                    self.end_headers()
+                    self.wfile.write(json.dumps({
+                        'success': False,
+                        'error': 'AccountLocked',
+                        'message': "Account has been temporarily locked for 15 minutes due to 5 consecutive failed login attempts. You can click 'Forgot Password?' to reset your password immediately.",
+                        'lockedUntil': fail_info.get('locked_until'),
+                        'remainingSeconds': rem_sec,
+                        'canResetPassword': True
+                    }).encode('utf-8'))
+                    return
+
+                failed_count = fail_info.get('failed_attempts', 1)
+                rem_attempts = fail_info.get('remaining_attempts', max(0, 5 - failed_count))
+                self.send_response(401)
+                self.send_header('Content-Type', 'application/json')
+                self.end_headers()
+                self.wfile.write(json.dumps({
+                    'success': False,
+                    'error': 'InvalidCredentials',
+                    'message': f"Invalid email or password. Attempt {failed_count} of 5 before account lockout.",
+                    'failedAttempts': failed_count,
+                    'remainingAttempts': rem_attempts
+                }).encode('utf-8'))
+                return
+
+            # Auth Succeeded -> Reset lockout counter
+            try:
+                succ_req = urllib.request.Request(
+                    f"{supabase_url}/rest/v1/rpc/record_admin_login_success",
+                    data=json.dumps({'p_email': email}).encode('utf-8'),
+                    headers={
+                        'apikey': supabase_anon_key,
+                        'Authorization': f"Bearer {supabase_anon_key}",
+                        'Content-Type': 'application/json'
+                    },
+                    method='POST'
+                )
+                with urllib.request.urlopen(succ_req, timeout=10):
+                    pass
+            except Exception as e:
+                print('[VoltEdge DevServer] Error recording login success:', e)
+
+            # Check profile active status
+            user_id = (auth_data.get('user') or {}).get('id')
+            profile = None
+            if user_id:
+                try:
+                    prof_req = urllib.request.Request(
+                        f"{supabase_url}/rest/v1/admin_profiles?user_id=eq.{user_id}&select=*",
+                        headers={
+                            'apikey': supabase_anon_key,
+                            'Authorization': f"Bearer {auth_data.get('access_token')}",
+                            'Accept': 'application/vnd.pgrst.object+json'
+                        }
+                    )
+                    with urllib.request.urlopen(prof_req, timeout=10) as p_resp:
+                        profile = json.loads(p_resp.read().decode('utf-8'))
+                except Exception as e:
+                    print('[VoltEdge DevServer] Error fetching profile:', e)
+
+            if profile and profile.get('is_active') is False:
+                self.send_response(403)
+                self.send_header('Content-Type', 'application/json')
+                self.end_headers()
+                self.wfile.write(json.dumps({
+                    'success': False,
+                    'error': 'AccountDeactivated',
+                    'message': 'Your administrator account has been deactivated. Please contact the system owner.'
+                }).encode('utf-8'))
+                return
+
+            self.send_response(200)
+            self.send_header('Content-Type', 'application/json')
+            self.end_headers()
+            self.wfile.write(json.dumps({
+                'success': True,
+                'session': {
+                    'access_token': auth_data.get('access_token'),
+                    'refresh_token': auth_data.get('refresh_token'),
+                    'expires_in': auth_data.get('expires_in'),
+                    'token_type': auth_data.get('token_type'),
+                    'user': auth_data.get('user')
+                },
+                'profile': profile
+            }).encode('utf-8'))
+            return
 
         # 1. Feedback Form Endpoint
         if self.path.startswith('/api/feedback'):

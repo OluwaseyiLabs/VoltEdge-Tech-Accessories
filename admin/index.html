@@ -39,6 +39,12 @@
         <p id="authSubtitle">Enter your administrator credentials to manage products and inventory.</p>
       </div>
 
+      <!-- INLINE AUTH ALERT (FOR ACCOUNT LOCKOUT / RATE LIMITING / CREDENTIAL WARNINGS) -->
+      <div id="authAlert" class="alert-banner alert-banner-error" style="display: none; margin-bottom: 1.25rem;">
+        <i class="ph-bold ph-warning-circle" style="font-size: 1.25rem; flex-shrink: 0; margin-top: 0.1rem;"></i>
+        <span id="authAlertText" style="line-height: 1.45; font-size: 0.85rem;"></span>
+      </div>
+
       <form id="authForm" onsubmit="handleAuthSubmit(event)">
         <div id="setupFields" style="display: none;">
           <div class="form-group" style="margin-bottom: 1rem;">

@@ -246,6 +246,21 @@ async function handleForgotPasswordSubmit(e) {
   }
 }
 
+
+function showAuthAlert(msg) {
+  const alertEl = document.getElementById('authAlert');
+  const textEl = document.getElementById('authAlertText');
+  if (alertEl && textEl) {
+    textEl.innerHTML = msg;
+    alertEl.style.display = 'flex';
+  }
+}
+
+function hideAuthAlert() {
+  const alertEl = document.getElementById('authAlert');
+  if (alertEl) alertEl.style.display = 'none';
+}
+
 async function handleAuthSubmit(e) {
   e.preventDefault();
   const email = document.getElementById('authEmail').value.trim();
@@ -286,14 +301,46 @@ async function handleAuthSubmit(e) {
 
       if (signInErr) throw signInErr;
     } else {
-      // Standard Sign In
-      const { data, error } = await supabaseClient.auth.signInWithPassword({
-        email,
-        password
+      // Standard Sign In with IP Rate Limiting + Account Lockout Proxy
+      const resp = await fetch('/api/admin-login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
       });
 
-      if (error) throw error;
+      const result = await resp.json();
+
+      if (!resp.ok) {
+        if (resp.status === 423 || result.error === 'AccountLocked') {
+          const remMin = Math.ceil((result.remainingSeconds || 900) / 60);
+          showToast(`Account Locked: Multiple failed login attempts. Wait ${remMin} min or use 'Forgot Password?'.`, 'error');
+          showAuthAlert(`<strong>Account Locked:</strong> Temporarily locked for 15 minutes due to consecutive failed attempts. You can <a href="#forgot" onclick="showForgotPasswordView()" style="color: inherit; text-decoration: underline; font-weight: 700;">reset your password</a> to unlock immediately.`);
+        } else if (resp.status === 429 || result.error === 'TooManyRequests') {
+          showToast(`Network Rate Limit: Too many requests from this IP. Retry in ${result.retryAfter || 60}s.`, 'warning');
+          showAuthAlert(`<strong>Network Rate Limit:</strong> Too many attempts from this network. Please wait ${result.retryAfter || 60} seconds before retrying.`);
+        } else if (resp.status === 401) {
+          const warn = result.message || 'Invalid email or password.';
+          showToast(warn, 'error');
+          showAuthAlert(warn);
+        } else {
+          showToast(result.message || 'Authentication failed. Please verify credentials.', 'error');
+          showAuthAlert(result.message || 'Authentication failed. Please verify credentials.');
+        }
+        resetAuthBtn();
+        return;
+      }
+
+      // Successful login -> set session on Supabase client
+      if (result.session && result.session.access_token) {
+        const { error: sessErr } = await supabaseClient.auth.setSession({
+          access_token: result.session.access_token,
+          refresh_token: result.session.refresh_token
+        });
+        if (sessErr) throw sessErr;
+      }
+
       showToast('Signed in successfully!', 'success');
+      hideAuthAlert();
     }
   } catch (err) {
     console.error('Auth error:', err);
@@ -724,13 +771,25 @@ function renderProductsTable(filteredList = null) {
           </span>
         </td>
         <td style="text-align: right;">
-          <div style="display: inline-flex; gap: 0.4rem;">
+          <div style="display: inline-flex; gap: 0.35rem; align-items: center;">
             <button class="btn btn-secondary btn-sm" onclick="openEditProductModal('${p.id}')" title="Edit Product">
               <i class="ph-bold ph-pencil-simple"></i>
             </button>
-            <button class="btn btn-secondary btn-sm" onclick="toggleProductPublish('${p.id}')" title="${p.publication_status === 'PUBLISHED' ? 'Unpublish' : 'Publish'}">
-              <i class="ph-bold ${p.publication_status === 'PUBLISHED' ? 'ph-eye-slash' : 'ph-eye'}"></i>
+            <button class="btn btn-secondary btn-sm" onclick="duplicateProduct('${p.id}')" title="Duplicate Product">
+              <i class="ph-bold ph-copy"></i>
             </button>
+            ${p.publication_status === 'ARCHIVED' ? `
+              <button class="btn btn-secondary btn-sm" onclick="restoreProduct('${p.id}')" title="Restore Product to Draft">
+                <i class="ph-bold ph-arrow-counter-clockwise"></i>
+              </button>
+            ` : `
+              <button class="btn btn-secondary btn-sm" onclick="toggleProductPublish('${p.id}')" title="${p.publication_status === 'PUBLISHED' ? 'Unpublish to Draft' : 'Publish'}">
+                <i class="ph-bold ${p.publication_status === 'PUBLISHED' ? 'ph-eye-slash' : 'ph-eye'}"></i>
+              </button>
+              <button class="btn btn-secondary btn-sm" onclick="archiveProduct('${p.id}')" title="Archive Product">
+                <i class="ph-bold ph-archive"></i>
+              </button>
+            `}
             <button class="btn btn-secondary btn-sm" onclick="openInventoryForProduct('${p.id}')" title="Adjust Stock">
               <i class="ph-bold ph-stack"></i>
             </button>
@@ -1063,6 +1122,137 @@ async function toggleProductPublish(productId) {
   } catch (err) {
     console.error('Error updating status:', err);
     showToast('Failed to update publication status', 'error');
+  }
+}
+
+async function duplicateProduct(productId) {
+  const p = STATE.products.find(x => x.id === productId);
+  if (!p) return;
+
+  const baseSku = p.sku ? `${p.sku}-COPY` : 'ITEM-COPY';
+  const baseSlug = p.slug ? `${p.slug}-copy` : 'item-copy';
+
+  let copySku = baseSku;
+  let copySlug = baseSlug;
+  let counter = 1;
+
+  while (STATE.products.some(x => x.sku === copySku || x.slug === copySlug)) {
+    copySku = `${baseSku}-${counter}`;
+    copySlug = `${baseSlug}-${counter}`;
+    counter++;
+  }
+
+  const payload = {
+    name: `${p.name} (Copy)`,
+    sku: copySku,
+    slug: copySlug,
+    category_id: p.category_id || null,
+    publication_status: 'DRAFT',
+    is_published: false,
+    short_name: p.short_name ? `${p.short_name} (Copy)` : `${p.name} (Copy)`,
+    tagline: p.tagline || '',
+    short_description: p.short_description || '',
+    finish: p.finish || '',
+    description: p.description || '',
+    price: p.price,
+    compare_at_price: p.compare_at_price,
+    badge: p.badge || 'NONE',
+    badge_type: p.badge_type || 'neutral',
+    warranty: p.warranty || '1-Year Product Warranty',
+    specs_highlight: p.specs_highlight || null,
+    dispatch_badge: p.dispatch_badge || 'Same-Day Dispatch Eligible',
+    bullets: Array.isArray(p.bullets) ? p.bullets : [],
+    features: Array.isArray(p.features) ? p.features : [],
+    technical_specs: (p.technical_specs && typeof p.technical_specs === 'object') ? p.technical_specs : {}
+  };
+
+  try {
+    const { data: newProd, error } = await supabaseClient
+      .from('products')
+      .insert([payload])
+      .select()
+      .single();
+
+    if (error) throw error;
+
+    if (p.images && p.images.length) {
+      const imgPayloads = p.images.map(img => ({
+        product_id: newProd.id,
+        thumbnail_url: img.thumbnail_url,
+        card_url: img.card_url,
+        detail_url: img.detail_url,
+        storage_path: img.storage_path,
+        alt_text: newProd.name,
+        is_primary: !!img.is_primary,
+        display_order: img.display_order || 1
+      }));
+      await supabaseClient.from('product_images').insert(imgPayloads);
+    }
+
+    logActivity('DUPLICATE_PRODUCT', 'products', newProd.id, { original_id: productId, sku: copySku });
+    showToast(`Product duplicated as "${newProd.name}" (Draft)!`, 'success');
+    await loadProducts();
+    await loadInventory();
+    updateDashboardKPIs();
+  } catch (err) {
+    console.error('Error duplicating product:', err);
+    showToast('Failed to duplicate product: ' + (err.message || 'Unknown error'), 'error');
+  }
+}
+
+async function archiveProduct(productId) {
+  const p = STATE.products.find(x => x.id === productId);
+  if (!p) return;
+
+  if (!confirm(`Are you sure you want to archive "${p.name}"? It will be removed from storefront displays.`)) {
+    return;
+  }
+
+  try {
+    const { error } = await supabaseClient
+      .from('products')
+      .update({
+        publication_status: 'ARCHIVED',
+        is_published: false
+      })
+      .eq('id', productId);
+
+    if (error) throw error;
+
+    logActivity('ARCHIVE_PRODUCT', 'products', productId, { publication_status: 'ARCHIVED' });
+    showToast(`Product "${p.name}" has been archived.`, 'info');
+    await loadProducts();
+    await loadInventory();
+    updateDashboardKPIs();
+  } catch (err) {
+    console.error('Error archiving product:', err);
+    showToast('Failed to archive product: ' + (err.message || 'Unknown error'), 'error');
+  }
+}
+
+async function restoreProduct(productId) {
+  const p = STATE.products.find(x => x.id === productId);
+  if (!p) return;
+
+  try {
+    const { error } = await supabaseClient
+      .from('products')
+      .update({
+        publication_status: 'DRAFT',
+        is_published: false
+      })
+      .eq('id', productId);
+
+    if (error) throw error;
+
+    logActivity('RESTORE_PRODUCT', 'products', productId, { publication_status: 'DRAFT' });
+    showToast(`Product "${p.name}" restored to Draft status.`, 'success');
+    await loadProducts();
+    await loadInventory();
+    updateDashboardKPIs();
+  } catch (err) {
+    console.error('Error restoring product:', err);
+    showToast('Failed to restore product: ' + (err.message || 'Unknown error'), 'error');
   }
 }
 
@@ -1616,6 +1806,11 @@ window.handleCategoryFormSubmit = handleCategoryFormSubmit;
 window.showForgotPasswordView = showForgotPasswordView;
 window.showSignInView = showSignInView;
 window.handleForgotPasswordSubmit = handleForgotPasswordSubmit;
+window.duplicateProduct = duplicateProduct;
+window.archiveProduct = archiveProduct;
+window.restoreProduct = restoreProduct;
+window.showAuthAlert = showAuthAlert;
+window.hideAuthAlert = hideAuthAlert;
 
 function renderCategoriesTable() {
   const tbody = document.getElementById('categoriesTableBody');
