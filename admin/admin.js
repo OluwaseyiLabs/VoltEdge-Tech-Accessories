@@ -390,6 +390,7 @@ async function loadActivityLogs() {
 // ==========================================
 
 function switchView(viewName) {
+  closeMobileMenu();
   STATE.activeView = viewName;
 
   // Sidebar link highlight
@@ -449,8 +450,25 @@ function handlePrimaryHeaderAction() {
 }
 
 function toggleMobileMenu() {
-  document.getElementById('sidebar').classList.toggle('mobile-open');
+  const sidebar = document.getElementById('sidebar');
+  const backdrop = document.getElementById('sidebarBackdrop');
+  if (sidebar) {
+    const isOpen = sidebar.classList.toggle('mobile-open');
+    if (backdrop) backdrop.classList.toggle('active', isOpen);
+    document.body.style.overflow = isOpen ? 'hidden' : '';
+  }
 }
+
+function closeMobileMenu() {
+  const sidebar = document.getElementById('sidebar');
+  const backdrop = document.getElementById('sidebarBackdrop');
+  if (sidebar) sidebar.classList.remove('mobile-open');
+  if (backdrop) backdrop.classList.remove('active');
+  document.body.style.overflow = '';
+}
+
+window.toggleMobileMenu = toggleMobileMenu;
+window.closeMobileMenu = closeMobileMenu;
 
 // ==========================================
 // 4. OVERVIEW & KPIS

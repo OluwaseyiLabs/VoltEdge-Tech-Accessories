@@ -72,6 +72,8 @@
 
   <!-- APPLICATION DASHBOARD LAYOUT -->
   <div id="appContainer" class="app-layout" style="display: none;">
+    <!-- Mobile Sidebar Backdrop Overlay -->
+    <div id="sidebarBackdrop" class="sidebar-backdrop" onclick="closeMobileMenu()"></div>
     
     <!-- SIDEBAR -->
     <aside id="sidebar" class="sidebar">
@@ -422,7 +424,7 @@
                   Customer orders and delivery records remain authoritatively stored in <strong>Google Sheets</strong> via n8n automation. Supabase manages <strong>real-time stock reservations</strong>, stock deduction idempotency, and inventory counts.
                 </p>
                 <div style="margin-top: 0.75rem;">
-                  <a href="https://docs.google.com/spreadsheets/d/1Zt-6X6j1NqgKkYI8-ZkU6Iq2Z1p4K6O6Vqg5yP0/edit" target="_blank" class="btn btn-accent btn-sm">
+                  <a href="https://docs.google.com/spreadsheets/d/1QQoaT7GsG4JUKFFmvu5EtJ6iw2LMJ281g_61i_8LQlM/edit?usp=sharing" target="_blank" class="btn btn-accent btn-sm">
                     <i class="ph-bold ph-file-csv"></i>
                     <span>Open Google Sheets Order Processing Sheet</span>
                   </a>

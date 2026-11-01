@@ -1003,3 +1003,116 @@ body {
     justify-content: space-between;
   }
 }
+
+
+/* Mobile Responsive Enhancements */
+.sidebar-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.55);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  z-index: 999;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+}
+
+.sidebar-backdrop.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+@media (max-width: 1024px) {
+  .sidebar {
+    z-index: 1000;
+  }
+}
+
+@media (max-width: 640px) {
+  .top-header {
+    padding: 0 0.85rem;
+    height: 60px;
+  }
+  .page-container {
+    padding: 0.85rem;
+  }
+  .metrics-grid {
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)) !important;
+    gap: 0.75rem !important;
+    margin-bottom: 1.25rem !important;
+  }
+  .metric-card {
+    padding: 0.85rem !important;
+  }
+  .metric-icon {
+    width: 2.25rem !important;
+    height: 2.25rem !important;
+    font-size: 1.15rem !important;
+  }
+  .metric-value {
+    font-size: 1.35rem !important;
+  }
+  .form-grid {
+    grid-template-columns: 1fr !important;
+  }
+  .form-group.col-span-2 {
+    grid-column: span 1 !important;
+  }
+  .toolbar-card {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 0.75rem !important;
+    padding: 0.85rem !important;
+  }
+  .search-box {
+    min-width: 100% !important;
+    width: 100% !important;
+  }
+  .toolbar-filters {
+    width: 100% !important;
+    flex-direction: column !important;
+    gap: 0.5rem !important;
+  }
+  .toolbar-filters select, .toolbar-filters button, .toolbar-filters a {
+    width: 100% !important;
+  }
+  /* Modals on Mobile */
+  .modal-overlay {
+    padding: 0.5rem !important;
+  }
+  .modal-card {
+    width: 100% !important;
+    max-width: 100% !important;
+    max-height: 94vh !important;
+    border-radius: var(--radius-lg) !important;
+  }
+  .modal-header {
+    padding: 0.85rem 1rem !important;
+  }
+  .modal-tabs {
+    margin: -1rem -1rem 1rem -1rem !important;
+    padding: 0 0.75rem !important;
+    scrollbar-width: none !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+  .modal-tabs::-webkit-scrollbar {
+    display: none !important;
+  }
+  .modal-tab-btn {
+    padding: 0.65rem 0.75rem !important;
+    font-size: 0.8rem !important;
+  }
+  .modal-body {
+    padding: 1rem 0.85rem !important;
+  }
+  .modal-footer {
+    padding: 0.75rem 1rem !important;
+    flex-wrap: wrap !important;
+    gap: 0.5rem !important;
+  }
+  .modal-footer .btn {
+    flex: 1 1 auto !important;
+    justify-content: center !important;
+  }
+}
