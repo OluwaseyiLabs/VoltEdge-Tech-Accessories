@@ -84,7 +84,7 @@ const PRODUCTS_DATA = [
     category: "ups",
     categoryLabel: "Wi-Fi UPS Backups",
     price: 35000,
-    compareAtPrice: 45000,
+    compareAtPrice: 50000,
     badge: "Remote Must-Have",
     badgeType: "highlight",
     rating: 5.0,
@@ -94,7 +94,8 @@ const PRODUCTS_DATA = [
     warranty: "1-Year Product Warranty",
     dispatchBadge: "Same-Day Dispatch Eligible",
     finish: "Arctic White finish",
-    inStock: true,
+    inStock: false,
+    availableQuantity: 0,
     tagline: "Never get disconnected from Zoom, Google Meet, or Slack when power switches.",
     bullets: [
       "Automatic 0-second switchover: router doesn't reboot during grid failure",

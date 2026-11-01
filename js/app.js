@@ -242,13 +242,19 @@ function renderProducts(filter = currentCatalogCategory, searchQuery = currentCa
   if (emptyState) emptyState.style.display = 'none';
 
   grid.innerHTML = products.map(product => {
+    const isOutOfStock = product.inStock === false || (product.availableQuantity !== undefined && product.availableQuantity <= 0);
+
     return `
-      <article class="product-card" data-id="${product.id}" onclick="handleCardClick(event, '${product.id}')" role="button" tabindex="0" aria-label="View full details of ${product.name}">
+      <article class="product-card ${isOutOfStock ? 'is-out-of-stock' : ''}" data-id="${product.id}" onclick="handleCardClick(event, '${product.id}')" role="button" tabindex="0" aria-label="View full details of ${product.name}">
         <div class="product-card-top">
           <img src="${product.image}" alt="${product.name}" class="product-card-img" loading="lazy">
           <div class="card-badges">
-            <span class="card-badge ${product.badgeType}">${product.badge}</span>
-            <span class="warranty-pill"><i class="ph ph-shield-check"></i> 1-Yr Warranty</span>
+            ${isOutOfStock ? `
+              <span class="card-badge badge-out-of-stock">Out of Stock</span>
+            ` : `
+              <span class="card-badge ${product.badgeType}">${product.badge}</span>
+              <span class="warranty-pill"><i class="ph ph-shield-check"></i> 1-Yr Warranty</span>
+            `}
           </div>
           <button class="quick-view-btn" onclick="event.stopPropagation(); openQuickView('${product.id}')" aria-label="Quick view of ${product.name}">
             <i class="ph ph-eye"></i> Quick View
@@ -288,9 +294,15 @@ function renderProducts(filter = currentCatalogCategory, searchQuery = currentCa
                 ` : ''}
               </div>
             </div>
-            <button class="btn btn-volt btn-sm" onclick="event.stopPropagation(); VoltEdgeCart.addItem('${product.id}', 1, true)" aria-label="Add ${product.name} to Cart">
-              <i class="ph-bold ph-shopping-bag"></i> Add to Cart
-            </button>
+            ${isOutOfStock ? `
+              <button class="btn btn-disabled btn-sm btn-out-of-stock" disabled aria-disabled="true" onclick="event.stopPropagation();" aria-label="${product.name} is Out of Stock">
+                <i class="ph-bold ph-prohibit"></i> Out of Stock
+              </button>
+            ` : `
+              <button class="btn btn-volt btn-sm" onclick="event.stopPropagation(); VoltEdgeCart.addItem('${product.id}', 1, true)" aria-label="Add ${product.name} to Cart">
+                <i class="ph-bold ph-shopping-bag"></i> Add to Cart
+              </button>
+            `}
           </div>
         </div>
       </article>
@@ -1552,12 +1564,21 @@ window.openQuickView = function(productId) {
         ` : ''}
 
         <div style="display: flex; gap: 0.75rem; margin-top: auto; padding-top: 1rem; flex-wrap: wrap;">
-          <button class="btn btn-volt" style="flex: 1; min-width: 140px;" onclick="VoltEdgeCart.addItem('${product.id}', 1, true)">
-            <i class="ph-bold ph-shopping-bag"></i> Add to Cart
-          </button>
-          <button class="btn btn-primary" style="flex: 1; min-width: 140px;" onclick="modalSelectOrder('${product.id}')">
-            Order Directly
-          </button>
+          ${(product.inStock === false || (product.availableQuantity !== undefined && product.availableQuantity <= 0)) ? `
+            <button class="btn btn-out-of-stock" disabled style="flex: 1; min-width: 140px; cursor: not-allowed;">
+              <i class="ph-bold ph-prohibit"></i> Out of Stock
+            </button>
+            <a href="https://wa.me/2347047922403?text=${encodeURIComponent('Hello VoltEdge, I would like to be notified when ' + product.name + ' (' + product.sku + ') is back in stock.')}" target="_blank" class="btn btn-volt" style="flex: 1; min-width: 140px;">
+              <i class="ph-bold ph-bell"></i> Notify When Restocked
+            </a>
+          ` : `
+            <button class="btn btn-volt" style="flex: 1; min-width: 140px;" onclick="VoltEdgeCart.addItem('${product.id}', 1, true)">
+              <i class="ph-bold ph-shopping-bag"></i> Add to Cart
+            </button>
+            <button class="btn btn-primary" style="flex: 1; min-width: 140px;" onclick="modalSelectOrder('${product.id}')">
+              Order Directly
+            </button>
+          `}
           <a href="https://wa.me/2347047922403?text=${encodeURIComponent('Hello VoltEdge, I have questions regarding the ' + product.name + ' (' + product.sku + ').')}" target="_blank" class="btn btn-ghost">
             Enquire on WhatsApp
           </a>

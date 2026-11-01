@@ -149,6 +149,15 @@
         return false;
       }
 
+      if (product.inStock === false || (product.availableQuantity !== undefined && product.availableQuantity <= 0)) {
+        if (typeof showToast === 'function') {
+          showToast(`Sorry, "${product.name}" is currently out of stock.`, 'warning');
+        } else {
+          alert(`Sorry, "${product.name}" is currently out of stock.`);
+        }
+        return false;
+      }
+
       const qtyToAdd = Math.max(1, parseInt(quantity, 10) || 1);
       const cart = this.getCart();
       const existing = cart.find(item => 

@@ -2809,3 +2809,43 @@ textarea.form-control {
 }
 
 
+
+
+/* Out of Stock product card styling */
+.product-card.is-out-of-stock {
+  opacity: 0.58;
+  filter: grayscale(35%);
+  transition: opacity 0.2s ease, filter 0.2s ease, transform 0.2s ease;
+  position: relative;
+}
+
+.product-card.is-out-of-stock:hover {
+  opacity: 0.85;
+  filter: grayscale(10%);
+}
+
+.card-badge.badge-out-of-stock {
+  background: #dc2626 !important;
+  color: #ffffff !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  box-shadow: 0 2px 4px rgba(220, 38, 38, 0.25);
+}
+
+.btn-out-of-stock {
+  background: #e2e8f0 !important;
+  color: #64748b !important;
+  border-color: #cbd5e1 !important;
+  cursor: not-allowed !important;
+  opacity: 0.9 !important;
+  font-weight: 700 !important;
+  pointer-events: auto !important;
+}
+
+.btn-out-of-stock:hover {
+  background: #e2e8f0 !important;
+  color: #64748b !important;
+  transform: none !important;
+  box-shadow: none !important;
+}
