@@ -534,11 +534,11 @@
       <div class="modal-tabs">
         <button class="modal-tab-btn active" data-tab="tabGeneral" onclick="switchProductTab('tabGeneral')">General Info</button>
         <button class="modal-tab-btn" data-tab="tabPricing" onclick="switchProductTab('tabPricing')">Pricing & Badges</button>
-        <button class="modal-tab-btn" data-tab="tabFeatures" onclick="switchProductTab('tabFeatures')">Features & Specs</button>
+        <button class="modal-tab-btn" data-tab="tabFeatures" onclick="switchProductTab('tabFeatures')">Key Features</button>
         <button class="modal-tab-btn" data-tab="tabImages" onclick="switchProductTab('tabImages')">Product Images</button>
       </div>
 
-      <form id="productForm" onsubmit="handleProductFormSubmit(event)" style="display: flex; flex-direction: column; flex: 1; overflow: hidden;">
+      <form id="productForm" novalidate onsubmit="handleProductFormSubmit(event)" style="display: flex; flex-direction: column; flex: 1; overflow: hidden;">
         <input type="hidden" id="formProductId">
         
         <div class="modal-body">
@@ -654,11 +654,6 @@
               <span class="form-helper">Enter each bullet point on a separate new line.</span>
             </div>
 
-            <div class="form-group">
-              <label class="form-label">Technical Specifications (JSON format)</label>
-              <textarea id="formTechnicalSpecs" class="form-textarea" style="min-height: 120px; font-family: monospace; font-size: 0.85rem;" placeholder='{"Capacity": "30,000mAh / 111Wh", "USB-C Output": "65W Max", "Display": "Digital LED"}'></textarea>
-              <span class="form-helper">Key-value JSON dictionary for technical details.</span>
-            </div>
           </div>
 
           <!-- TAB 4: PRODUCT IMAGES & UPLOADS -->
@@ -692,7 +687,7 @@
 
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" onclick="closeProductModal()">Cancel</button>
-          <button type="submit" id="saveProductBtn" class="btn btn-primary">
+          <button type="button" id="saveProductBtn" class="btn btn-primary" onclick="handleProductFormSubmit(event)">
             <i class="ph-bold ph-floppy-disk"></i>
             <span>Save Product</span>
           </button>

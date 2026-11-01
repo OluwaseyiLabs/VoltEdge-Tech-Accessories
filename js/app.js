@@ -280,7 +280,13 @@ function renderProducts(filter = currentCatalogCategory, searchQuery = currentCa
           <div class="product-card-footer">
             <div class="price-wrap">
               <span class="price-label">Price in Naira</span>
-              <span class="price-amount">${formatNaira(product.price)}</span>
+              <div class="price-container">
+                <span class="price-amount">${formatNaira(product.price)}</span>
+                ${(product.compareAtPrice && product.compareAtPrice > product.price) ? `
+                  <span class="price-compare">${formatNaira(product.compareAtPrice)}</span>
+                  <span class="price-discount-pill">-${Math.round((1 - (product.price / product.compareAtPrice)) * 100)}%</span>
+                ` : ''}
+              </div>
             </div>
             <button class="btn btn-volt btn-sm" onclick="VoltEdgeCart.addItem('${product.id}', 1, true)" aria-label="Add ${product.name} to Cart">
               <i class="ph-bold ph-shopping-bag"></i> Add to Cart
@@ -1509,8 +1515,16 @@ window.openQuickView = function(productId) {
       <div class="modal-body-content">
         <span class="product-sku">${product.sku}</span>
         <h2 style="font-size: 1.5rem; color: var(--text-main); margin: 0.25rem 0 0.5rem; font-weight: 800;">${product.name}</h2>
-        <div style="font-size: 1.5rem; font-weight: 800; color: var(--primary); margin-bottom: 0.85rem;">
-          ${formatNaira(product.price)}
+        <div style="margin-bottom: 0.85rem;">
+          <div class="price-container" style="align-items: baseline; gap: 0.65rem;">
+            <span style="font-size: 1.6rem; font-weight: 800; color: var(--primary);">${formatNaira(product.price)}</span>
+            ${(product.compareAtPrice && product.compareAtPrice > product.price) ? `
+              <span class="price-compare" style="font-size: 1.05rem;">${formatNaira(product.compareAtPrice)}</span>
+              <span class="price-discount-pill" style="font-size: 0.75rem; padding: 0.15rem 0.45rem;">
+                Save ${formatNaira(product.compareAtPrice - product.price)} (${Math.round((1 - (product.price / product.compareAtPrice)) * 100)}% OFF)
+              </span>
+            ` : ''}
+          </div>
         </div>
         
         <p style="color: var(--text-muted); font-size: 0.88rem; margin-bottom: 1.15rem; line-height: 1.55;">

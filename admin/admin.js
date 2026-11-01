@@ -660,6 +660,7 @@ function filterProducts() {
 function openCreateProductModal() {
   STATE.selectedProduct = null;
   STATE.productImagesBuffer = [];
+  STATE.deletedImageIds = [];
   document.getElementById('productForm').reset();
   document.getElementById('formProductId').value = '';
   document.getElementById('productModalTitle').textContent = 'Add New Product';
@@ -677,6 +678,7 @@ function openEditProductModal(productId) {
 
   STATE.selectedProduct = product;
   STATE.productImagesBuffer = [...(product.images || [])];
+  STATE.deletedImageIds = [];
 
   document.getElementById('formProductId').value = product.id;
   document.getElementById('productModalTitle').textContent = `Edit Product: ${product.name}`;
@@ -701,9 +703,7 @@ function openEditProductModal(productId) {
   const bullets = Array.isArray(product.bullets) ? product.bullets : (Array.isArray(product.features) ? product.features : []);
   document.getElementById('formBullets').value = bullets.join('\n');
 
-  // Specs
-  const specs = product.technical_specs || {};
-  document.getElementById('formTechnicalSpecs').value = JSON.stringify(specs, null, 2);
+
 
   renderModalImageGallery();
   switchProductTab('tabGeneral');
@@ -735,51 +735,74 @@ function handleProductNameInput() {
 }
 
 async function handleProductFormSubmit(e) {
-  e.preventDefault();
+  if (e) {
+    e.preventDefault();
+    if (e.stopPropagation) e.stopPropagation();
+  }
   const saveBtn = document.getElementById('saveProductBtn');
+
+  const id = document.getElementById('formProductId').value.trim();
+  const name = document.getElementById('formName').value.trim();
+  const sku = document.getElementById('formSku').value.trim().toUpperCase();
+  let slug = document.getElementById('formSlug').value.trim().toLowerCase();
+  const category_id = document.getElementById('formCategory').value || null;
+  const publication_status = document.getElementById('formPubStatus').value || 'PUBLISHED';
+  const is_published = publication_status === 'PUBLISHED';
+  const short_name = document.getElementById('formShortName').value.trim();
+  const tagline = document.getElementById('formTagline').value.trim();
+  const finish = document.getElementById('formFinish').value.trim();
+  const description = document.getElementById('formDescription').value.trim();
+  const priceRaw = document.getElementById('formPrice').value;
+  const price = parseFloat(priceRaw);
+  const compareVal = document.getElementById('formComparePrice').value;
+  const compare_at_price = (compareVal && !isNaN(parseFloat(compareVal))) ? parseFloat(compareVal) : null;
+  const badge = document.getElementById('formBadge').value.trim() || 'NONE';
+  const badge_type = document.getElementById('formBadgeType').value || 'neutral';
+  const warranty = document.getElementById('formWarranty').value.trim() || '1-Year Product Warranty';
+  const specs_highlight = document.getElementById('formSpecsHighlight').value.trim() || null;
+  const dispatch_badge = document.getElementById('formDispatchBadge').value.trim() || 'Same-Day Dispatch Eligible';
+
+  // Smart client-side validations with tab navigation
+  if (!name) {
+    showToast('Product Name / Title is required', 'warning');
+    switchProductTab('tabGeneral');
+    document.getElementById('formName').focus();
+    return;
+  }
+
+  if (!sku) {
+    showToast('SKU is required (e.g. VE-PB-30K-BLK)', 'warning');
+    switchProductTab('tabGeneral');
+    document.getElementById('formSku').focus();
+    return;
+  }
+
+  if (!slug) {
+    slug = generateSlug(name);
+    document.getElementById('formSlug').value = slug;
+  }
+
+  if (isNaN(price) || price < 0) {
+    showToast('Valid Selling Price (₦ NGN) is required', 'warning');
+    switchProductTab('tabPricing');
+    document.getElementById('formPrice').focus();
+    return;
+  }
+
+  // Parse bullets
+  const bulletsRaw = document.getElementById('formBullets').value;
+  const bullets = bulletsRaw.split('\n').map(s => s.trim()).filter(Boolean);
+
+  // Preserve existing technical specs if present or default to {}
+  const technical_specs = (STATE.selectedProduct && typeof STATE.selectedProduct.technical_specs === 'object' && STATE.selectedProduct.technical_specs !== null)
+    ? STATE.selectedProduct.technical_specs
+    : {};
+
+  // Show loading state
   saveBtn.disabled = true;
   saveBtn.innerHTML = '<span class="spinner"></span> <span>Saving...</span>';
 
   try {
-    const id = document.getElementById('formProductId').value;
-    const name = document.getElementById('formName').value.trim();
-    const sku = document.getElementById('formSku').value.trim().toUpperCase();
-    const slug = document.getElementById('formSlug').value.trim().toLowerCase();
-    const category_id = document.getElementById('formCategory').value;
-    const publication_status = document.getElementById('formPubStatus').value;
-    const is_published = publication_status === 'PUBLISHED';
-    const short_name = document.getElementById('formShortName').value.trim();
-    const tagline = document.getElementById('formTagline').value.trim();
-    const finish = document.getElementById('formFinish').value.trim();
-    const description = document.getElementById('formDescription').value.trim();
-    const price = parseFloat(document.getElementById('formPrice').value);
-    const compareVal = document.getElementById('formComparePrice').value;
-    const compare_at_price = compareVal ? parseFloat(compareVal) : null;
-    const badge = document.getElementById('formBadge').value.trim() || null;
-    const badge_type = document.getElementById('formBadgeType').value;
-    const warranty = document.getElementById('formWarranty').value.trim();
-    const specs_highlight = document.getElementById('formSpecsHighlight').value.trim() || null;
-    const dispatch_badge = document.getElementById('formDispatchBadge').value.trim();
-
-    // Parse bullets
-    const bulletsRaw = document.getElementById('formBullets').value;
-    const bullets = bulletsRaw.split('\n').map(s => s.trim()).filter(Boolean);
-
-    // Parse specs JSON
-    let technical_specs = {};
-    const specsRaw = document.getElementById('formTechnicalSpecs').value.trim();
-    if (specsRaw) {
-      try {
-        technical_specs = JSON.parse(specsRaw);
-      } catch (err) {
-        showToast('Invalid JSON in Technical Specifications field', 'warning');
-        saveBtn.disabled = false;
-        saveBtn.innerHTML = '<i class="ph-bold ph-floppy-disk"></i> <span>Save Product</span>';
-        switchProductTab('tabFeatures');
-        return;
-      }
-    }
-
     const payload = {
       name,
       sku,
@@ -807,7 +830,7 @@ async function handleProductFormSubmit(e) {
     let resultProductId = id;
 
     if (id) {
-      // Update
+      // Update existing product
       const { data, error } = await supabaseClient
         .from('products')
         .update(payload)
@@ -819,7 +842,7 @@ async function handleProductFormSubmit(e) {
       showToast(`Product "${name}" updated successfully!`, 'success');
       logActivity('UPDATE_PRODUCT', 'products', id, payload);
     } else {
-      // Insert
+      // Insert new product
       const { data, error } = await supabaseClient
         .from('products')
         .insert([payload])
@@ -832,21 +855,41 @@ async function handleProductFormSubmit(e) {
       logActivity('CREATE_PRODUCT', 'products', data.id, payload);
     }
 
+    // Process deleted images
+    if (STATE.deletedImageIds && STATE.deletedImageIds.length) {
+      for (const delId of STATE.deletedImageIds) {
+        await supabaseClient.from('product_images').delete().eq('id', delId);
+      }
+      STATE.deletedImageIds = [];
+    }
+
     // Save image associations if buffer contains images
-    if (resultProductId && STATE.productImagesBuffer.length) {
-      for (const img of STATE.productImagesBuffer) {
+    if (resultProductId && STATE.productImagesBuffer && STATE.productImagesBuffer.length) {
+      for (let i = 0; i < STATE.productImagesBuffer.length; i++) {
+        const img = STATE.productImagesBuffer[i];
+        const cardUrl = img.card_url || img.detail_url || img.thumbnail_url || '';
+        const detailUrl = img.detail_url || img.card_url || img.thumbnail_url || '';
+        const thumbUrl = img.thumbnail_url || img.card_url || img.detail_url || '';
+
         if (!img.id) {
           // New image inserted
-          await supabaseClient.from('product_images').insert([{
+          const { error: imgErr } = await supabaseClient.from('product_images').insert([{
             product_id: resultProductId,
-            thumbnail_url: img.thumbnail_url,
-            card_url: img.card_url,
-            detail_url: img.detail_url,
-            storage_path: img.storage_path,
+            thumbnail_url: thumbUrl,
+            card_url: cardUrl,
+            detail_url: detailUrl,
+            storage_path: img.storage_path || null,
             alt_text: name,
             is_primary: !!img.is_primary,
-            display_order: img.display_order || 1
+            display_order: i + 1
           }]);
+          if (imgErr) console.warn('Failed to insert product image:', imgErr);
+        } else {
+          // Update primary state and order
+          await supabaseClient.from('product_images').update({
+            is_primary: !!img.is_primary,
+            display_order: i + 1
+          }).eq('id', img.id);
         }
       }
     }
@@ -857,7 +900,17 @@ async function handleProductFormSubmit(e) {
     updateDashboardKPIs();
   } catch (err) {
     console.error('Error saving product:', err);
-    showToast(err.message || 'Failed to save product. Please check fields.', 'error');
+    let msg = err.message || 'Failed to save product. Please check fields.';
+    if (msg.includes('products_sku_key') || (msg.includes('unique constraint') && msg.includes('sku'))) {
+      msg = `SKU "${sku}" is already in use by another product.`;
+      switchProductTab('tabGeneral');
+      document.getElementById('formSku').focus();
+    } else if (msg.includes('products_slug_key') || (msg.includes('unique constraint') && msg.includes('slug'))) {
+      msg = `URL Slug "${slug}" is already taken. Please customize the slug.`;
+      switchProductTab('tabGeneral');
+      document.getElementById('formSlug').focus();
+    }
+    showToast(msg, 'error');
   } finally {
     saveBtn.disabled = false;
     saveBtn.innerHTML = '<i class="ph-bold ph-floppy-disk"></i> <span>Save Product</span>';
@@ -933,6 +986,10 @@ function setPrimaryImage(index) {
 
 function removeBufferImage(index) {
   const removed = STATE.productImagesBuffer.splice(index, 1)[0];
+  if (removed && removed.id) {
+    STATE.deletedImageIds = STATE.deletedImageIds || [];
+    STATE.deletedImageIds.push(removed.id);
+  }
   if (removed && removed.is_primary && STATE.productImagesBuffer.length > 0) {
     STATE.productImagesBuffer[0].is_primary = true;
   }
