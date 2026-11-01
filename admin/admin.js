@@ -1541,9 +1541,13 @@ function getStockStatus(available, threshold, salesEnabled) {
 function getPrimaryImageUrl(product) {
   if (product.images && product.images.length) {
     const primary = product.images.find(img => img.is_primary) || product.images[0];
-    return primary.card_url || primary.detail_url || primary.thumbnail_url;
+    const url = primary.card_url || primary.detail_url || primary.thumbnail_url;
+    if (url && !url.startsWith('http') && !url.startsWith('/')) {
+      return '/' + url;
+    }
+    return url;
   }
-  return 'assets/images/pb-black.jpg';
+  return '/assets/images/pb-black.jpg';
 }
 
 function generateSlug(text) {
