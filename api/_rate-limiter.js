@@ -16,6 +16,10 @@ const RATE_LIMITS = {
   feedback: {
     limit: parseInt(process.env.RATE_LIMIT_FEEDBACK_MAX || '5', 10),
     windowSec: parseInt(process.env.RATE_LIMIT_FEEDBACK_WINDOW_SEC || '60', 10)
+  },
+  admin_login: {
+    limit: parseInt(process.env.RATE_LIMIT_LOGIN_MAX || '5', 10),
+    windowSec: parseInt(process.env.RATE_LIMIT_LOGIN_WINDOW_SEC || '60', 10)
   }
 };
 

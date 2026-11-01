@@ -1170,6 +1170,7 @@
   <!-- Products Catalog Data -->
   <script src="../js/products.js"></script>
   <script src="../js/cart.js"></script>
+  <script src="../js/supabase-catalog.js" defer></script>
 
   <!-- Checkout Interaction Script -->
   <script>
@@ -1547,9 +1548,25 @@
         const trackingCode = `VE-${year}${month}${day}-${randomSuffix}`;
         const lookupToken = 've_tok_' + Math.random().toString(36).substring(2, 10);
 
-        const cart = VoltEdgeCart.getCart();
+        if (typeof window !== 'undefined' && window.IS_FALLBACK_MODE) {
+          alert('Live catalogue connection is temporarily offline. Online ordering is paused to protect your order from pricing or stock discrepancies. Please contact our WhatsApp desk (+234 704 792 2403) for immediate assistance.');
+          isCheckoutSubmitting = false;
+          return;
+        }
+
+        const cart = (typeof VoltEdgeCart.revalidateCart === 'function') 
+          ? VoltEdgeCart.revalidateCart() 
+          : VoltEdgeCart.getCart();
+
         if (!cart.length) {
           alert('Your shopping cart is empty. Please select at least one item.');
+          isCheckoutSubmitting = false;
+          return;
+        }
+
+        const oosItem = cart.find(i => i.isOutOfStock || (i.availableQuantity !== undefined && i.availableQuantity <= 0));
+        if (oosItem) {
+          alert(`Sorry, "${oosItem.name}" is currently out of stock. Please remove it from your cart to proceed with checkout.`);
           isCheckoutSubmitting = false;
           return;
         }

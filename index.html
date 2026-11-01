@@ -654,6 +654,27 @@
     </div>
   </div>
 
+  <!-- ENLARGED IMAGE LIGHTBOX MODAL -->
+  <div class="modal-overlay image-lightbox-overlay" id="image-lightbox-modal" role="dialog" aria-modal="true" aria-label="Enlarged Product Image Viewer" onclick="window.closeImageLightbox(event)">
+    <button type="button" class="lightbox-close-btn" onclick="window.closeImageLightbox()" aria-label="Close enlarged view">
+      <i class="ph-bold ph-x"></i>
+    </button>
+    <button type="button" class="lightbox-nav-btn lightbox-prev-btn" id="lightboxPrevBtn" onclick="event.stopPropagation(); window.stepLightboxImage(-1)" aria-label="Previous image">
+      <i class="ph-bold ph-caret-left"></i>
+    </button>
+    <div class="lightbox-content-inner" onclick="event.stopPropagation()">
+      <img id="lightboxActiveImg" src="" alt="Enlarged product image">
+    </div>
+    <button type="button" class="lightbox-nav-btn lightbox-next-btn" id="lightboxNextBtn" onclick="event.stopPropagation(); window.stepLightboxImage(1)" aria-label="Next image">
+      <i class="ph-bold ph-caret-right"></i>
+    </button>
+    <div class="lightbox-bottom-bar" onclick="event.stopPropagation()">
+      <div class="lightbox-thumbnails-bar" id="lightboxThumbnailsBar"></div>
+      <div class="lightbox-counter" id="lightboxCounter">1 / 1</div>
+    </div>
+  </div>
+
+
   <!-- ORDER SUCCESS MODAL -->
   <div class="modal-overlay" id="order-success-modal" role="dialog" aria-modal="true" aria-label="Order Confirmation">
     <div class="modal-content" style="max-width: 580px;">
@@ -796,6 +817,7 @@
   <script src="js/products.js"></script>
   <script src="js/cart.js"></script>
   <script src="js/app.js"></script>
+  <script src="js/supabase-catalog.js"></script>
 </body>
 
 </html>

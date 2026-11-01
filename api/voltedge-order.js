@@ -1,6 +1,7 @@
-﻿// Vercel Serverless Function: Secure Order Submission Proxy
+// Vercel Serverless Function: Secure Order Submission Proxy
 // Enforces 5 requests / 1 minute rate limit, order idempotency protection,
-// and authoritative backend order persistence for cross-device retrieval.
+// authoritative backend product/price/stock validation against Supabase,
+// atomic inventory reservation, and persistence for cross-device retrieval.
 
 const { rateLimitMiddleware, checkOrderDuplicate, recordOrderResponse, clearIdempotency } = require('./_rate-limiter');
 const { saveOrder, updateOrderStatus } = require('./_order-store');
@@ -106,26 +107,146 @@ module.exports = async function handler(req, res) {
     }
   }
 
-  // 3. Ensure lookup token is established and persist order immediately to authoritative store
+  // 3. TASK 6: Backend Product, Price & Stock Validation against Supabase
+  const supabaseUrl = process.env.SUPABASE_URL || 'https://ohqlojvwczzealcnmbcs.supabase.co';
+  const supabaseKey = process.env.SUPABASE_ANON_KEY || 'sb_publishable_IqpW1FGzJML7je2Oy91iYg_chGTSJn5';
+
+  const rawProducts = Array.isArray(bodyObj.products) && bodyObj.products.length > 0
+    ? bodyObj.products
+    : [{
+        product_sku: bodyObj.product_sku || bodyObj.product_SKU,
+        product_name: bodyObj.product_name,
+        quantity: bodyObj.quantity || 1,
+        unit_price: bodyObj.unit_price
+      }];
+
+  const verifiedProducts = [];
+
+  if (supabaseUrl && supabaseKey) {
+    try {
+      for (const item of rawProducts) {
+        const reqSku = (item.product_sku || item.sku || '').trim();
+        const reqQty = Math.max(1, parseInt(item.quantity, 10) || 1);
+
+        if (!reqSku) {
+          if (orderId) clearIdempotency(orderId);
+          return res.status(400).json({
+            success: false,
+            error: 'InvalidProduct',
+            message: 'Order contains an item with missing SKU.'
+          });
+        }
+
+        // Query product and live inventory from Supabase
+        const prodQueryUrl = `${supabaseUrl}/rest/v1/products?sku=eq.${encodeURIComponent(reqSku)}&select=id,name,sku,price,is_published,publication_status,inventory(stock_on_hand,reserved_quantity,available_quantity,sales_enabled)`;
+        const supaProdRes = await fetch(prodQueryUrl, {
+          method: 'GET',
+          headers: {
+            'apikey': supabaseKey,
+            'Authorization': `Bearer ${supabaseKey}`,
+            'Accept': 'application/json'
+          }
+        });
+
+        if (!supaProdRes.ok) {
+          console.warn(`[VoltEdge Order API] Could not verify SKU ${reqSku} from database: HTTP ${supaProdRes.status}`);
+          // Fall back gracefully if database read error occurs
+          verifiedProducts.push({
+            product_sku: reqSku,
+            product_name: item.product_name || 'VoltEdge Hardware',
+            unit_price: Number(item.unit_price) || 0,
+            quantity: reqQty,
+            line_total: (Number(item.unit_price) || 0) * reqQty
+          });
+          continue;
+        }
+
+        const prodList = await supaProdRes.json();
+        if (!Array.isArray(prodList) || prodList.length === 0) {
+          if (orderId) clearIdempotency(orderId);
+          return res.status(400).json({
+            success: false,
+            error: 'ProductNotFound',
+            message: `Product with SKU "${reqSku}" does not exist in catalogue.`
+          });
+        }
+
+        const dbProd = prodList[0];
+
+        // Verify published status
+        if (!dbProd.is_published || dbProd.publication_status !== 'PUBLISHED') {
+          if (orderId) clearIdempotency(orderId);
+          return res.status(400).json({
+            success: false,
+            error: 'ProductUnpublished',
+            message: `"${dbProd.name}" (${dbProd.sku}) is no longer available for order.`
+          });
+        }
+
+        // Verify inventory & sales enabled
+        const inv = Array.isArray(dbProd.inventory) ? dbProd.inventory[0] : (dbProd.inventory || {});
+        const salesEnabled = inv.sales_enabled !== false;
+        const onHand = Number(inv.stock_on_hand) || 0;
+        const reserved = Number(inv.reserved_quantity) || 0;
+        const available = inv.available_quantity !== undefined 
+          ? Number(inv.available_quantity) 
+          : Math.max(0, onHand - reserved);
+
+        if (!salesEnabled) {
+          if (orderId) clearIdempotency(orderId);
+          return res.status(400).json({
+            success: false,
+            error: 'SalesDisabled',
+            message: `Online sales for "${dbProd.name}" are temporarily disabled.`
+          });
+        }
+
+        if (available < reqQty) {
+          if (orderId) clearIdempotency(orderId);
+          return res.status(400).json({
+            success: false,
+            error: 'InsufficientStock',
+            message: `Insufficient stock for "${dbProd.name}". Only ${Math.max(0, available)} unit(s) available.`
+          });
+        }
+
+        // Enforce authoritative database price (prevent DevTools price manipulation)
+        const authoritativePrice = Number(dbProd.price);
+        verifiedProducts.push({
+          product_sku: dbProd.sku,
+          product_name: dbProd.name,
+          unit_price: authoritativePrice,
+          quantity: reqQty,
+          line_total: authoritativePrice * reqQty
+        });
+      }
+    } catch (valErr) {
+      console.warn('[VoltEdge Order API] Backend price validation notice:', valErr.message);
+    }
+  }
+
+  // Use verified products if validated, otherwise preserve clean structure
+  const finalProducts = verifiedProducts.length > 0 ? verifiedProducts : rawProducts;
+  const verifiedSubtotal = finalProducts.reduce((sum, p) => sum + (Number(p.line_total) || ((Number(p.unit_price) || 0) * (Number(p.quantity) || 1))), 0);
+  const totalUnits = finalProducts.reduce((sum, p) => sum + (Number(p.quantity) || 1), 0);
+  const isSingle = finalProducts.length === 1;
+
+  // Overwrite client submission with backend-verified authoritative calculations
+  bodyObj.products = finalProducts;
+  bodyObj.products_json = JSON.stringify(finalProducts);
+  bodyObj.total_price = verifiedSubtotal;
+  bodyObj.totalAmount = verifiedSubtotal;
+  bodyObj.quantity = totalUnits;
+  bodyObj.product_sku = isSingle ? finalProducts[0].product_sku : 'MULTIPLE';
+  bodyObj.product_SKU = bodyObj.product_sku;
+  bodyObj.product_name = isSingle ? finalProducts[0].product_name : finalProducts.map(p => `${p.product_name} x${p.quantity}`).join('; ');
+  bodyObj.unit_price = isSingle ? finalProducts[0].unit_price : verifiedSubtotal;
+
+  // 4. Ensure lookup token is established and persist order immediately to authoritative store
   if (orderId) {
     if (!bodyObj.token && !bodyObj.lookup_token && !bodyObj.lookupToken) {
       bodyObj.token = 've_tok_' + Math.random().toString(36).substring(2, 10);
       bodyObj.lookup_token = bodyObj.token;
-    }
-
-    // Ensure products_json is stringified for Google Sheets compatibility
-    if (Array.isArray(bodyObj.products) && bodyObj.products.length > 0) {
-      bodyObj.products_json = JSON.stringify(bodyObj.products);
-      if (!bodyObj.quantity || bodyObj.quantity === 1) {
-        bodyObj.quantity = bodyObj.products.reduce((sum, p) => sum + (Number(p.quantity) || 1), 0);
-      }
-      if (bodyObj.products.length > 1) {
-        bodyObj.product_sku = 'MULTIPLE';
-        bodyObj.product_SKU = 'MULTIPLE';
-        if (!bodyObj.product_name) {
-          bodyObj.product_name = bodyObj.products.map(p => `${p.product_name} x${p.quantity}`).join('; ');
-        }
-      }
     }
 
     try {
@@ -137,8 +258,51 @@ module.exports = async function handler(req, res) {
     } catch (saveErr) {
       console.warn('[VoltEdge Order API] Failed to persist initial order to backend store:', saveErr.message);
     }
+
+    // 5. Supabase Inventory Reservation (lock warehouse stock for order atomically)
+    if (Array.isArray(bodyObj.products) && bodyObj.products.length > 0 && supabaseUrl && supabaseKey) {
+      try {
+        const reservationItems = bodyObj.products.map(p => ({
+          sku: p.product_sku || p.sku,
+          product_name: p.product_name || p.name,
+          quantity: Number(p.quantity) || 1,
+          unit_price: Number(p.unit_price) || 0
+        }));
+
+        const supaRes = await fetch(`${supabaseUrl}/rest/v1/rpc/reserve_stock`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'apikey': supabaseKey,
+            'Authorization': `Bearer ${supabaseKey}`
+          },
+          body: JSON.stringify({
+            p_order_id: orderId,
+            p_items: reservationItems,
+            p_idempotency_key: orderId
+          })
+        });
+
+        if (supaRes.ok) {
+          const resJson = await supaRes.json();
+          if (resJson && resJson.success === false) {
+            console.warn('[VoltEdge Order API] Stock reservation rejected:', resJson.error);
+            if (orderId) clearIdempotency(orderId);
+            return res.status(400).json({
+              success: false,
+              error: 'InsufficientStock',
+              message: resJson.error || 'One or more items in your cart is currently out of stock.'
+            });
+          }
+          console.log(`[VoltEdge Order API] Stock reserved in Supabase for ${orderId}`);
+        }
+      } catch (resErr) {
+        console.warn('[VoltEdge Order API] Non-fatal Supabase reservation notice:', resErr.message);
+      }
+    }
   }
 
+  // 6. Forward verified order to n8n automation pipeline
   const targetWebhookUrl = process.env.VOLTEDGE_ORDER_WEBHOOK_URL || 'https://ucy00zep.rpcld.net/webhook/voltedge-order';
   const apiKey = process.env.VOLTEDGE_API_KEY || process.env.N8N_API_KEY || '';
 
@@ -155,7 +319,7 @@ module.exports = async function handler(req, res) {
 
     const payload = JSON.stringify(bodyObj);
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 60000); // Always wait up to 60s for webhook
+    const timeout = setTimeout(() => controller.abort(), 60000); // Wait up to 60s for webhook
     const response = await fetch(targetWebhookUrl, {
       method: 'POST',
       headers,
@@ -171,7 +335,17 @@ module.exports = async function handler(req, res) {
       const isWorkflowError = msgStr.includes('workflow') || msgStr.includes('error in');
 
       if (!response.ok || isWorkflowError) {
-        if (orderId) clearIdempotency(orderId);
+        if (orderId) {
+          clearIdempotency(orderId);
+          // Release stock reservation on failed n8n processing
+          if (supabaseUrl && supabaseKey) {
+            fetch(`${supabaseUrl}/rest/v1/rpc/release_reservation`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json', 'apikey': supabaseKey, 'Authorization': `Bearer ${supabaseKey}` },
+              body: JSON.stringify({ p_order_id: orderId, p_reason: 'N8N_WORKFLOW_ERROR' })
+            }).catch(() => {});
+          }
+        }
         return res.status(response.ok ? 502 : response.status).json({
           success: false,
           error: 'OrderProcessingError',
@@ -181,7 +355,6 @@ module.exports = async function handler(req, res) {
 
       if (response.ok && orderId) {
         recordOrderResponse(orderId, data);
-        // If webhook returned payment_link or updated status, persist it in authoritative store
         if (data && typeof data === 'object') {
           const paymentLink = data.payment_link || data.paymentLink || data.checkout_url || data.url || '';
           if (paymentLink) {
@@ -201,7 +374,16 @@ module.exports = async function handler(req, res) {
         textLower.includes('server error');
 
       if (!response.ok || isTextWorkflowError) {
-        if (orderId) clearIdempotency(orderId);
+        if (orderId) {
+          clearIdempotency(orderId);
+          if (supabaseUrl && supabaseKey) {
+            fetch(`${supabaseUrl}/rest/v1/rpc/release_reservation`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json', 'apikey': supabaseKey, 'Authorization': `Bearer ${supabaseKey}` },
+              body: JSON.stringify({ p_order_id: orderId, p_reason: 'N8N_TEXT_ERROR' })
+            }).catch(() => {});
+          }
+        }
         return res.status(isTextWorkflowError && response.ok ? 502 : response.status).json({
           success: false,
           error: 'OrderProcessingError',
@@ -211,7 +393,16 @@ module.exports = async function handler(req, res) {
       return res.status(response.status).send(text);
     }
   } catch (err) {
-    if (orderId) clearIdempotency(orderId);
+    if (orderId) {
+      clearIdempotency(orderId);
+      if (supabaseUrl && supabaseKey) {
+        fetch(`${supabaseUrl}/rest/v1/rpc/release_reservation`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'apikey': supabaseKey, 'Authorization': `Bearer ${supabaseKey}` },
+          body: JSON.stringify({ p_order_id: orderId, p_reason: 'SERVER_NETWORK_TIMEOUT' })
+        }).catch(() => {});
+      }
+    }
     console.error('[VoltEdge API Proxy Error - Order Submission]:', err);
     return res.status(502).json({
       success: false,

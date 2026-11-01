@@ -88,6 +88,7 @@ function initApp() {
   // Initializations with safe try/catch guards so one failure never blocks the others
   try { initAnnouncementCountdown(); } catch (e) { console.error('[VoltEdge] initAnnouncementCountdown error:', e); }
   try { initCatalogSearch(); } catch (e) { console.error('[VoltEdge] initCatalogSearch error:', e); }
+  try { renderFilterTabs(); } catch (e) { console.error('[VoltEdge] renderFilterTabs error:', e); }
   try { renderProducts('all'); } catch (e) { console.error('[VoltEdge] renderProducts error:', e); }
   try { renderAccessories(); } catch (e) { console.error('[VoltEdge] renderAccessories error:', e); }
   try { renderReviews(); } catch (e) { console.error('[VoltEdge] renderReviews error:', e); }
@@ -192,6 +193,21 @@ function matchesProduct(product, query) {
 }
 
 // 3. Render Product Catalog with Category Filtering & Real-Time Search
+// Format Warranty Statement for Card Badges and Details
+function formatWarrantyBadge(warranty) {
+  if (!warranty || typeof warranty !== 'string') return '1-Yr Warranty';
+  const trimmed = sanitizeInput(warranty, 80).trim();
+  if (!trimmed) return '1-Yr Warranty';
+
+  let w = trimmed.replace(/product\s+warranty/gi, 'Warranty').trim();
+  w = w.replace(/(\d+)\s*(?:-|–|\s)?(?:year|years)\b/gi, (m, n) => n + '-Yr');
+  w = w.replace(/(\d+)\s*(?:-|–|\s)?(?:months|month)\b/gi, (m, n) => n + '-Month');
+  if (!w.toLowerCase().includes('warranty')) {
+    w += ' Warranty';
+  }
+  return w;
+}
+
 function renderProducts(filter = currentCatalogCategory, searchQuery = currentCatalogSearchQuery) {
   currentCatalogCategory = filter;
   currentCatalogSearchQuery = searchQuery;
@@ -242,15 +258,21 @@ function renderProducts(filter = currentCatalogCategory, searchQuery = currentCa
   if (emptyState) emptyState.style.display = 'none';
 
   grid.innerHTML = products.map(product => {
+    const isOutOfStock = product.inStock === false || (product.availableQuantity !== undefined && product.availableQuantity <= 0);
+
     return `
-      <article class="product-card" data-id="${product.id}">
+      <article class="product-card ${isOutOfStock ? 'is-out-of-stock' : ''}" data-id="${product.id}" onclick="handleCardClick(event, '${product.id}')" role="button" tabindex="0" aria-label="View full details of ${product.name}">
         <div class="product-card-top">
           <img src="${product.image}" alt="${product.name}" class="product-card-img" loading="lazy">
           <div class="card-badges">
-            <span class="card-badge ${product.badgeType}">${product.badge}</span>
-            <span class="warranty-pill"><i class="ph ph-shield-check"></i> 1-Yr Warranty</span>
+            ${isOutOfStock ? `
+              <span class="card-badge badge-out-of-stock">Out of Stock</span>
+            ` : `
+              ${product.badge ? `<span class="card-badge ${product.badgeType || 'accent'}">${product.badge}</span>` : ''}
+              <span class="warranty-pill"><i class="ph ph-shield-check"></i> ${formatWarrantyBadge(product.warranty)}</span>
+            `}
           </div>
-          <button class="quick-view-btn" onclick="openQuickView('${product.id}')" aria-label="Quick view of ${product.name}">
+          <button class="quick-view-btn" onclick="event.stopPropagation(); openQuickView('${product.id}')" aria-label="Quick view of ${product.name}">
             <i class="ph ph-eye"></i> Quick View
           </button>
         </div>
@@ -280,17 +302,77 @@ function renderProducts(filter = currentCatalogCategory, searchQuery = currentCa
           <div class="product-card-footer">
             <div class="price-wrap">
               <span class="price-label">Price in Naira</span>
-              <span class="price-amount">${formatNaira(product.price)}</span>
+              <div class="price-container">
+                <span class="price-amount">${formatNaira(product.price)}</span>
+                ${(product.compareAtPrice && product.compareAtPrice > product.price) ? `
+                  <span class="price-compare">${formatNaira(product.compareAtPrice)}</span>
+                  <span class="price-discount-pill">-${Math.round((1 - (product.price / product.compareAtPrice)) * 100)}%</span>
+                ` : ''}
+              </div>
             </div>
-            <button class="btn btn-volt btn-sm" onclick="VoltEdgeCart.addItem('${product.id}', 1, true)" aria-label="Add ${product.name} to Cart">
-              <i class="ph-bold ph-shopping-bag"></i> Add to Cart
-            </button>
+            ${isOutOfStock ? `
+              <button class="btn btn-disabled btn-sm btn-out-of-stock" disabled aria-disabled="true" onclick="event.stopPropagation();" aria-label="${product.name} is Out of Stock">
+                <i class="ph-bold ph-prohibit"></i> Out of Stock
+              </button>
+            ` : `
+              <button class="btn btn-volt btn-sm" onclick="event.stopPropagation(); VoltEdgeCart.addItem('${product.id}', 1, true)" aria-label="Add ${product.name} to Cart">
+                <i class="ph-bold ph-shopping-bag"></i> Add to Cart
+              </button>
+            `}
           </div>
         </div>
       </article>
     `;
   }).join('');
 }
+
+
+// Dynamic Category Filter Tabs Synchronization
+function renderFilterTabs() {
+  const container = document.querySelector('.filter-tabs');
+  if (!container) return;
+
+  const catalog = getProductCatalogData();
+  const totalCount = catalog.length;
+
+  let categories = [];
+  if (Array.isArray(window.CATEGORIES_DATA) && window.CATEGORIES_DATA.length) {
+    categories = window.CATEGORIES_DATA
+      .filter(c => c.is_active !== false && c.slug !== 'accessories')
+      .map(c => ({ slug: c.slug, name: c.name }));
+  } else {
+    categories = [
+      { slug: 'powerbanks', name: 'Laptop Power Banks' },
+      { slug: 'ups', name: 'Wi-Fi UPS Backup' },
+      { slug: 'ergonomics', name: 'Ergonomics & Gear' },
+      { slug: 'bundles', name: 'WFH Bundles' }
+    ];
+  }
+
+  // Include any other category present in catalog products
+  catalog.forEach(p => {
+    if (p.category && p.category !== 'all' && p.category !== 'accessories') {
+      if (!categories.some(c => c.slug === p.category)) {
+        categories.push({
+          slug: p.category,
+          name: p.categoryLabel || p.category
+        });
+      }
+    }
+  });
+
+  const activeCat = currentCatalogCategory || 'all';
+
+  let html = `<button class="tab-btn ${activeCat === 'all' ? 'active' : ''}" onclick="filterCategory('all', this)" role="tab">All Products (${totalCount})</button>`;
+
+  categories.forEach(cat => {
+    const isActive = activeCat === cat.slug;
+    html += `\n<button class="tab-btn ${isActive ? 'active' : ''}" onclick="filterCategory('${cat.slug}', this)" role="tab">${cat.name}</button>`;
+  });
+
+  container.innerHTML = html;
+}
+window.renderFilterTabs = renderFilterTabs;
 
 // Handle Category Tab Switches
 window.filterCategory = function(cat, buttonEl) {
@@ -1494,43 +1576,110 @@ window.openQuickView = function(productId) {
   const modalBody = document.getElementById('quick-view-body');
   if (!modal || !modalBody) return;
 
-  const specsRows = Object.entries(product.technicalSpecs).map(([key, val]) => `
+  const specs = (typeof product.technicalSpecs === 'object' && product.technicalSpecs !== null) ? product.technicalSpecs : {};
+  const hasSpecs = Object.keys(specs).length > 0;
+  const specsRows = Object.entries(specs).map(([key, val]) => `
     <tr>
       <td>${key}</td>
       <td>${val}</td>
     </tr>
   `).join('');
 
+  const bullets = Array.isArray(product.bullets) ? product.bullets : [];
+  const bulletsHtml = bullets.length ? `
+    <h4 style="font-size: 0.88rem; color: var(--text-main); margin: 0.85rem 0 0.45rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700;">Key Features</h4>
+    <ul class="product-bullets" style="margin-bottom: 1rem;">
+      ${bullets.map(b => `<li class="product-bullet"><i class="ph-bold ph-check bullet-icon"></i><span>${b}</span></li>`).join('')}
+    </ul>
+  ` : '';
+
+  // Multi-image gallery preparation
+  const images = (Array.isArray(product.images) && product.images.length) 
+    ? product.images 
+    : (product.image ? [product.image] : []);
+  const activeImage = images[0] || product.image || 'assets/images/pb-black.jpg';
+
+  // Store for enlarged lightbox viewer
+  window.currentQuickViewProduct = product;
+  window.currentQuickViewImages = images;
+  window.currentQuickViewImageIndex = 0;
+
+  const galleryHtml = `
+    <div class="modal-gallery-wrap">
+      ${images.length > 1 ? `
+        <div class="modal-thumbnails-strip" role="group" aria-label="Product thumbnails">
+          ${images.map((img, idx) => `
+            <button type="button" 
+              class="gallery-thumb-btn ${idx === 0 ? 'active' : ''}" 
+              onclick="window.switchQuickViewImage(this, '${img}', ${idx})"
+              onmouseenter="window.switchQuickViewImage(this, '${img}', ${idx})"
+              aria-label="View product image ${idx + 1}">
+              <img src="${img}" alt="${product.name} view ${idx + 1}" loading="lazy">
+            </button>
+          `).join('')}
+        </div>
+      ` : ''}
+      <div class="modal-img-wrap" onclick="window.openImageLightbox()" title="Click to view enlarged image" tabindex="0" role="button" aria-label="Click to enlarge image">
+        <img id="quickViewMainImg" src="${activeImage}" alt="${product.name}">
+        <span class="img-zoom-hint">
+          <i class="ph-bold ph-magnifying-glass-plus"></i>
+          <span>Click to enlarge</span>
+        </span>
+      </div>
+    </div>
+  `;
+
   modalBody.innerHTML = `
     <div class="quick-view-modal-grid">
-      <div class="modal-img-wrap">
-        <img src="${product.image}" alt="${product.name}">
-      </div>
+      ${galleryHtml}
       <div class="modal-body-content">
-        <span class="product-sku">${product.sku}</span>
+        <div style="display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; margin-bottom: 0.35rem; flex-wrap: wrap;">
+          <span class="product-sku">${product.sku}</span>
+          <span class="warranty-pill" style="font-size: 0.72rem; padding: 0.2rem 0.55rem;"><i class="ph ph-shield-check"></i> ${formatWarrantyBadge(product.warranty)}</span>
+        </div>
         <h2 style="font-size: 1.5rem; color: var(--text-main); margin: 0.25rem 0 0.5rem; font-weight: 800;">${product.name}</h2>
-        <div style="font-size: 1.5rem; font-weight: 800; color: var(--primary); margin-bottom: 0.85rem;">
-          ${formatNaira(product.price)}
+        <div style="margin-bottom: 0.85rem;">
+          <div class="price-container" style="align-items: baseline; gap: 0.65rem;">
+            <span style="font-size: 1.6rem; font-weight: 800; color: var(--primary);">${formatNaira(product.price)}</span>
+            ${(product.compareAtPrice && product.compareAtPrice > product.price) ? `
+              <span class="price-compare" style="font-size: 1.05rem;">${formatNaira(product.compareAtPrice)}</span>
+              <span class="price-discount-pill" style="font-size: 0.75rem; padding: 0.15rem 0.45rem;">
+                Save ${formatNaira(product.compareAtPrice - product.price)} (${Math.round((1 - (product.price / product.compareAtPrice)) * 100)}% OFF)
+              </span>
+            ` : ''}
+          </div>
         </div>
         
         <p style="color: var(--text-muted); font-size: 0.88rem; margin-bottom: 1.15rem; line-height: 1.55;">
           ${product.tagline}
         </p>
 
-        <h4 style="font-size: 0.88rem; color: var(--text-main); margin-bottom: 0.45rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700;">Technical Specifications</h4>
-        <table class="modal-specs-table">
-          <tbody>
-            ${specsRows}
-          </tbody>
-        </table>
+        ${bulletsHtml}
+        ${hasSpecs ? `
+          <h4 style="font-size: 0.88rem; color: var(--text-main); margin-bottom: 0.45rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700;">Technical Specifications</h4>
+          <table class="modal-specs-table">
+            <tbody>
+              ${specsRows}
+            </tbody>
+          </table>
+        ` : ''}
 
         <div style="display: flex; gap: 0.75rem; margin-top: auto; padding-top: 1rem; flex-wrap: wrap;">
-          <button class="btn btn-volt" style="flex: 1; min-width: 140px;" onclick="VoltEdgeCart.addItem('${product.id}', 1, true)">
-            <i class="ph-bold ph-shopping-bag"></i> Add to Cart
-          </button>
-          <button class="btn btn-primary" style="flex: 1; min-width: 140px;" onclick="modalSelectOrder('${product.id}')">
-            Order Directly
-          </button>
+          ${(product.inStock === false || (product.availableQuantity !== undefined && product.availableQuantity <= 0)) ? `
+            <button class="btn btn-out-of-stock" disabled style="flex: 1; min-width: 140px; cursor: not-allowed;">
+              <i class="ph-bold ph-prohibit"></i> Out of Stock
+            </button>
+            <a href="https://wa.me/2347047922403?text=${encodeURIComponent('Hello VoltEdge, I would like to be notified when ' + product.name + ' (' + product.sku + ') is back in stock.')}" target="_blank" class="btn btn-volt" style="flex: 1; min-width: 140px;">
+              <i class="ph-bold ph-bell"></i> Notify When Restocked
+            </a>
+          ` : `
+            <button class="btn btn-volt" style="flex: 1; min-width: 140px;" onclick="VoltEdgeCart.addItem('${product.id}', 1, true)">
+              <i class="ph-bold ph-shopping-bag"></i> Add to Cart
+            </button>
+            <button class="btn btn-primary" style="flex: 1; min-width: 140px;" onclick="modalSelectOrder('${product.id}')">
+              Order Directly
+            </button>
+          `}
           <a href="https://wa.me/2347047922403?text=${encodeURIComponent('Hello VoltEdge, I have questions regarding the ' + product.name + ' (' + product.sku + ').')}" target="_blank" class="btn btn-ghost">
             Enquire on WhatsApp
           </a>
@@ -1541,6 +1690,183 @@ window.openQuickView = function(productId) {
 
   modal.classList.add('active');
 };
+
+window.switchQuickViewImage = function(btnEl, imgUrl, idx) {
+  const mainImg = document.getElementById('quickViewMainImg');
+  if (mainImg && imgUrl) {
+    if (mainImg.getAttribute('src') !== imgUrl) {
+      mainImg.style.opacity = '0.35';
+      mainImg.src = imgUrl;
+      setTimeout(() => {
+        mainImg.style.opacity = '1';
+      }, 70);
+    }
+  }
+  if (typeof idx === 'number') {
+    window.currentQuickViewImageIndex = idx;
+  }
+  if (btnEl) {
+    const parent = btnEl.closest('.modal-thumbnails-strip');
+    if (parent) {
+      parent.querySelectorAll('.gallery-thumb-btn').forEach(btn => btn.classList.remove('active'));
+    }
+    btnEl.classList.add('active');
+  }
+};
+
+// ==========================================
+// ENLARGED IMAGE LIGHTBOX VIEWER
+// ==========================================
+
+window.openImageLightbox = function(initialIndex) {
+  let images = window.currentQuickViewImages || [];
+  if (!images.length) {
+    const mainImg = document.getElementById('quickViewMainImg');
+    if (mainImg && mainImg.src) {
+      images = [mainImg.src];
+      window.currentQuickViewImages = images;
+    }
+  }
+  if (!images.length) return;
+
+  const idx = (typeof initialIndex === 'number' && initialIndex >= 0 && initialIndex < images.length)
+    ? initialIndex
+    : (window.currentQuickViewImageIndex || 0);
+
+  window.currentLightboxIndex = idx;
+
+  const lightbox = document.getElementById('image-lightbox-modal');
+  if (!lightbox) return;
+
+  updateLightboxView();
+  lightbox.classList.add('active');
+  document.body.style.overflow = 'hidden';
+};
+
+window.closeImageLightbox = function(e) {
+  if (e && e.target && e.target.closest('.lightbox-content-inner') && !e.target.closest('.lightbox-close-btn')) {
+    return;
+  }
+  const lightbox = document.getElementById('image-lightbox-modal');
+  if (lightbox) {
+    lightbox.classList.remove('active');
+    document.body.style.overflow = '';
+  }
+};
+
+window.stepLightboxImage = function(direction) {
+  const images = window.currentQuickViewImages || [];
+  if (!images.length) return;
+
+  let newIndex = (window.currentLightboxIndex || 0) + direction;
+  if (newIndex < 0) newIndex = images.length - 1;
+  if (newIndex >= images.length) newIndex = 0;
+
+  window.currentLightboxIndex = newIndex;
+  window.currentQuickViewImageIndex = newIndex;
+  updateLightboxView();
+
+  // Also sync quick-view modal if open
+  const thumbs = document.querySelectorAll('.gallery-thumb-btn');
+  if (thumbs[newIndex]) {
+    thumbs.forEach(b => b.classList.remove('active'));
+    thumbs[newIndex].classList.add('active');
+  }
+  const mainImg = document.getElementById('quickViewMainImg');
+  if (mainImg && images[newIndex]) {
+    mainImg.src = images[newIndex];
+  }
+};
+
+window.setLightboxImage = function(index) {
+  const images = window.currentQuickViewImages || [];
+  if (index >= 0 && index < images.length) {
+    window.currentLightboxIndex = index;
+    window.currentQuickViewImageIndex = index;
+    updateLightboxView();
+
+    const thumbs = document.querySelectorAll('.gallery-thumb-btn');
+    if (thumbs[index]) {
+      thumbs.forEach(b => b.classList.remove('active'));
+      thumbs[index].classList.add('active');
+    }
+    const mainImg = document.getElementById('quickViewMainImg');
+    if (mainImg && images[index]) {
+      mainImg.src = images[index];
+    }
+  }
+};
+
+function updateLightboxView() {
+  const images = window.currentQuickViewImages || [];
+  const idx = window.currentLightboxIndex || 0;
+  const currentImgUrl = images[idx] || '';
+
+  const activeImgEl = document.getElementById('lightboxActiveImg');
+  const counterEl = document.getElementById('lightboxCounter');
+  const prevBtn = document.getElementById('lightboxPrevBtn');
+  const nextBtn = document.getElementById('lightboxNextBtn');
+  const thumbsBar = document.getElementById('lightboxThumbnailsBar');
+
+  if (activeImgEl) {
+    activeImgEl.style.opacity = '0.35';
+    activeImgEl.src = currentImgUrl;
+    activeImgEl.onload = () => { activeImgEl.style.opacity = '1'; };
+    setTimeout(() => { activeImgEl.style.opacity = '1'; }, 90);
+  }
+
+  if (counterEl) {
+    if (images.length > 1) {
+      counterEl.textContent = `${idx + 1} / ${images.length}`;
+      counterEl.style.display = 'block';
+    } else {
+      counterEl.style.display = 'none';
+    }
+  }
+
+  if (prevBtn && nextBtn) {
+    if (images.length > 1) {
+      prevBtn.style.display = 'flex';
+      nextBtn.style.display = 'flex';
+    } else {
+      prevBtn.style.display = 'none';
+      nextBtn.style.display = 'none';
+    }
+  }
+
+  if (thumbsBar) {
+    if (images.length > 1) {
+      thumbsBar.style.display = 'flex';
+      thumbsBar.innerHTML = images.map((img, i) => `
+        <button type="button" 
+          class="lightbox-thumb-btn ${i === idx ? 'active' : ''}" 
+          onclick="window.setLightboxImage(${i})" 
+          aria-label="View photo ${i + 1}">
+          <img src="${img}" alt="Thumbnail ${i + 1}">
+        </button>
+      `).join('');
+    } else {
+      thumbsBar.style.display = 'none';
+      thumbsBar.innerHTML = '';
+    }
+  }
+}
+
+// Global Keyboard Navigation for Enlarged Lightbox
+document.addEventListener('keydown', (e) => {
+  const lightbox = document.getElementById('image-lightbox-modal');
+  if (!lightbox || !lightbox.classList.contains('active')) return;
+
+  if (e.key === 'Escape') {
+    window.closeImageLightbox();
+  } else if (e.key === 'ArrowLeft') {
+    window.stepLightboxImage(-1);
+  } else if (e.key === 'ArrowRight') {
+    window.stepLightboxImage(1);
+  }
+});
+
+
 
 window.modalSelectOrder = function(productId) {
   const modal = document.getElementById('quick-view-modal');
@@ -1624,3 +1950,32 @@ if (typeof document !== 'undefined') {
     initApp();
   }
 }
+
+
+// Global handler for clicking any product card to view full details
+function handleCardClick(event, productId) {
+  if (event.target.closest('button') || event.target.closest('a') || event.target.closest('.btn') || event.target.closest('.card-badge')) {
+    return;
+  }
+  openQuickView(productId);
+}
+window.handleCardClick = handleCardClick;
+
+// Expose rendering functions for live Supabase synchronization
+window.renderProducts = renderProducts;
+window.renderAccessories = renderAccessories;
+window.currentCatalogCategory = currentCatalogCategory;
+window.currentCatalogSearchQuery = currentCatalogSearchQuery;
+
+// Re-render when live Supabase catalogue is fetched
+window.addEventListener('voltedge:catalog-synced', () => {
+  try {
+    if (typeof window.renderFilterTabs === 'function') {
+      window.renderFilterTabs();
+    }
+    renderProducts(currentCatalogCategory, currentCatalogSearchQuery);
+    renderAccessories();
+  } catch (err) {
+    console.warn('[VoltEdge] Error re-rendering on catalog sync:', err);
+  }
+});
