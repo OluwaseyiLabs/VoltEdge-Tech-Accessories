@@ -42,8 +42,8 @@ module.exports = async function handler(req, res) {
     });
   }
 
-  const supabaseUrl = (process.env.SUPABASE_URL || '').replace(/\/$/, '');
-  const supabaseAnonKey = process.env.SUPABASE_ANON_KEY || '';
+  const supabaseUrl = (process.env.SUPABASE_URL || 'https://ohqlojvwczzealcnmbcs.supabase.co').replace(/\/$/, '');
+  const supabaseAnonKey = process.env.SUPABASE_ANON_KEY || 'sb_publishable_IqpW1FGzJML7je2Oy91iYg_chGTSJn5';
 
   if (!supabaseUrl || !supabaseAnonKey) {
     return res.status(500).json({

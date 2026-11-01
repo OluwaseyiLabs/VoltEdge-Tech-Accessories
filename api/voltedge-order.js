@@ -108,8 +108,8 @@ module.exports = async function handler(req, res) {
   }
 
   // 3. TASK 6: Backend Product, Price & Stock Validation against Supabase
-  const supabaseUrl = process.env.SUPABASE_URL;
-  const supabaseKey = process.env.SUPABASE_ANON_KEY;
+  const supabaseUrl = process.env.SUPABASE_URL || 'https://ohqlojvwczzealcnmbcs.supabase.co';
+  const supabaseKey = process.env.SUPABASE_ANON_KEY || 'sb_publishable_IqpW1FGzJML7je2Oy91iYg_chGTSJn5';
 
   const rawProducts = Array.isArray(bodyObj.products) && bodyObj.products.length > 0
     ? bodyObj.products

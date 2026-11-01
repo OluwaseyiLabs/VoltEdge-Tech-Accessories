@@ -30,8 +30,8 @@ module.exports = async function handler(req, res) {
     return res.status(400).json({ success: false, error: 'Missing order_id' });
   }
 
-  const supabaseUrl = process.env.SUPABASE_URL;
-  const supabaseKey = process.env.SUPABASE_ANON_KEY;
+  const supabaseUrl = process.env.SUPABASE_URL || 'https://ohqlojvwczzealcnmbcs.supabase.co';
+  const supabaseKey = process.env.SUPABASE_ANON_KEY || 'sb_publishable_IqpW1FGzJML7je2Oy91iYg_chGTSJn5';
 
   if (!supabaseUrl || !supabaseKey) {
     console.error('[VoltEdge Payment Webhook] SUPABASE_URL or SUPABASE_ANON_KEY is not configured in .env');
