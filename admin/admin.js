@@ -85,15 +85,20 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 async function checkInitialSetupNeeded() {
   try {
-    const { count, error } = await supabaseClient
-      .from('admin_profiles')
-      .select('*', { count: 'exact', head: true });
+    const { data: needed, error } = await supabaseClient.rpc('is_setup_needed');
 
-    if (!error && (count === 0 || count === null)) {
+    const toggleWrap = document.getElementById('setupToggleWrap');
+    if (!error && needed === false) {
+      // Owner already exists! Force standard Sign In mode and hide setup toggle
+      setSetupMode(false);
+      if (toggleWrap) toggleWrap.style.display = 'none';
+    } else if (needed === true) {
+      // No owner yet, prompt to initialize
       setSetupMode(true);
+      if (toggleWrap) toggleWrap.style.display = 'block';
     }
   } catch (e) {
-    console.warn('Error checking admin profiles count:', e);
+    console.warn('Error checking setup status:', e);
   }
 }
 
