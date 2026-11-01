@@ -59,6 +59,8 @@ PORT = int(os.getenv('PORT', 8000))
 ORDER_WEBHOOK = os.getenv('VOLTEDGE_ORDER_WEBHOOK_URL', 'https://ucy00zep.rpcld.net/webhook/voltedge-order')
 ORDER_DETAILS_WEBHOOK = os.getenv('VOLTEDGE_ORDER_DETAILS_WEBHOOK_URL', 'https://ucy00zep.rpcld.net/webhook/voltedge-order-details')
 FEEDBACK_WEBHOOK = os.getenv('VOLTEDGE_FEEDBACK_WEBHOOK_URL', '')
+SUPABASE_URL = os.getenv('SUPABASE_URL', 'https://ohqlojvwczzealcnmbcs.supabase.co').rstrip('/')
+SUPABASE_ANON_KEY = os.getenv('SUPABASE_ANON_KEY', 'sb_publishable_IqpW1FGzJML7je2Oy91iYg_chGTSJn5')
 
 RATE_LIMITS = {
     'order_submission': {
@@ -577,6 +579,149 @@ class DevHandler(http.server.SimpleHTTPRequestHandler):
                         self.end_headers()
                         self.wfile.write(entry['response'])
                         return
+
+                # Task 6: Backend Product, Price & Stock Validation against Supabase
+                raw_prods = body_data.get('products') if isinstance(body_data.get('products'), list) and len(body_data.get('products')) > 0 else [{
+                    'product_sku': body_data.get('product_sku') or body_data.get('product_SKU'),
+                    'product_name': body_data.get('product_name'),
+                    'quantity': body_data.get('quantity', 1),
+                    'unit_price': body_data.get('unit_price', 0)
+                }]
+
+                verified_prods = []
+                if SUPABASE_URL and SUPABASE_ANON_KEY:
+                    val_error = None
+                    for item in raw_prods:
+                        req_sku = (item.get('product_sku') or item.get('sku') or '').strip()
+                        try:
+                            req_qty = max(1, int(item.get('quantity', 1)))
+                        except:
+                            req_qty = 1
+
+                        if not req_sku:
+                            val_error = (400, 'InvalidProduct', 'Order contains an item with missing SKU.')
+                            break
+
+                        try:
+                            p_query_url = f"{SUPABASE_URL}/rest/v1/products?sku=eq.{urllib.parse.quote(req_sku)}&select=id,name,sku,price,is_published,publication_status,inventory(stock_on_hand,reserved_quantity,available_quantity,sales_enabled)"
+                            p_req = urllib.request.Request(p_query_url, headers={
+                                'apikey': SUPABASE_ANON_KEY,
+                                'Authorization': f'Bearer {SUPABASE_ANON_KEY}',
+                                'Accept': 'application/json'
+                            }, method='GET')
+                            with urllib.request.urlopen(p_req, timeout=10) as p_resp:
+                                p_list = json.loads(p_resp.read().decode('utf-8'))
+                                if not p_list:
+                                    val_error = (400, 'ProductNotFound', f'Product with SKU "{req_sku}" does not exist in catalogue.')
+                                    break
+                                db_prod = p_list[0]
+                                if not db_prod.get('is_published') or db_prod.get('publication_status') != 'PUBLISHED':
+                                    val_error = (400, 'ProductUnpublished', f'"{db_prod.get("name")}" ({db_prod.get("sku")}) is no longer available for order.')
+                                    break
+                                inv = db_prod.get('inventory') or {}
+                                if isinstance(inv, list) and inv:
+                                    inv = inv[0]
+                                sales_enabled = inv.get('sales_enabled') is not False
+                                on_hand = int(inv.get('stock_on_hand') or 0)
+                                reserved = int(inv.get('reserved_quantity') or 0)
+                                avail = int(inv.get('available_quantity')) if inv.get('available_quantity') is not None else max(0, on_hand - reserved)
+
+                                if not sales_enabled:
+                                    val_error = (400, 'SalesDisabled', f'Online sales for "{db_prod.get("name")}" are temporarily disabled.')
+                                    break
+                                if avail < req_qty:
+                                    val_error = (400, 'InsufficientStock', f'Insufficient stock for "{db_prod.get("name")}". Only {max(0, avail)} unit(s) available.')
+                                    break
+
+                                auth_price = float(db_prod.get('price') or 0)
+                                verified_prods.append({
+                                    'product_sku': db_prod.get('sku'),
+                                    'product_name': db_prod.get('name'),
+                                    'unit_price': auth_price,
+                                    'quantity': req_qty,
+                                    'line_total': auth_price * req_qty
+                                })
+                        except Exception as e:
+                            print(f"[VoltEdge DevServer] Warning validating SKU {req_sku}:", e)
+                            verified_prods.append({
+                                'product_sku': req_sku,
+                                'product_name': item.get('product_name') or 'VoltEdge Hardware',
+                                'unit_price': float(item.get('unit_price') or 0),
+                                'quantity': req_qty,
+                                'line_total': float(item.get('unit_price') or 0) * req_qty
+                            })
+
+                    if val_error:
+                        status_c, err_c, msg_c = val_error
+                        self.send_response(status_c)
+                        self.send_header('Content-Type', 'application/json')
+                        self.end_headers()
+                        self.wfile.write(json.dumps({
+                            'success': False,
+                            'error': err_c,
+                            'message': msg_c
+                        }).encode('utf-8'))
+                        return
+
+                final_prods = verified_prods if verified_prods else raw_prods
+                verified_subtotal = sum(p['line_total'] for p in final_prods)
+                total_units = sum(p['quantity'] for p in final_prods)
+                is_single = len(final_prods) == 1
+
+                body_data['products'] = final_prods
+                body_data['products_json'] = json.dumps(final_prods)
+                body_data['total_price'] = verified_subtotal
+                body_data['totalAmount'] = verified_subtotal
+                body_data['quantity'] = total_units
+                body_data['product_sku'] = final_prods[0]['product_sku'] if is_single else 'MULTIPLE'
+                body_data['product_SKU'] = body_data['product_sku']
+                body_data['product_name'] = final_prods[0]['product_name'] if is_single else '; '.join([f"{p['product_name']} x{p['quantity']}" for p in final_prods])
+                body_data['unit_price'] = final_prods[0]['unit_price'] if is_single else verified_subtotal
+                post_body = json.dumps(body_data).encode('utf-8')
+
+                if order_id:
+                    normalized_verified = normalize_order(body_data)
+                    if normalized_verified:
+                        order_store[order_id.lower()] = normalized_verified
+
+                # Atomically reserve stock in Supabase
+                if order_id and SUPABASE_URL and SUPABASE_ANON_KEY:
+                    try:
+                        res_items = [{
+                            'sku': p['product_sku'],
+                            'product_name': p['product_name'],
+                            'quantity': p['quantity'],
+                            'unit_price': p['unit_price']
+                        } for p in final_prods]
+                        res_url = f"{SUPABASE_URL}/rest/v1/rpc/reserve_stock"
+                        res_req = urllib.request.Request(
+                            res_url,
+                            data=json.dumps({
+                                'p_order_id': order_id,
+                                'p_items': res_items,
+                                'p_idempotency_key': order_id
+                            }).encode('utf-8'),
+                            headers={
+                                'Content-Type': 'application/json',
+                                'apikey': SUPABASE_ANON_KEY,
+                                'Authorization': f'Bearer {SUPABASE_ANON_KEY}'
+                            },
+                            method='POST'
+                        )
+                        with urllib.request.urlopen(res_req, timeout=10) as r_resp:
+                            r_data = json.loads(r_resp.read().decode('utf-8'))
+                            if r_data.get('success') is False:
+                                self.send_response(400)
+                                self.send_header('Content-Type', 'application/json')
+                                self.end_headers()
+                                self.wfile.write(json.dumps({
+                                    'success': False,
+                                    'error': 'InsufficientStock',
+                                    'message': r_data.get('error') or 'One or more items in your cart is currently out of stock.'
+                                }).encode('utf-8'))
+                                return
+                    except Exception as e:
+                        print('[VoltEdge DevServer] Notice on stock reservation:', e)
             except Exception as e:
                 print('[VoltEdge DevServer] Error parsing order payload:', e)
 
@@ -677,6 +822,64 @@ class DevHandler(http.server.SimpleHTTPRequestHandler):
             self.end_headers()
             self.wfile.write(last_err_content if last_err_content else json.dumps(FRIENDLY_ERROR_JSON).encode('utf-8'))
             return
+
+        # 3. Payment Webhook Endpoint (Bachs simulation / sandbox handler)
+        if self.path.startswith('/api/payment-webhook'):
+            content_length = int(self.headers.get('Content-Length', 0))
+            post_body = self.rfile.read(content_length)
+            try:
+                hook_data = json.loads(post_body.decode('utf-8'))
+                order_id = hook_data.get('order_id') or hook_data.get('orderId') or hook_data.get('reference') or hook_data.get('trackingCode')
+                event_id = hook_data.get('event_id') or hook_data.get('eventId') or f"evt_{int(time.time()*1000)}"
+                amount = float(hook_data.get('amount') or hook_data.get('total_price') or 0)
+                currency = hook_data.get('currency', 'NGN')
+
+                if not order_id:
+                    self.send_response(400)
+                    self.send_header('Content-Type', 'application/json')
+                    self.end_headers()
+                    self.wfile.write(json.dumps({'success': False, 'error': 'Missing order_id'}).encode('utf-8'))
+                    return
+
+                supa_url = f"{SUPABASE_URL}/rest/v1/rpc/confirm_payment_and_deduct_stock"
+                supa_req = urllib.request.Request(
+                    supa_url,
+                    data=json.dumps({
+                        'p_order_id': order_id,
+                        'p_payment_provider': 'BACHS',
+                        'p_provider_event_id': str(event_id),
+                        'p_amount': amount,
+                        'p_currency': currency,
+                        'p_raw_payload': hook_data
+                    }).encode('utf-8'),
+                    headers={
+                        'Content-Type': 'application/json',
+                        'apikey': SUPABASE_ANON_KEY,
+                        'Authorization': f'Bearer {SUPABASE_ANON_KEY}'
+                    },
+                    method='POST'
+                )
+                with urllib.request.urlopen(supa_req, timeout=15) as s_resp:
+                    result = json.loads(s_resp.read().decode('utf-8'))
+                    if order_id.lower() in order_store:
+                        order_store[order_id.lower()]['payment_status'] = 'paid'
+                        order_store[order_id.lower()]['status'] = 'paid'
+
+                    self.send_response(200)
+                    self.send_header('Content-Type', 'application/json')
+                    self.end_headers()
+                    self.wfile.write(json.dumps({
+                        'success': True,
+                        'message': 'Payment verified and stock deducted successfully',
+                        'result': result
+                    }).encode('utf-8'))
+                    return
+            except Exception as e:
+                self.send_response(500)
+                self.send_header('Content-Type', 'application/json')
+                self.end_headers()
+                self.wfile.write(json.dumps({'success': False, 'error': str(e)}).encode('utf-8'))
+                return
 
         self.send_response(404)
         self.end_headers()

@@ -138,6 +138,16 @@
 
     // Add item to cart
     addItem: function (productIdOrSku, quantity = 1, openDrawerAfter = false) {
+      if (typeof window !== 'undefined' && window.IS_FALLBACK_MODE) {
+        const msg = 'Live catalogue connection is temporarily offline. Online ordering is paused to protect your order from pricing discrepancies. Please contact our WhatsApp desk for immediate ordering.';
+        if (typeof window.showToast === 'function') {
+          window.showToast(msg, 'warning');
+        } else {
+          alert(msg);
+        }
+        return false;
+      }
+
       const catalog = getCatalog();
       const product = catalog.find(p => 
         (p.id && p.id.toLowerCase() === String(productIdOrSku).toLowerCase()) ||
@@ -150,23 +160,42 @@
       }
 
       if (product.inStock === false || (product.availableQuantity !== undefined && product.availableQuantity <= 0)) {
-        if (typeof showToast === 'function') {
-          showToast(`Sorry, "${product.name}" is currently out of stock.`, 'warning');
+        if (typeof window.showToast === 'function') {
+          window.showToast(`Sorry, "${product.name}" is currently out of stock.`, 'warning');
         } else {
           alert(`Sorry, "${product.name}" is currently out of stock.`);
         }
         return false;
       }
 
-      const qtyToAdd = Math.max(1, parseInt(quantity, 10) || 1);
+      let qtyToAdd = Math.max(1, parseInt(quantity, 10) || 1);
       const cart = this.getCart();
       const existing = cart.find(item => 
         (item.sku && product.sku && item.sku.toLowerCase() === product.sku.toLowerCase()) ||
         (item.id && product.id && item.id.toLowerCase() === product.id.toLowerCase())
       );
 
+      const maxAvail = product.availableQuantity !== undefined ? product.availableQuantity : 50;
+      const currentQty = existing ? existing.quantity : 0;
+      if (currentQty + qtyToAdd > maxAvail) {
+        const allowed = Math.max(0, maxAvail - currentQty);
+        if (allowed <= 0) {
+          const msg = `Cannot add more "${product.shortName || product.name}". You already have the maximum available stock (${maxAvail} units) in your cart.`;
+          if (typeof window.showToast === 'function') {
+            window.showToast(msg, 'warning');
+          } else {
+            alert(msg);
+          }
+          return false;
+        }
+        qtyToAdd = allowed;
+        if (typeof window.showToast === 'function') {
+          window.showToast(`Only ${maxAvail} unit(s) available in stock. Added ${allowed} to reach available limit.`, 'warning');
+        }
+      }
+
       if (existing) {
-        existing.quantity = Math.min(50, existing.quantity + qtyToAdd);
+        existing.quantity = Math.min(maxAvail, existing.quantity + qtyToAdd);
       } else {
         cart.push({
           id: product.id,
@@ -175,7 +204,7 @@
           shortName: product.shortName || product.name,
           price: product.price,
           image: product.image,
-          quantity: Math.min(50, qtyToAdd)
+          quantity: Math.min(maxAvail, qtyToAdd)
         });
       }
 
@@ -208,8 +237,73 @@
         return;
       }
 
-      target.quantity = Math.min(50, qty);
+      const catalog = getCatalog();
+      const product = catalog.find(p => 
+        (p.sku && p.sku.toLowerCase() === String(skuOrId).toLowerCase()) ||
+        (p.id && p.id.toLowerCase() === String(skuOrId).toLowerCase())
+      );
+      const maxAvail = (product && product.availableQuantity !== undefined) ? product.availableQuantity : 50;
+
+      if (qty > maxAvail) {
+        target.quantity = maxAvail;
+        if (typeof window.showToast === 'function') {
+          window.showToast(`Quantity adjusted to maximum available stock (${maxAvail} units).`, 'warning');
+        }
+      } else {
+        target.quantity = Math.min(50, qty);
+      }
       this.saveCart(cart);
+    },
+
+    // Revalidate cart against live catalogue prices and availability
+    revalidateCart: function () {
+      const cart = this.getCart();
+      const catalog = getCatalog();
+      if (!catalog.length) return cart;
+
+      let modified = false;
+      const revalidated = [];
+
+      for (const item of cart) {
+        const match = catalog.find(p => 
+          (item.sku && p.sku && p.sku.toLowerCase() === item.sku.toLowerCase()) ||
+          (item.id && p.id && p.id.toLowerCase() === item.id.toLowerCase())
+        );
+
+        if (!match) {
+          revalidated.push(item);
+          continue;
+        }
+
+        const isOutOfStock = match.inStock === false || (match.availableQuantity !== undefined && match.availableQuantity <= 0);
+        const maxAvail = match.availableQuantity !== undefined ? match.availableQuantity : 50;
+
+        // Authoritative price sync
+        if (item.price !== match.price) {
+          console.log(`[VoltEdge Cart] Price updated for ${item.name}: ${item.price} -> ${match.price}`);
+          item.price = match.price;
+          modified = true;
+        }
+
+        // Available quantity clamping
+        if (!isOutOfStock && item.quantity > maxAvail) {
+          console.log(`[VoltEdge Cart] Quantity clamped for ${item.name}: ${item.quantity} -> ${maxAvail}`);
+          item.quantity = Math.max(1, maxAvail);
+          modified = true;
+        }
+
+        item.isOutOfStock = isOutOfStock;
+        item.availableQuantity = match.availableQuantity;
+        revalidated.push(item);
+      }
+
+      if (modified) {
+        this.saveCart(revalidated);
+      } else {
+        this.updateBadges();
+        this.renderDrawer();
+      }
+      return revalidated;
     },
 
     // Remove single item by SKU or ID
@@ -430,10 +524,31 @@
     submitCartOrder: async function () {
       if (this.isSubmitting) return;
 
-      const cart = this.getCart();
+      if (typeof window !== 'undefined' && window.IS_FALLBACK_MODE) {
+        const msg = 'Live catalogue connection is temporarily offline. Online ordering is paused to protect your order from pricing or stock discrepancies. Please contact our WhatsApp desk (+234 704 792 2403) for immediate assistance.';
+        if (typeof window.showToast === 'function') {
+          window.showToast(msg, 'error');
+        } else {
+          alert(msg);
+        }
+        return;
+      }
+
+      const cart = this.revalidateCart();
       if (!cart.length) {
         if (typeof window.showToast === 'function') {
           window.showToast('Your shopping cart is empty.', 'error');
+        }
+        return;
+      }
+
+      const oosItem = cart.find(i => i.isOutOfStock);
+      if (oosItem) {
+        const msg = `Sorry, "${oosItem.name}" is currently out of stock. Please remove it from your cart to proceed with checkout.`;
+        if (typeof window.showToast === 'function') {
+          window.showToast(msg, 'error');
+        } else {
+          alert(msg);
         }
         return;
       }
