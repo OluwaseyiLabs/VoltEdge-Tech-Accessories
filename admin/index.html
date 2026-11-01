@@ -53,7 +53,10 @@
         </div>
 
         <div class="form-group" style="margin-bottom: 1.5rem;">
-          <label class="form-label">Password <span class="req">*</span></label>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.25rem;">
+            <label class="form-label" style="margin-bottom: 0;">Password <span class="req">*</span></label>
+            <button type="button" class="btn-link" id="authForgotBtn" onclick="showForgotPasswordView()" style="font-size: 0.8rem; padding: 0; text-decoration: none;">Forgot Password?</button>
+          </div>
           <input type="password" id="authPassword" class="form-input" required placeholder="••••••••">
         </div>
 
@@ -62,6 +65,40 @@
           <i class="ph-bold ph-arrow-right"></i>
         </button>
       </form>
+
+      <!-- FORGOT PASSWORD FORM -->
+      <form id="forgotPasswordForm" onsubmit="handleForgotPasswordSubmit(event)" style="display: none;">
+        <div class="form-group" style="margin-bottom: 1.25rem;">
+          <label class="form-label">Registered Work Email <span class="req">*</span></label>
+          <input type="email" id="forgotEmail" class="form-input" required placeholder="admin@voltedge.ng">
+          <span class="form-helper">Enter the email address registered with your VoltEdge administrator account.</span>
+        </div>
+
+        <button type="submit" id="forgotSubmitBtn" class="btn btn-primary" style="width: 100%; margin-bottom: 1rem;">
+          <span>Send Recovery Link</span>
+          <i class="ph-bold ph-paper-plane-tilt"></i>
+        </button>
+
+        <div style="text-align: center;">
+          <button type="button" class="btn-link" onclick="showSignInView()" style="font-size: 0.875rem; text-decoration: none; display: inline-flex; align-items: center; gap: 0.35rem;">
+            <i class="ph-bold ph-arrow-left"></i> <span>Back to Sign In</span>
+          </button>
+        </div>
+      </form>
+
+      <!-- FORGOT PASSWORD CONFIRMATION NOTICE -->
+      <div id="forgotSuccessNotice" style="display: none; text-align: center; padding: 0.75rem 0;">
+        <div style="width: 48px; height: 48px; border-radius: 50%; background: #d1fae5; color: #047857; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; margin: 0 auto 1rem;">
+          <i class="ph-bold ph-envelope-simple"></i>
+        </div>
+        <h3 style="font-size: 1.2rem; font-weight: 700; margin-bottom: 0.5rem; color: var(--text-main);">Check Your Inbox</h3>
+        <p id="forgotSuccessMessage" style="font-size: 0.88rem; color: var(--text-muted); line-height: 1.55; margin-bottom: 1.5rem;">
+          If an administrator account exists for this email address, a password recovery link has been dispatched. Please check your inbox and spam folder.
+        </p>
+        <button type="button" class="btn btn-secondary" onclick="showSignInView()" style="width: 100%;">
+          <i class="ph-bold ph-arrow-left"></i> Return to Sign In
+        </button>
+      </div>
 
       <div id="setupToggleWrap" style="margin-top: 1.25rem; text-align: center; font-size: 0.85rem;">
         <span id="setupPromptText">Need to initialize the first owner account?</span>

@@ -2,6 +2,10 @@
   "version": 2,
   "cleanUrls": true,
   "trailingSlash": false,
+  "rewrites": [
+    { "source": "/admin/reset-password", "destination": "/admin/reset-password/index.html" },
+    { "source": "/admin/forgot-password", "destination": "/admin/index.html" }
+  ],
   "headers": [
     {
       "source": "/(.*)",
@@ -14,4 +18,3 @@
     }
   ]
 }
-

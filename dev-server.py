@@ -466,6 +466,14 @@ class DevHandler(http.server.SimpleHTTPRequestHandler):
     def do_GET(self):
         client_ip = get_client_ip(self)
 
+        # Clean admin route rewrites
+        parsed = urllib.parse.urlparse(self.path)
+        clean_path = parsed.path.rstrip('/')
+        if clean_path in ('/admin/reset-password', '/reset-password'):
+            self.path = '/admin/reset-password/index.html' + (f'?{parsed.query}' if parsed.query else '')
+        elif clean_path in ('/admin/forgot-password', '/forgot-password'):
+            self.path = '/admin/index.html' + (f'?{parsed.query}' if parsed.query else '')
+
         # Public Configuration Endpoint
         if self.path.startswith('/api/config'):
             self.send_response(200)

@@ -69,6 +69,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   } else {
     await checkInitialSetupNeeded();
     showAuthView();
+    if (window.location.hash === '#forgot' || window.location.hash === '#forgot-password' || window.location.pathname.includes('forgot-password')) {
+      showForgotPasswordView();
+    }
   }
 
   // Listen for auth state changes
@@ -139,6 +142,107 @@ function setSetupMode(isSetup) {
     authSubmitBtn.querySelector('span').textContent = 'Sign In';
     setupPromptText.textContent = 'Need to initialize the first owner account?';
     setupToggleBtn.textContent = 'First-Time Setup';
+  }
+}
+
+function showForgotPasswordView() {
+  STATE.isForgotPasswordMode = true;
+  const authForm = document.getElementById('authForm');
+  const forgotForm = document.getElementById('forgotPasswordForm');
+  const forgotNotice = document.getElementById('forgotSuccessNotice');
+  const setupWrap = document.getElementById('setupToggleWrap');
+  const authTitle = document.getElementById('authTitle');
+  const authSubtitle = document.getElementById('authSubtitle');
+
+  if (authForm) authForm.style.display = 'none';
+  if (forgotForm) forgotForm.style.display = 'block';
+  if (forgotNotice) forgotNotice.style.display = 'none';
+  if (setupWrap) setupWrap.style.display = 'none';
+  if (authTitle) authTitle.textContent = 'Recover Password';
+  if (authSubtitle) authSubtitle.textContent = 'Enter your registered work email to receive a secure password recovery link.';
+
+  const authEmailVal = document.getElementById('authEmail')?.value?.trim();
+  const forgotEmailInput = document.getElementById('forgotEmail');
+  if (authEmailVal && forgotEmailInput && !forgotEmailInput.value) {
+    forgotEmailInput.value = authEmailVal;
+  }
+  if (forgotEmailInput) {
+    forgotEmailInput.focus();
+  }
+}
+
+function showSignInView() {
+  STATE.isForgotPasswordMode = false;
+  const authForm = document.getElementById('authForm');
+  const forgotForm = document.getElementById('forgotPasswordForm');
+  const forgotNotice = document.getElementById('forgotSuccessNotice');
+
+  if (authForm) authForm.style.display = 'block';
+  if (forgotForm) forgotForm.style.display = 'none';
+  if (forgotNotice) forgotNotice.style.display = 'none';
+
+  setSetupMode(STATE.isSetupMode || false);
+  checkInitialSetupNeeded();
+}
+
+let isRecoveringPassword = false;
+
+async function handleForgotPasswordSubmit(e) {
+  e.preventDefault();
+  if (isRecoveringPassword) return;
+
+  const emailInput = document.getElementById('forgotEmail');
+  const email = emailInput ? emailInput.value.trim().toLowerCase() : '';
+  const submitBtn = document.getElementById('forgotSubmitBtn');
+
+  if (!email || !email.includes('@')) {
+    showToast('Please provide a valid work email address.', 'warning');
+    if (emailInput) emailInput.focus();
+    return;
+  }
+
+  isRecoveringPassword = true;
+  submitBtn.disabled = true;
+  const originalBtnHtml = submitBtn.innerHTML;
+  submitBtn.innerHTML = '<span class="spinner"></span> <span>Sending recovery link...</span>';
+
+  try {
+    const origin = window.location.origin;
+    const redirectTo = `${origin}/admin/reset-password`;
+
+    const { data, error } = await supabaseClient.auth.resetPasswordForEmail(email, {
+      redirectTo: redirectTo
+    });
+
+    if (error) {
+      if (error.status === 429 || (error.message && error.message.toLowerCase().includes('rate limit'))) {
+        showToast('Too many recovery requests. Please wait a few moments before trying again.', 'warning');
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalBtnHtml;
+        isRecoveringPassword = false;
+        return;
+      }
+      console.warn('Supabase resetPasswordForEmail notice:', error.message);
+    }
+
+    // Generic confirmation to avoid revealing whether an email exists (Req 19)
+    const forgotForm = document.getElementById('forgotPasswordForm');
+    const notice = document.getElementById('forgotSuccessNotice');
+    const msg = document.getElementById('forgotSuccessMessage');
+
+    if (forgotForm) forgotForm.style.display = 'none';
+    if (notice) notice.style.display = 'block';
+    if (msg) {
+      msg.innerHTML = `If an administrator account exists for <strong>${escapeHtml(email)}</strong>, a password recovery link has been dispatched. Please check your inbox and spam folder.`;
+    }
+    showToast('Password recovery link dispatched if the email is registered.', 'success');
+  } catch (err) {
+    console.error('Password recovery error:', err);
+    showToast('Unable to complete request at this time. Please try again later.', 'error');
+  } finally {
+    isRecoveringPassword = false;
+    submitBtn.disabled = false;
+    submitBtn.innerHTML = originalBtnHtml;
   }
 }
 
@@ -1509,6 +1613,9 @@ window.openCreateCategoryModal = openCreateCategoryModal;
 window.closeCategoryModal = closeCategoryModal;
 window.handleCategoryNameInput = handleCategoryNameInput;
 window.handleCategoryFormSubmit = handleCategoryFormSubmit;
+window.showForgotPasswordView = showForgotPasswordView;
+window.showSignInView = showSignInView;
+window.handleForgotPasswordSubmit = handleForgotPasswordSubmit;
 
 function renderCategoriesTable() {
   const tbody = document.getElementById('categoriesTableBody');
