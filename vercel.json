@@ -3,17 +3,43 @@
   "cleanUrls": true,
   "trailingSlash": false,
   "rewrites": [
-    { "source": "/admin/reset-password", "destination": "/admin/reset-password/index.html" },
-    { "source": "/admin/forgot-password", "destination": "/admin/index.html" }
+    {
+      "source": "/admin/reset-password",
+      "destination": "/admin/reset-password/index.html"
+    },
+    {
+      "source": "/admin/forgot-password",
+      "destination": "/admin/index.html"
+    },
+    {
+      "source": "/admin.css",
+      "destination": "/admin/admin.css"
+    },
+    {
+      "source": "/admin.js",
+      "destination": "/admin/admin.js"
+    }
   ],
   "headers": [
     {
       "source": "/(.*)",
       "headers": [
-        { "key": "X-Content-Type-Options", "value": "nosniff" },
-        { "key": "X-Frame-Options", "value": "DENY" },
-        { "key": "X-XSS-Protection", "value": "1; mode=block" },
-        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" }
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "X-Frame-Options",
+          "value": "DENY"
+        },
+        {
+          "key": "X-XSS-Protection",
+          "value": "1; mode=block"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "strict-origin-when-cross-origin"
+        }
       ]
     }
   ]

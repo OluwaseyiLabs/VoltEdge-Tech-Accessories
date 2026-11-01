@@ -894,6 +894,10 @@ class DevHandler(http.server.SimpleHTTPRequestHandler):
             self.path = '/admin/reset-password/index.html' + (f'?{parsed.query}' if parsed.query else '')
         elif clean_path in ('/admin/forgot-password', '/forgot-password'):
             self.path = '/admin/index.html' + (f'?{parsed.query}' if parsed.query else '')
+        elif clean_path == '/admin.css':
+            self.path = '/admin/admin.css'
+        elif clean_path == '/admin.js':
+            self.path = '/admin/admin.js'
 
         # Public Configuration Endpoint
         if self.path.startswith('/api/config'):
