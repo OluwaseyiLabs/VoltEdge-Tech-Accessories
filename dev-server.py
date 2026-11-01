@@ -465,6 +465,17 @@ class DevHandler(http.server.SimpleHTTPRequestHandler):
     def do_GET(self):
         client_ip = get_client_ip(self)
 
+        # Public Configuration Endpoint
+        if self.path.startswith('/api/config'):
+            self.send_response(200)
+            self.send_header('Content-Type', 'application/json')
+            self.end_headers()
+            self.wfile.write(json.dumps({
+                'supabaseUrl': os.getenv('SUPABASE_URL', ''),
+                'supabaseAnonKey': os.getenv('SUPABASE_ANON_KEY', '')
+            }).encode('utf-8'))
+            return
+
         # Proxy endpoint for order details
         if self.path.startswith('/api/voltedge-order-details'):
             rl = check_rate_limit('order_lookup', client_ip)

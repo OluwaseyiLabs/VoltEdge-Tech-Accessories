@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VoltEdge Admin | CMS & Inventory Management Platform</title>
+  
+  <!-- Favicon -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220%22 width=%2232%22 height=%2232%22><rect width=%2232%22 height=%2232%22 rx=%228%22 fill=%22%23064E3B%22/><path d=%22M18 4L10 17h5l-2 11 10-14h-6l3-10z%22 fill=%22%2310B981%22/></svg>">
+  
+  <!-- Google Fonts Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Phosphor Icons -->
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+  
+  <!-- Supabase JS Client v2 -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  
+  <!-- Admin Styles -->
+  <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+
+  <!-- AUTHENTICATION / LOGIN VIEW -->
+  <div id="authContainer" class="auth-container">
+    <div class="auth-card">
+      <div class="auth-logo">
+        <div class="brand-icon">
+          <i class="ph-bold ph-lightning"></i>
+        </div>
+        <div class="brand-title">VoltEdge Admin</div>
+      </div>
+      
+      <div class="auth-header">
+        <h1 id="authTitle">Sign In to Dashboard</h1>
+        <p id="authSubtitle">Enter your administrator credentials to manage products and inventory.</p>
+      </div>
+
+      <form id="authForm" onsubmit="handleAuthSubmit(event)">
+        <div id="setupFields" style="display: none;">
+          <div class="form-group" style="margin-bottom: 1rem;">
+            <label class="form-label">Full Name <span class="req">*</span></label>
+            <input type="text" id="authFullName" class="form-input" placeholder="e.g. Chief Executive">
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 1rem;">
+          <label class="form-label">Work Email <span class="req">*</span></label>
+          <input type="email" id="authEmail" class="form-input" required placeholder="admin@voltedge.ng">
+        </div>
+
+        <div class="form-group" style="margin-bottom: 1.5rem;">
+          <label class="form-label">Password <span class="req">*</span></label>
+          <input type="password" id="authPassword" class="form-input" required placeholder="••••••••">
+        </div>
+
+        <button type="submit" id="authSubmitBtn" class="btn btn-primary" style="width: 100%;">
+          <span>Sign In</span>
+          <i class="ph-bold ph-arrow-right"></i>
+        </button>
+      </form>
+
+      <div id="setupToggleWrap" style="margin-top: 1.25rem; text-align: center; font-size: 0.85rem;">
+        <span id="setupPromptText">Need to initialize the first owner account?</span>
+        <button type="button" id="setupToggleBtn" class="btn-link" onclick="toggleSetupMode()">First-Time Setup</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- APPLICATION DASHBOARD LAYOUT -->
+  <div id="appContainer" class="app-layout" style="display: none;">
+    
+    <!-- SIDEBAR -->
+    <aside id="sidebar" class="sidebar">
+      <div class="sidebar-header">
+        <a href="#overview" class="sidebar-brand">
+          <div class="brand-icon">
+            <i class="ph-bold ph-lightning"></i>
+          </div>
+          <div class="sidebar-brand-text">
+            <h2>VoltEdge</h2>
+            <span>CMS & Inventory</span>
+          </div>
+        </a>
+        <button class="mobile-menu-btn" onclick="toggleMobileMenu()" style="color: #ecfdf5;">
+          <i class="ph-bold ph-x"></i>
+        </button>
+      </div>
+
+      <nav class="sidebar-nav">
+        <div class="nav-section-title">Core Management</div>
+        <button class="nav-item active" data-view="overview" onclick="switchView('overview')">
+          <i class="ph-bold ph-gauge"></i>
+          <span>Overview</span>
+        </button>
+        <button class="nav-item" data-view="products" onclick="switchView('products')">
+          <i class="ph-bold ph-package"></i>
+          <span>Product Catalogue</span>
+          <span class="nav-badge" id="navProductCount">0</span>
+        </button>
+        <button class="nav-item" data-view="inventory" onclick="switchView('inventory')">
+          <i class="ph-bold ph-stack"></i>
+          <span>Inventory & Stock</span>
+        </button>
+        <button class="nav-item" data-view="categories" onclick="switchView('categories')">
+          <i class="ph-bold ph-squares-four"></i>
+          <span>Categories</span>
+        </button>
+
+        <div class="nav-section-title">Store & Fulfillment</div>
+        <button class="nav-item" data-view="orders" onclick="switchView('orders')">
+          <i class="ph-bold ph-receipt"></i>
+          <span>Orders & Reservations</span>
+        </button>
+
+        <div class="nav-section-title admin-restricted">Administration</div>
+        <button class="nav-item admin-restricted" data-view="admins" onclick="switchView('admins')">
+          <i class="ph-bold ph-users-three"></i>
+          <span>Team & Roles</span>
+        </button>
+        <button class="nav-item admin-restricted" data-view="logs" onclick="switchView('logs')">
+          <i class="ph-bold ph-clock-counter-clockwise"></i>
+          <span>Activity Audit Logs</span>
+        </button>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="user-snippet">
+          <div class="user-avatar" id="userAvatar">A</div>
+          <div class="user-info">
+            <div class="user-name" id="userName">Administrator</div>
+            <div class="user-role-badge" id="userRole">OWNER</div>
+          </div>
+        </div>
+        <button class="btn-signout" title="Sign Out" onclick="handleSignOut()">
+          <i class="ph-bold ph-sign-out"></i>
+        </button>
+      </div>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <div class="main-wrapper">
+      
+      <!-- TOP HEADER -->
+      <header class="top-header">
+        <div style="display: flex; align-items: center; gap: 1rem;">
+          <button class="mobile-menu-btn" onclick="toggleMobileMenu()">
+            <i class="ph-bold ph-list"></i>
+          </button>
+          <div class="page-title">
+            <h1 id="viewHeading">Overview</h1>
+          </div>
+        </div>
+
+        <div class="header-actions">
+          <a href="/" target="_blank" class="btn btn-secondary btn-sm" title="Open live storefront">
+            <i class="ph-bold ph-arrow-square-out"></i>
+            <span>Live Storefront</span>
+          </a>
+          <button id="headerActionBtn" class="btn btn-primary btn-sm" onclick="handlePrimaryHeaderAction()">
+            <i class="ph-bold ph-plus"></i>
+            <span id="headerActionLabel">New Product</span>
+          </button>
+        </div>
+      </header>
+
+      <!-- PAGE CONTENT AREA -->
+      <main class="page-container">
+
+        <!-- 1. OVERVIEW VIEW -->
+        <section id="viewOverview" class="view-section active">
+          <div class="metrics-grid">
+            <div class="metric-card">
+              <div class="metric-details">
+                <span>Active Products</span>
+                <div class="metric-number" id="kpiActiveProducts">0</div>
+                <div class="metric-sub" id="kpiTotalProducts">0 total in catalogue</div>
+              </div>
+              <div class="metric-icon icon-emerald">
+                <i class="ph-bold ph-package"></i>
+              </div>
+            </div>
+
+            <div class="metric-card">
+              <div class="metric-details">
+                <span>Total On Hand</span>
+                <div class="metric-number" id="kpiStockOnHand">0</div>
+                <div class="metric-sub">Physical warehouse stock</div>
+              </div>
+              <div class="metric-icon icon-blue">
+                <i class="ph-bold ph-stack"></i>
+              </div>
+            </div>
+
+            <div class="metric-card">
+              <div class="metric-details">
+                <span>Active Reservations</span>
+                <div class="metric-number" id="kpiReservedUnits">0</div>
+                <div class="metric-sub">Units held in checkout</div>
+              </div>
+              <div class="metric-icon icon-amber">
+                <i class="ph-bold ph-lock-key"></i>
+              </div>
+            </div>
+
+            <div class="metric-card">
+              <div class="metric-details">
+                <span>Stock Alerts</span>
+                <div class="metric-number" id="kpiStockAlerts">0</div>
+                <div class="metric-sub" id="kpiStockAlertsSub">0 low stock, 0 sold out</div>
+              </div>
+              <div class="metric-icon icon-rose">
+                <i class="ph-bold ph-warning-circle"></i>
+              </div>
+            </div>
+          </div>
+
+          <!-- Quick Inventory Alerts Banner -->
+          <div id="stockAlertsBanner" style="display: none; margin-bottom: 2rem; background: #fff1f2; border: 1px solid #fecdd3; border-radius: var(--radius-lg); padding: 1rem 1.25rem;">
+            <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.75rem;">
+              <div style="display: flex; align-items: center; gap: 0.65rem; color: #9f1239;">
+                <i class="ph-bold ph-warning" style="font-size: 1.25rem;"></i>
+                <span style="font-weight: 600;" id="stockAlertMessage">Attention: 0 products are low or out of stock!</span>
+              </div>
+              <button class="btn btn-danger btn-sm" onclick="switchView('inventory')">Manage Stock Now</button>
+            </div>
+          </div>
+
+          <!-- Recent Products Preview Table -->
+          <div style="margin-bottom: 1rem; display: flex; align-items: center; justify-content: space-between;">
+            <h2 style="font-size: 1.1rem; font-weight: 700;">Catalogue Quick View</h2>
+            <button class="btn btn-link btn-sm" onclick="switchView('products')">View all products &rarr;</button>
+          </div>
+          <div class="table-card">
+            <div class="table-responsive">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Product</th>
+                    <th>SKU</th>
+                    <th>Category</th>
+                    <th>Price</th>
+                    <th>Availability</th>
+                    <th>Publication</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="overviewProductsTable">
+                  <tr><td colspan="7" style="text-align: center; padding: 2rem;">Loading catalogue...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- 2. PRODUCTS CATALOGUE VIEW -->
+        <section id="viewProducts" class="view-section">
+          <div class="toolbar-card">
+            <div class="search-box">
+              <i class="ph-bold ph-magnifying-glass"></i>
+              <input type="text" id="productSearchInput" class="search-input" placeholder="Search by name, SKU, or keyword..." oninput="filterProducts()">
+            </div>
+            <div class="toolbar-filters">
+              <select id="productCategoryFilter" class="select-filter" onchange="filterProducts()">
+                <option value="">All Categories</option>
+              </select>
+              <select id="productStockFilter" class="select-filter" onchange="filterProducts()">
+                <option value="">All Stock Status</option>
+                <option value="in_stock">In Stock</option>
+                <option value="low_stock">Low Stock</option>
+                <option value="out_of_stock">Out of Stock</option>
+              </select>
+              <select id="productStatusFilter" class="select-filter" onchange="filterProducts()">
+                <option value="">All Statuses</option>
+                <option value="PUBLISHED">Published</option>
+                <option value="DRAFT">Draft</option>
+                <option value="ARCHIVED">Archived</option>
+              </select>
+              <button class="btn btn-primary" onclick="openCreateProductModal()">
+                <i class="ph-bold ph-plus"></i>
+                <span>Add Product</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="table-card">
+            <div class="table-responsive">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Product</th>
+                    <th>SKU</th>
+                    <th>Category</th>
+                    <th>Price</th>
+                    <th>Stock</th>
+                    <th>Status</th>
+                    <th style="text-align: right;">Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="productsTableBody">
+                  <tr><td colspan="7" style="text-align: center; padding: 2rem;">Loading products...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- 3. INVENTORY & MOVEMENTS VIEW -->
+        <section id="viewInventory" class="view-section">
+          <div class="toolbar-card">
+            <div class="search-box">
+              <i class="ph-bold ph-magnifying-glass"></i>
+              <input type="text" id="inventorySearchInput" class="search-input" placeholder="Search inventory by product or SKU..." oninput="filterInventory()">
+            </div>
+            <div class="toolbar-filters">
+              <select id="inventoryStockFilter" class="select-filter" onchange="filterInventory()">
+                <option value="">All Stock Levels</option>
+                <option value="low">Low Stock Only (&le; Threshold)</option>
+                <option value="out">Out of Stock Only</option>
+                <option value="reserved">Has Active Reservations</option>
+              </select>
+              <button class="btn btn-primary" onclick="openInventoryModal()">
+                <i class="ph-bold ph-arrows-down-up"></i>
+                <span>Stock Adjustment</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="table-card" style="margin-bottom: 2.5rem;">
+            <div class="table-responsive">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Product / SKU</th>
+                    <th>On Hand (Physical)</th>
+                    <th>Reserved (Hold)</th>
+                    <th>Available to Sell</th>
+                    <th>Threshold</th>
+                    <th>Checkout Status</th>
+                    <th style="text-align: right;">Adjust</th>
+                  </tr>
+                </thead>
+                <tbody id="inventoryTableBody">
+                  <tr><td colspan="7" style="text-align: center; padding: 2rem;">Loading inventory...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Movement Audit Log Table -->
+          <div style="margin-bottom: 1rem; display: flex; align-items: center; justify-content: space-between;">
+            <div>
+              <h2 style="font-size: 1.1rem; font-weight: 700;">Stock Movement Audit Trail</h2>
+              <p style="font-size: 0.82rem; color: var(--text-muted);">Real-time log of all restocks, reservations, sales deductions, and adjustments.</p>
+            </div>
+          </div>
+          <div class="table-card">
+            <div class="table-responsive">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Timestamp</th>
+                    <th>Product</th>
+                    <th>Type</th>
+                    <th>Change</th>
+                    <th>Stock (Before &rarr; After)</th>
+                    <th>Reason / Reference</th>
+                  </tr>
+                </thead>
+                <tbody id="inventoryMovementsBody">
+                  <tr><td colspan="6" style="text-align: center; padding: 2rem;">Loading movement history...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- 4. CATEGORIES VIEW -->
+        <section id="viewCategories" class="view-section">
+          <div class="toolbar-card">
+            <div>
+              <h2 style="font-size: 1.1rem; font-weight: 700;">Product Categories</h2>
+              <p style="font-size: 0.82rem; color: var(--text-muted);">Manage catalogue departments and storefront filters.</p>
+            </div>
+          </div>
+
+          <div class="table-card">
+            <div class="table-responsive">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Order</th>
+                    <th>Category Name</th>
+                    <th>Slug</th>
+                    <th>Description</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody id="categoriesTableBody">
+                  <tr><td colspan="5" style="text-align: center; padding: 2rem;">Loading categories...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- 5. ORDERS & RESERVATIONS VIEW -->
+        <section id="viewOrders" class="view-section">
+          <!-- Banner explaining hybrid model -->
+          <div style="background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: var(--radius-lg); padding: 1.25rem; margin-bottom: 1.5rem;">
+            <div style="display: flex; align-items: flex-start; gap: 0.85rem;">
+              <i class="ph-bold ph-shield-check" style="font-size: 1.5rem; color: #047857; flex-shrink: 0; margin-top: 2px;"></i>
+              <div>
+                <h3 style="font-size: 0.95rem; font-weight: 700; color: #064e3b; margin-bottom: 0.25rem;">Hybrid Architecture Source of Truth</h3>
+                <p style="font-size: 0.85rem; color: #065f46; line-height: 1.4;">
+                  Customer orders and delivery records remain authoritatively stored in <strong>Google Sheets</strong> via n8n automation. Supabase manages <strong>real-time stock reservations</strong>, stock deduction idempotency, and inventory counts.
+                </p>
+                <div style="margin-top: 0.75rem;">
+                  <a href="https://docs.google.com/spreadsheets/d/1Zt-6X6j1NqgKkYI8-ZkU6Iq2Z1p4K6O6Vqg5yP0/edit" target="_blank" class="btn btn-accent btn-sm">
+                    <i class="ph-bold ph-file-csv"></i>
+                    <span>Open Google Sheets Order Processing Sheet</span>
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Active Reservations Table -->
+          <div style="margin-bottom: 1rem;">
+            <h2 style="font-size: 1.1rem; font-weight: 700;">Live Inventory Reservations</h2>
+            <p style="font-size: 0.82rem; color: var(--text-muted);">Stock units temporarily locked while customers complete orders or make transfers.</p>
+          </div>
+          <div class="table-card">
+            <div class="table-responsive">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Order ID</th>
+                    <th>Status</th>
+                    <th>Created At</th>
+                    <th>Expires At</th>
+                    <th>Items Reserved</th>
+                    <th style="text-align: right;">Action</th>
+                  </tr>
+                </thead>
+                <tbody id="reservationsTableBody">
+                  <tr><td colspan="6" style="text-align: center; padding: 2rem;">Loading reservations...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- 6. ADMINISTRATORS & TEAM VIEW -->
+        <section id="viewAdmins" class="view-section">
+          <div class="toolbar-card">
+            <div>
+              <h2 style="font-size: 1.1rem; font-weight: 700;">Administrators & Role Permissions</h2>
+              <p style="font-size: 0.82rem; color: var(--text-muted);">Grant and manage team access to the VoltEdge platform.</p>
+            </div>
+            <button class="btn btn-primary" onclick="openAdminModal()">
+              <i class="ph-bold ph-user-plus"></i>
+              <span>Add Team Member</span>
+            </button>
+          </div>
+
+          <div class="table-card">
+            <div class="table-responsive">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Full Name</th>
+                    <th>Email Address</th>
+                    <th>Role</th>
+                    <th>Status</th>
+                    <th>Joined</th>
+                  </tr>
+                </thead>
+                <tbody id="adminsTableBody">
+                  <tr><td colspan="5" style="text-align: center; padding: 2rem;">Loading administrators...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- 7. AUDIT ACTIVITY LOGS VIEW -->
+        <section id="viewLogs" class="view-section">
+          <div class="toolbar-card">
+            <div>
+              <h2 style="font-size: 1.1rem; font-weight: 700;">Administrative Activity Audit</h2>
+              <p style="font-size: 0.82rem; color: var(--text-muted);">Full immutable log of administrative actions across the platform.</p>
+            </div>
+          </div>
+
+          <div class="table-card">
+            <div class="table-responsive">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Timestamp</th>
+                    <th>Administrator</th>
+                    <th>Action</th>
+                    <th>Entity Type</th>
+                    <th>Entity ID</th>
+                  </tr>
+                </thead>
+                <tbody id="activityLogsTableBody">
+                  <tr><td colspan="5" style="text-align: center; padding: 2rem;">Loading audit logs...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+      </main>
+    </div>
+  </div>
+
+  <!-- PRODUCT CREATE/EDIT MODAL -->
+  <div id="productModal" class="modal-overlay">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="productModalTitle">Add New Product</h3>
+        <button class="modal-close-btn" onclick="closeProductModal()">
+          <i class="ph-bold ph-x"></i>
+        </button>
+      </div>
+
+      <!-- Modal Tabs -->
+      <div class="modal-tabs">
+        <button class="modal-tab-btn active" data-tab="tabGeneral" onclick="switchProductTab('tabGeneral')">General Info</button>
+        <button class="modal-tab-btn" data-tab="tabPricing" onclick="switchProductTab('tabPricing')">Pricing & Badges</button>
+        <button class="modal-tab-btn" data-tab="tabFeatures" onclick="switchProductTab('tabFeatures')">Features & Specs</button>
+        <button class="modal-tab-btn" data-tab="tabImages" onclick="switchProductTab('tabImages')">Product Images</button>
+      </div>
+
+      <form id="productForm" onsubmit="handleProductFormSubmit(event)" style="display: flex; flex-direction: column; flex: 1; overflow: hidden;">
+        <input type="hidden" id="formProductId">
+        
+        <div class="modal-body">
+          
+          <!-- TAB 1: GENERAL INFO -->
+          <div id="tabGeneral" class="tab-pane active">
+            <div class="form-grid">
+              <div class="form-group col-span-2">
+                <label class="form-label">Product Name / Title <span class="req">*</span></label>
+                <input type="text" id="formName" class="form-input" required placeholder="e.g. 30,000mAh Laptop Power Bank (Black)" oninput="handleProductNameInput()">
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">SKU (Stock Keeping Unit) <span class="req">*</span></label>
+                <input type="text" id="formSku" class="form-input" required placeholder="VE-PB-30K-BLK" style="text-transform: uppercase;">
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">URL Slug <span class="req">*</span></label>
+                <input type="text" id="formSlug" class="form-input" required placeholder="ve-pb-30k-blk">
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Category <span class="req">*</span></label>
+                <select id="formCategory" class="form-select" required>
+                  <option value="">Select Category</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Publication Status</label>
+                <select id="formPubStatus" class="form-select">
+                  <option value="PUBLISHED">Published (Visible on Storefront)</option>
+                  <option value="DRAFT">Draft (Hidden)</option>
+                  <option value="ARCHIVED">Archived</option>
+                </select>
+              </div>
+
+              <div class="form-group col-span-2">
+                <label class="form-label">Short Name / Card Title</label>
+                <input type="text" id="formShortName" class="form-input" placeholder="e.g. 30,000mAh Power Bank (Black)">
+              </div>
+
+              <div class="form-group col-span-2">
+                <label class="form-label">Tagline</label>
+                <input type="text" id="formTagline" class="form-input" placeholder="e.g. Uninterrupted laptop power during grid drops.">
+              </div>
+
+              <div class="form-group col-span-2">
+                <label class="form-label">Finish / Color</label>
+                <input type="text" id="formFinish" class="form-input" placeholder="e.g. Matte Black finish">
+              </div>
+
+              <div class="form-group col-span-2">
+                <label class="form-label">Full Product Description</label>
+                <textarea id="formDescription" class="form-textarea" placeholder="Detailed product description for customer exploration..."></textarea>
+              </div>
+            </div>
+          </div>
+
+          <!-- TAB 2: PRICING & BADGES -->
+          <div id="tabPricing" class="tab-pane">
+            <div class="form-grid">
+              <div class="form-group">
+                <label class="form-label">Selling Price (₦ NGN) <span class="req">*</span></label>
+                <input type="number" id="formPrice" class="form-input" required min="0" step="500" placeholder="65000">
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Compare-at Price (₦ NGN)</label>
+                <input type="number" id="formComparePrice" class="form-input" min="0" step="500" placeholder="80000">
+                <span class="form-helper">Crossed-out original price to show discount</span>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Card Badge Text</label>
+                <input type="text" id="formBadge" class="form-input" placeholder="e.g. Bestseller, Popular, Remote Must-Have">
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Badge Styling Type</label>
+                <select id="formBadgeType" class="form-select">
+                  <option value="hot">Hot / Red Accent</option>
+                  <option value="accent">Emerald Brand Accent</option>
+                  <option value="highlight">Amber Highlight</option>
+                  <option value="bundle">Purple Bundle Value</option>
+                  <option value="neutral">Neutral Slate</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Warranty Statement</label>
+                <input type="text" id="formWarranty" class="form-input" value="1-Year Product Warranty" placeholder="1-Year Product Warranty">
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Key Specs Highlight</label>
+                <input type="text" id="formSpecsHighlight" class="form-input" placeholder="e.g. 65W PD Fast Charging">
+              </div>
+
+              <div class="form-group col-span-2">
+                <label class="form-label">Dispatch Badge Text</label>
+                <input type="text" id="formDispatchBadge" class="form-input" value="Same-Day Dispatch Eligible" placeholder="Same-Day Dispatch Eligible">
+              </div>
+            </div>
+          </div>
+
+          <!-- TAB 3: FEATURES & SPECS -->
+          <div id="tabFeatures" class="tab-pane">
+            <div class="form-group" style="margin-bottom: 1.5rem;">
+              <label class="form-label">Key Features / Bullets (One per line)</label>
+              <textarea id="formBullets" class="form-textarea" style="min-height: 120px;" placeholder="65W Power Delivery (PD 3.0) fast charging output&#10;Massive 30,000mAh true capacity&#10;High-contrast digital LED battery readout"></textarea>
+              <span class="form-helper">Enter each bullet point on a separate new line.</span>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Technical Specifications (JSON format)</label>
+              <textarea id="formTechnicalSpecs" class="form-textarea" style="min-height: 120px; font-family: monospace; font-size: 0.85rem;" placeholder='{"Capacity": "30,000mAh / 111Wh", "USB-C Output": "65W Max", "Display": "Digital LED"}'></textarea>
+              <span class="form-helper">Key-value JSON dictionary for technical details.</span>
+            </div>
+          </div>
+
+          <!-- TAB 4: PRODUCT IMAGES & UPLOADS -->
+          <div id="tabImages" class="tab-pane">
+            <div class="image-upload-zone" onclick="document.getElementById('imageFileInput').click()" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleImageDrop(event)">
+              <i class="ph-bold ph-cloud-arrow-up"></i>
+              <div style="font-weight: 700; color: var(--text-main);">Drag & Drop Product Images Here</div>
+              <div style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.25rem;">Or click to browse files (JPEG, PNG, WebP)</div>
+              <div style="font-size: 0.75rem; color: var(--accent); margin-top: 0.5rem; font-weight: 600;">
+                <i class="ph-bold ph-cpu"></i> Automatically converts to high-performance WebP (Thumb, Card, Detail)
+              </div>
+              <input type="file" id="imageFileInput" accept="image/*" multiple style="display: none;" onchange="handleImageFileSelect(event)">
+            </div>
+
+            <div id="imageCompressionStatus" style="display: none; margin-top: 1rem; padding: 0.75rem 1rem; background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: var(--radius-md); font-size: 0.85rem; color: #064e3b;">
+              <span class="spinner" style="border-top-color: #064e3b; margin-right: 0.5rem;"></span>
+              <span id="compressionText">Processing WebP compression...</span>
+            </div>
+
+            <div style="margin-top: 1.5rem;">
+              <div class="form-label">Current Product Images</div>
+              <div class="image-gallery-grid" id="modalImageGallery">
+                <div style="grid-column: 1 / -1; font-size: 0.85rem; color: var(--text-muted); text-align: center; padding: 1.5rem;">
+                  No images uploaded yet.
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeProductModal()">Cancel</button>
+          <button type="submit" id="saveProductBtn" class="btn btn-primary">
+            <i class="ph-bold ph-floppy-disk"></i>
+            <span>Save Product</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- INVENTORY ADJUSTMENT MODAL -->
+  <div id="inventoryModal" class="modal-overlay">
+    <div class="modal-card" style="max-width: 520px;">
+      <div class="modal-header">
+        <h3>Adjust Inventory Count</h3>
+        <button class="modal-close-btn" onclick="closeInventoryModal()">
+          <i class="ph-bold ph-x"></i>
+        </button>
+      </div>
+
+      <form id="inventoryForm" onsubmit="handleInventorySubmit(event)">
+        <div class="modal-body">
+          <div class="form-group" style="margin-bottom: 1rem;">
+            <label class="form-label">Product / SKU <span class="req">*</span></label>
+            <select id="invAdjustProductId" class="form-select" required onchange="handleInvProductChange()">
+              <option value="">Select a product...</option>
+            </select>
+          </div>
+
+          <div style="background: #f8fafc; border: 1px solid var(--border); border-radius: var(--radius-md); padding: 0.85rem 1rem; margin-bottom: 1.25rem; display: flex; justify-content: space-between;">
+            <div>
+              <span style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">Stock On Hand</span>
+              <div style="font-size: 1.25rem; font-weight: 800;" id="invCurrentOnHand">--</div>
+            </div>
+            <div>
+              <span style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">Reserved</span>
+              <div style="font-size: 1.25rem; font-weight: 800; color: #b45309;" id="invCurrentReserved">--</div>
+            </div>
+            <div>
+              <span style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">Available</span>
+              <div style="font-size: 1.25rem; font-weight: 800; color: #047857;" id="invCurrentAvailable">--</div>
+            </div>
+          </div>
+
+          <div class="form-group" style="margin-bottom: 1rem;">
+            <label class="form-label">Movement Type <span class="req">*</span></label>
+            <select id="invMovementType" class="form-select" required>
+              <option value="RESTOCK">Stock Received / Restocked (+)</option>
+              <option value="PHYSICAL_COUNT_ADJUSTMENT">Physical Audit Count Adjustment (+ / -)</option>
+              <option value="DAMAGED_WRITE_OFF">Damaged / Defective Write-off (-)</option>
+              <option value="CUSTOMER_RETURN">Customer Return Restock (+)</option>
+            </select>
+          </div>
+
+          <div class="form-group" style="margin-bottom: 1rem;">
+            <label class="form-label">Quantity Change (+ or -) <span class="req">*</span></label>
+            <input type="number" id="invQuantityChange" class="form-input" required placeholder="e.g. 25 or -3">
+            <span class="form-helper">Positive integer to add stock, negative to reduce.</span>
+          </div>
+
+          <div class="form-group" style="margin-bottom: 1rem;">
+            <label class="form-label">Reason / Reference Note <span class="req">*</span></label>
+            <input type="text" id="invReason" class="form-input" required placeholder="e.g. Batch #401 arrival from assembly line">
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeInventoryModal()">Cancel</button>
+          <button type="submit" id="saveInventoryBtn" class="btn btn-primary">
+            <i class="ph-bold ph-check"></i>
+            <span>Commit Adjustment</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ADD ADMIN MODAL -->
+  <div id="adminModal" class="modal-overlay">
+    <div class="modal-card" style="max-width: 480px;">
+      <div class="modal-header">
+        <h3>Add Team Member</h3>
+        <button class="modal-close-btn" onclick="closeAdminModal()">
+          <i class="ph-bold ph-x"></i>
+        </button>
+      </div>
+
+      <form id="adminForm" onsubmit="handleAdminSubmit(event)">
+        <div class="modal-body">
+          <div class="form-group" style="margin-bottom: 1rem;">
+            <label class="form-label">Full Name <span class="req">*</span></label>
+            <input type="text" id="adminNewName" class="form-input" required placeholder="e.g. Adeola Davis">
+          </div>
+
+          <div class="form-group" style="margin-bottom: 1rem;">
+            <label class="form-label">Work Email <span class="req">*</span></label>
+            <input type="email" id="adminNewEmail" class="form-input" required placeholder="adeola@voltedge.ng">
+          </div>
+
+          <div class="form-group" style="margin-bottom: 1rem;">
+            <label class="form-label">Temporary Password <span class="req">*</span></label>
+            <input type="password" id="adminNewPassword" class="form-input" required placeholder="At least 8 characters">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Administrative Role <span class="req">*</span></label>
+            <select id="adminNewRole" class="form-select" required>
+              <option value="PRODUCT_MANAGER">Product Manager (Catalogue & Pricing)</option>
+              <option value="INVENTORY_MANAGER">Inventory Manager (Stock Levels & Audits)</option>
+              <option value="ADMINISTRATOR">Administrator (Full operational access)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeAdminModal()">Cancel</button>
+          <button type="submit" id="saveAdminBtn" class="btn btn-primary">
+            <i class="ph-bold ph-user-plus"></i>
+            <span>Create Account</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- TOAST NOTIFICATION CONTAINER -->
+  <div id="toastContainer" class="toast-container"></div>
+
+  <!-- Admin Application Logic -->
+  <script src="admin.js"></script>
+</body>
+</html>

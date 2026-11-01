@@ -137,6 +137,53 @@ module.exports = async function handler(req, res) {
     } catch (saveErr) {
       console.warn('[VoltEdge Order API] Failed to persist initial order to backend store:', saveErr.message);
     }
+
+    // 4. Supabase Inventory Reservation (lock warehouse stock for order)
+    if (Array.isArray(bodyObj.products) && bodyObj.products.length > 0) {
+      try {
+        const reservationItems = bodyObj.products.map(p => ({
+          sku: p.product_sku || p.sku,
+          product_name: p.product_name || p.name,
+          quantity: Number(p.quantity) || 1,
+          unit_price: Number(p.unit_price) || 0
+        }));
+
+        const supabaseUrl = process.env.SUPABASE_URL;
+        const supabaseKey = process.env.SUPABASE_ANON_KEY;
+
+        if (supabaseUrl && supabaseKey) {
+          const supaRes = await fetch(`${supabaseUrl}/rest/v1/rpc/reserve_stock`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'apikey': supabaseKey,
+              'Authorization': `Bearer ${supabaseKey}`
+            },
+            body: JSON.stringify({
+              p_order_id: orderId,
+              p_items: reservationItems,
+              p_idempotency_key: orderId
+            })
+          });
+
+          if (supaRes.ok) {
+            const resJson = await supaRes.json();
+            if (resJson && resJson.success === false) {
+              console.warn('[VoltEdge Order API] Stock reservation rejected:', resJson.error);
+              if (orderId) clearIdempotency(orderId);
+              return res.status(400).json({
+                success: false,
+                error: 'InsufficientStock',
+                message: resJson.error || 'One or more items in your cart is currently out of stock.'
+              });
+            }
+            console.log(`[VoltEdge Order API] Stock reserved in Supabase for ${orderId}`);
+          }
+        }
+      } catch (resErr) {
+        console.warn('[VoltEdge Order API] Non-fatal Supabase reservation notice:', resErr.message);
+      }
+    }
   }
 
   const targetWebhookUrl = process.env.VOLTEDGE_ORDER_WEBHOOK_URL || 'https://ucy00zep.rpcld.net/webhook/voltedge-order';
