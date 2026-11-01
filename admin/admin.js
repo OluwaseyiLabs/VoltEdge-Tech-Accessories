@@ -1392,6 +1392,106 @@ async function releaseReservation(orderId) {
 // 9. CATEGORIES, TEAM & AUDIT
 // ==========================================
 
+
+// ==========================================
+// CATEGORY MANAGEMENT
+// ==========================================
+
+function openCreateCategoryModal() {
+  const form = document.getElementById('categoryForm');
+  if (form) form.reset();
+  const title = document.getElementById('categoryModalTitle');
+  if (title) title.textContent = 'Add New Category';
+  
+  const nextOrder = (STATE.categories && STATE.categories.length) ? STATE.categories.length + 1 : 1;
+  const orderInput = document.getElementById('catSortOrder');
+  if (orderInput) orderInput.value = nextOrder;
+
+  const activeSelect = document.getElementById('catIsActive');
+  if (activeSelect) activeSelect.value = 'true';
+
+  const modal = document.getElementById('categoryModal');
+  if (modal) modal.classList.add('active');
+}
+
+function closeCategoryModal() {
+  const modal = document.getElementById('categoryModal');
+  if (modal) modal.classList.remove('active');
+}
+
+function handleCategoryNameInput() {
+  const nameEl = document.getElementById('catName');
+  const slugEl = document.getElementById('catSlug');
+  if (nameEl && slugEl) {
+    slugEl.value = generateSlug(nameEl.value);
+  }
+}
+
+async function handleCategoryFormSubmit(e) {
+  if (e) e.preventDefault();
+  const btn = document.getElementById('saveCategoryBtn');
+  const name = document.getElementById('catName').value.trim();
+  const slug = document.getElementById('catSlug').value.trim() || generateSlug(name);
+  const description = document.getElementById('catDescription').value.trim();
+  const sortOrder = parseInt(document.getElementById('catSortOrder').value, 10) || 0;
+  const isActive = document.getElementById('catIsActive').value === 'true';
+
+  if (!name) {
+    showToast('Please enter a category name', 'error');
+    return;
+  }
+
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = '<i class="ph-bold ph-spinner spinner"></i> Saving...';
+  }
+
+  try {
+    const payload = {
+      name,
+      slug,
+      description: description || null,
+      sort_order: sortOrder,
+      is_active: isActive
+    };
+
+    const { data, error } = await supabaseClient
+      .from('categories')
+      .insert([payload])
+      .select()
+      .single();
+
+    if (error) {
+      throw error;
+    }
+
+    showToast(`Category "${name}" created successfully!`, 'success');
+    closeCategoryModal();
+    await loadCategories();
+
+    // If the product modal is currently open, select this newly created category automatically
+    const formCat = document.getElementById('formCategory');
+    if (formCat && data && data.id) {
+      formCat.value = data.id;
+    }
+
+    logActivity('CREATE_CATEGORY', 'categories', data ? data.id : null, payload);
+  } catch (err) {
+    console.error('Error saving category:', err);
+    showToast(err.message || 'Failed to save category', 'error');
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = '<i class="ph-bold ph-check"></i><span>Save Category</span>';
+    }
+  }
+}
+
+window.openCreateCategoryModal = openCreateCategoryModal;
+window.closeCategoryModal = closeCategoryModal;
+window.handleCategoryNameInput = handleCategoryNameInput;
+window.handleCategoryFormSubmit = handleCategoryFormSubmit;
+
 function renderCategoriesTable() {
   const tbody = document.getElementById('categoriesTableBody');
   if (!STATE.categories.length) {

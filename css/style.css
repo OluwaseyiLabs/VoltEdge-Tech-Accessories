@@ -1871,6 +1871,110 @@ textarea.form-control {
   padding: 2.25rem;
 }
 
+/* Product Details / Quick View Multi-Image Gallery */
+.modal-gallery-wrap {
+  display: flex;
+  flex-direction: row;
+  gap: 0.85rem;
+  align-items: flex-start;
+  width: 100%;
+}
+
+.modal-thumbnails-strip {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  max-height: 420px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 2px 4px 2px 2px;
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 transparent;
+  flex-shrink: 0;
+}
+
+.modal-thumbnails-strip::-webkit-scrollbar {
+  width: 4px;
+}
+
+.modal-thumbnails-strip::-webkit-scrollbar-thumb {
+  background-color: #cbd5e1;
+  border-radius: 4px;
+}
+
+.gallery-thumb-btn {
+  width: 60px;
+  height: 60px;
+  border-radius: var(--radius-md, 8px);
+  border: 2px solid #e2e8f0;
+  background-color: #ffffff;
+  padding: 2px;
+  cursor: pointer;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.18s ease-in-out;
+  outline: none;
+  flex-shrink: 0;
+}
+
+.gallery-thumb-btn:hover {
+  border-color: var(--primary, #047857);
+  transform: translateY(-1px);
+}
+
+.gallery-thumb-btn.active {
+  border-color: var(--primary, #047857);
+  box-shadow: 0 0 0 2px rgba(4, 120, 87, 0.25);
+}
+
+.gallery-thumb-btn img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 5px;
+}
+
+.modal-gallery-wrap .modal-img-wrap {
+  flex: 1;
+  min-width: 0;
+  aspect-ratio: 1/1;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background-color: #fafbfc;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-gallery-wrap .modal-img-wrap img {
+  width: 90%;
+  height: 90%;
+  object-fit: contain;
+  transition: opacity 0.18s ease-in-out;
+}
+
+@media (max-width: 768px) {
+  .modal-gallery-wrap {
+    flex-direction: column-reverse;
+    gap: 0.75rem;
+  }
+  .modal-thumbnails-strip {
+    flex-direction: row;
+    max-height: none;
+    overflow-x: auto;
+    overflow-y: hidden;
+    width: 100%;
+    padding-bottom: 0.35rem;
+  }
+  .gallery-thumb-btn {
+    width: 52px;
+    height: 52px;
+  }
+}
+
+
 .modal-img-wrap {
   aspect-ratio: 1/1;
   border-radius: var(--radius-lg);

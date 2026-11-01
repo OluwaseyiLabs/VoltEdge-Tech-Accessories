@@ -30,7 +30,7 @@
   }
 
   /**
-   * Fetches published products from Supabase via PostgREST
+   * Fetches published products and categories from Supabase via PostgREST
    */
   async function fetchLiveCatalogue() {
     const config = await getClientConfig();
@@ -40,28 +40,44 @@
     }
 
     const endpoint = `${config.supabaseUrl}/rest/v1/products?select=*,category:categories(id,slug,name),inventory(stock_on_hand,reserved_quantity,available_quantity,low_stock_threshold,sales_enabled),images:product_images(thumbnail_url,card_url,detail_url,is_primary,display_order)&is_published=eq.true&publication_status=eq.PUBLISHED&order=sort_order.asc`;
+    const catEndpoint = `${config.supabaseUrl}/rest/v1/categories?is_active=eq.true&order=sort_order.asc`;
 
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 6000); // 6s timeout
 
     try {
-      const response = await fetch(endpoint, {
-        method: 'GET',
-        headers: {
-          'apikey': config.supabaseAnonKey,
-          'Authorization': `Bearer ${config.supabaseAnonKey}`,
-          'Accept': 'application/json'
-        },
-        signal: controller.signal
-      });
+      const headers = {
+        'apikey': config.supabaseAnonKey,
+        'Authorization': `Bearer ${config.supabaseAnonKey}`,
+        'Accept': 'application/json'
+      };
+
+      const [prodRes, catRes] = await Promise.all([
+        fetch(endpoint, { method: 'GET', headers, signal: controller.signal }),
+        fetch(catEndpoint, { method: 'GET', headers, signal: controller.signal }).catch(err => {
+          console.warn('[VoltEdge Sync] Categories query warning:', err);
+          return null;
+        })
+      ]);
 
       clearTimeout(timeoutId);
 
-      if (!response.ok) {
-        throw new Error(`Supabase HTTP ${response.status}: ${response.statusText}`);
+      if (catRes && catRes.ok) {
+        try {
+          const categories = await catRes.json();
+          if (Array.isArray(categories) && categories.length) {
+            window.CATEGORIES_DATA = categories;
+          }
+        } catch (e) {
+          console.warn('[VoltEdge Sync] Failed parsing categories response:', e);
+        }
       }
 
-      const products = await response.json();
+      if (!prodRes.ok) {
+        throw new Error(`Supabase HTTP ${prodRes.status}: ${prodRes.statusText}`);
+      }
+
+      const products = await prodRes.json();
       if (!Array.isArray(products) || !products.length) {
         console.warn('[VoltEdge Sync] Empty catalogue returned from Supabase. Retaining fallback data.');
         return false;
@@ -98,12 +114,24 @@
       // In stock determination
       const inStock = available > 0 && salesEnabled;
 
-      // Primary image selection
+      // Primary image selection & multi-image collection
       let primaryImage = null;
+      let allImages = [];
       if (Array.isArray(sp.images) && sp.images.length) {
-        const sorted = [...sp.images].sort((a, b) => (b.is_primary ? 1 : 0) - (a.is_primary ? 1 : 0));
+        const sorted = [...sp.images].sort((a, b) => {
+          if (b.is_primary !== a.is_primary) return (b.is_primary ? 1 : 0) - (a.is_primary ? 1 : 0);
+          return (a.display_order || 0) - (b.display_order || 0);
+        });
         primaryImage = sorted[0].card_url || sorted[0].detail_url || sorted[0].thumbnail_url;
+        allImages = sorted.map(img => img.detail_url || img.card_url || img.thumbnail_url).filter(Boolean);
       }
+
+      const defaultCoreImg = 'assets/images/pb-black.jpg';
+      const defaultAccImg = 'assets/images/bundle-wfh.jpg';
+      const coreImg = primaryImage || defaultCoreImg;
+      const coreImages = allImages.length ? allImages : [coreImg];
+      const accImg = primaryImage || defaultAccImg;
+      const accImages = allImages.length ? allImages : [accImg];
 
       // Check if creator accessory (category 'accessories' or price 0)
       if (cat.slug === 'accessories' || Number(sp.price) === 0) {
@@ -114,7 +142,8 @@
           subtitle: sp.short_name || sp.short_description || '',
           description: sp.description || sp.tagline || '',
           status: inStock ? (sp.badge || 'Available by Enquiry / Pre-order') : 'Temporarily Unavailable',
-          image: primaryImage || 'assets/images/bundle-wfh.jpg',
+          image: accImg,
+          images: accImages,
           features: Array.isArray(sp.features) ? sp.features : (Array.isArray(sp.bullets) ? sp.bullets : []),
           inStock: inStock
         });
@@ -133,7 +162,8 @@
           badgeType: sp.badge_type || 'accent',
           rating: Number(sp.rating) || 5.0,
           reviewsCount: Number(sp.reviews_count) || 20,
-          image: primaryImage || 'assets/images/pb-black.jpg',
+          image: coreImg,
+          images: coreImages,
           specsHighlight: sp.specs_highlight || '',
           warranty: sp.warranty || '1-Year Product Warranty',
           dispatchBadge: sp.dispatch_badge || 'Same-Day Dispatch Eligible',

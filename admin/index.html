@@ -385,6 +385,9 @@
               <h2 style="font-size: 1.1rem; font-weight: 700;">Product Categories</h2>
               <p style="font-size: 0.82rem; color: var(--text-muted);">Manage catalogue departments and storefront filters.</p>
             </div>
+            <button type="button" class="btn btn-primary btn-sm" onclick="openCreateCategoryModal()">
+              <i class="ph-bold ph-plus"></i> Add Category
+            </button>
           </div>
 
           <div class="table-card">
@@ -562,7 +565,12 @@
               </div>
 
               <div class="form-group">
-                <label class="form-label">Category <span class="req">*</span></label>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.35rem;">
+                  <label class="form-label" style="margin-bottom: 0;">Category <span class="req">*</span></label>
+                  <button type="button" class="btn btn-secondary btn-sm" style="padding: 0.15rem 0.5rem; font-size: 0.72rem; line-height: 1.2;" onclick="openCreateCategoryModal()">
+                    <i class="ph-bold ph-plus"></i> New Category
+                  </button>
+                </div>
                 <select id="formCategory" class="form-select" required>
                   <option value="">Select Category</option>
                 </select>
@@ -805,6 +813,61 @@
           <button type="submit" id="saveAdminBtn" class="btn btn-primary">
             <i class="ph-bold ph-user-plus"></i>
             <span>Create Account</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ADD / EDIT CATEGORY MODAL -->
+  <div id="categoryModal" class="modal-overlay">
+    <div class="modal-card" style="max-width: 480px;">
+      <div class="modal-header">
+        <h3 id="categoryModalTitle">Add New Category</h3>
+        <button class="modal-close-btn" onclick="closeCategoryModal()">
+          <i class="ph-bold ph-x"></i>
+        </button>
+      </div>
+
+      <form id="categoryForm" onsubmit="handleCategoryFormSubmit(event)">
+        <div class="modal-body">
+          <div class="form-group" style="margin-bottom: 1rem;">
+            <label class="form-label">Category Name <span class="req">*</span></label>
+            <input type="text" id="catName" class="form-input" required placeholder="e.g. Headphones & Audio" oninput="handleCategoryNameInput()">
+          </div>
+
+          <div class="form-group" style="margin-bottom: 1rem;">
+            <label class="form-label">URL Slug <span class="req">*</span></label>
+            <input type="text" id="catSlug" class="form-input" required placeholder="headphones-audio">
+            <span class="form-hint" style="font-size: 0.75rem; color: var(--text-muted); display: block; margin-top: 0.25rem;">Used in storefront filtering and product grouping.</span>
+          </div>
+
+          <div class="form-group" style="margin-bottom: 1rem;">
+            <label class="form-label">Description (Optional)</label>
+            <textarea id="catDescription" class="form-textarea" rows="2" placeholder="Brief description of products in this category..."></textarea>
+          </div>
+
+          <div class="form-grid" style="grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div class="form-group">
+              <label class="form-label">Display Order</label>
+              <input type="number" id="catSortOrder" class="form-input" value="10" min="0">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Status</label>
+              <select id="catIsActive" class="form-select">
+                <option value="true">Active (Visible)</option>
+                <option value="false">Inactive</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeCategoryModal()">Cancel</button>
+          <button type="submit" id="saveCategoryBtn" class="btn btn-primary">
+            <i class="ph-bold ph-check"></i>
+            <span>Save Category</span>
           </button>
         </div>
       </form>

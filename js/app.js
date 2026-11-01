@@ -88,6 +88,7 @@ function initApp() {
   // Initializations with safe try/catch guards so one failure never blocks the others
   try { initAnnouncementCountdown(); } catch (e) { console.error('[VoltEdge] initAnnouncementCountdown error:', e); }
   try { initCatalogSearch(); } catch (e) { console.error('[VoltEdge] initCatalogSearch error:', e); }
+  try { renderFilterTabs(); } catch (e) { console.error('[VoltEdge] renderFilterTabs error:', e); }
   try { renderProducts('all'); } catch (e) { console.error('[VoltEdge] renderProducts error:', e); }
   try { renderAccessories(); } catch (e) { console.error('[VoltEdge] renderAccessories error:', e); }
   try { renderReviews(); } catch (e) { console.error('[VoltEdge] renderReviews error:', e); }
@@ -309,6 +310,54 @@ function renderProducts(filter = currentCatalogCategory, searchQuery = currentCa
     `;
   }).join('');
 }
+
+
+// Dynamic Category Filter Tabs Synchronization
+function renderFilterTabs() {
+  const container = document.querySelector('.filter-tabs');
+  if (!container) return;
+
+  const catalog = getProductCatalogData();
+  const totalCount = catalog.length;
+
+  let categories = [];
+  if (Array.isArray(window.CATEGORIES_DATA) && window.CATEGORIES_DATA.length) {
+    categories = window.CATEGORIES_DATA
+      .filter(c => c.is_active !== false && c.slug !== 'accessories')
+      .map(c => ({ slug: c.slug, name: c.name }));
+  } else {
+    categories = [
+      { slug: 'powerbanks', name: 'Laptop Power Banks' },
+      { slug: 'ups', name: 'Wi-Fi UPS Backup' },
+      { slug: 'ergonomics', name: 'Ergonomics & Gear' },
+      { slug: 'bundles', name: 'WFH Bundles' }
+    ];
+  }
+
+  // Include any other category present in catalog products
+  catalog.forEach(p => {
+    if (p.category && p.category !== 'all' && p.category !== 'accessories') {
+      if (!categories.some(c => c.slug === p.category)) {
+        categories.push({
+          slug: p.category,
+          name: p.categoryLabel || p.category
+        });
+      }
+    }
+  });
+
+  const activeCat = currentCatalogCategory || 'all';
+
+  let html = `<button class="tab-btn ${activeCat === 'all' ? 'active' : ''}" onclick="filterCategory('all', this)" role="tab">All Products (${totalCount})</button>`;
+
+  categories.forEach(cat => {
+    const isActive = activeCat === cat.slug;
+    html += `\n<button class="tab-btn ${isActive ? 'active' : ''}" onclick="filterCategory('${cat.slug}', this)" role="tab">${cat.name}</button>`;
+  });
+
+  container.innerHTML = html;
+}
+window.renderFilterTabs = renderFilterTabs;
 
 // Handle Category Tab Switches
 window.filterCategory = function(cat, buttonEl) {
@@ -1529,11 +1578,36 @@ window.openQuickView = function(productId) {
     </ul>
   ` : '';
 
+  // Multi-image gallery preparation
+  const images = (Array.isArray(product.images) && product.images.length) 
+    ? product.images 
+    : (product.image ? [product.image] : []);
+  const activeImage = images[0] || product.image || 'assets/images/pb-black.jpg';
+
+  const galleryHtml = `
+    <div class="modal-gallery-wrap">
+      ${images.length > 1 ? `
+        <div class="modal-thumbnails-strip" role="group" aria-label="Product thumbnails">
+          ${images.map((img, idx) => `
+            <button type="button" 
+              class="gallery-thumb-btn ${idx === 0 ? 'active' : ''}" 
+              onclick="window.switchQuickViewImage(this, '${img}')"
+              onmouseenter="window.switchQuickViewImage(this, '${img}')"
+              aria-label="View product image ${idx + 1}">
+              <img src="${img}" alt="${product.name} view ${idx + 1}" loading="lazy">
+            </button>
+          `).join('')}
+        </div>
+      ` : ''}
+      <div class="modal-img-wrap">
+        <img id="quickViewMainImg" src="${activeImage}" alt="${product.name}">
+      </div>
+    </div>
+  `;
+
   modalBody.innerHTML = `
     <div class="quick-view-modal-grid">
-      <div class="modal-img-wrap">
-        <img src="${product.image}" alt="${product.name}">
-      </div>
+      ${galleryHtml}
       <div class="modal-body-content">
         <span class="product-sku">${product.sku}</span>
         <h2 style="font-size: 1.5rem; color: var(--text-main); margin: 0.25rem 0 0.5rem; font-weight: 800;">${product.name}</h2>
@@ -1588,6 +1662,26 @@ window.openQuickView = function(productId) {
   `;
 
   modal.classList.add('active');
+};
+
+window.switchQuickViewImage = function(btnEl, imgUrl) {
+  const mainImg = document.getElementById('quickViewMainImg');
+  if (mainImg && imgUrl) {
+    if (mainImg.getAttribute('src') !== imgUrl) {
+      mainImg.style.opacity = '0.35';
+      mainImg.src = imgUrl;
+      setTimeout(() => {
+        mainImg.style.opacity = '1';
+      }, 70);
+    }
+  }
+  if (btnEl) {
+    const parent = btnEl.closest('.modal-thumbnails-strip');
+    if (parent) {
+      parent.querySelectorAll('.gallery-thumb-btn').forEach(btn => btn.classList.remove('active'));
+    }
+    btnEl.classList.add('active');
+  }
 };
 
 window.modalSelectOrder = function(productId) {
@@ -1692,6 +1786,9 @@ window.currentCatalogSearchQuery = currentCatalogSearchQuery;
 // Re-render when live Supabase catalogue is fetched
 window.addEventListener('voltedge:catalog-synced', () => {
   try {
+    if (typeof window.renderFilterTabs === 'function') {
+      window.renderFilterTabs();
+    }
     renderProducts(currentCatalogCategory, currentCatalogSearchQuery);
     renderAccessories();
   } catch (err) {
