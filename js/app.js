@@ -243,14 +243,14 @@ function renderProducts(filter = currentCatalogCategory, searchQuery = currentCa
 
   grid.innerHTML = products.map(product => {
     return `
-      <article class="product-card" data-id="${product.id}">
+      <article class="product-card" data-id="${product.id}" onclick="handleCardClick(event, '${product.id}')" role="button" tabindex="0" aria-label="View full details of ${product.name}">
         <div class="product-card-top">
           <img src="${product.image}" alt="${product.name}" class="product-card-img" loading="lazy">
           <div class="card-badges">
             <span class="card-badge ${product.badgeType}">${product.badge}</span>
             <span class="warranty-pill"><i class="ph ph-shield-check"></i> 1-Yr Warranty</span>
           </div>
-          <button class="quick-view-btn" onclick="openQuickView('${product.id}')" aria-label="Quick view of ${product.name}">
+          <button class="quick-view-btn" onclick="event.stopPropagation(); openQuickView('${product.id}')" aria-label="Quick view of ${product.name}">
             <i class="ph ph-eye"></i> Quick View
           </button>
         </div>
@@ -288,7 +288,7 @@ function renderProducts(filter = currentCatalogCategory, searchQuery = currentCa
                 ` : ''}
               </div>
             </div>
-            <button class="btn btn-volt btn-sm" onclick="VoltEdgeCart.addItem('${product.id}', 1, true)" aria-label="Add ${product.name} to Cart">
+            <button class="btn btn-volt btn-sm" onclick="event.stopPropagation(); VoltEdgeCart.addItem('${product.id}', 1, true)" aria-label="Add ${product.name} to Cart">
               <i class="ph-bold ph-shopping-bag"></i> Add to Cart
             </button>
           </div>
@@ -1500,12 +1500,22 @@ window.openQuickView = function(productId) {
   const modalBody = document.getElementById('quick-view-body');
   if (!modal || !modalBody) return;
 
-  const specsRows = Object.entries(product.technicalSpecs).map(([key, val]) => `
+  const specs = (typeof product.technicalSpecs === 'object' && product.technicalSpecs !== null) ? product.technicalSpecs : {};
+  const hasSpecs = Object.keys(specs).length > 0;
+  const specsRows = Object.entries(specs).map(([key, val]) => `
     <tr>
       <td>${key}</td>
       <td>${val}</td>
     </tr>
   `).join('');
+
+  const bullets = Array.isArray(product.bullets) ? product.bullets : [];
+  const bulletsHtml = bullets.length ? `
+    <h4 style="font-size: 0.88rem; color: var(--text-main); margin: 0.85rem 0 0.45rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700;">Key Features</h4>
+    <ul class="product-bullets" style="margin-bottom: 1rem;">
+      ${bullets.map(b => `<li class="product-bullet"><i class="ph-bold ph-check bullet-icon"></i><span>${b}</span></li>`).join('')}
+    </ul>
+  ` : '';
 
   modalBody.innerHTML = `
     <div class="quick-view-modal-grid">
@@ -1531,12 +1541,15 @@ window.openQuickView = function(productId) {
           ${product.tagline}
         </p>
 
-        <h4 style="font-size: 0.88rem; color: var(--text-main); margin-bottom: 0.45rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700;">Technical Specifications</h4>
-        <table class="modal-specs-table">
-          <tbody>
-            ${specsRows}
-          </tbody>
-        </table>
+        ${bulletsHtml}
+        ${hasSpecs ? `
+          <h4 style="font-size: 0.88rem; color: var(--text-main); margin-bottom: 0.45rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700;">Technical Specifications</h4>
+          <table class="modal-specs-table">
+            <tbody>
+              ${specsRows}
+            </tbody>
+          </table>
+        ` : ''}
 
         <div style="display: flex; gap: 0.75rem; margin-top: auto; padding-top: 1rem; flex-wrap: wrap;">
           <button class="btn btn-volt" style="flex: 1; min-width: 140px;" onclick="VoltEdgeCart.addItem('${product.id}', 1, true)">
@@ -1638,3 +1651,29 @@ if (typeof document !== 'undefined') {
     initApp();
   }
 }
+
+
+// Global handler for clicking any product card to view full details
+function handleCardClick(event, productId) {
+  if (event.target.closest('button') || event.target.closest('a') || event.target.closest('.btn') || event.target.closest('.card-badge')) {
+    return;
+  }
+  openQuickView(productId);
+}
+window.handleCardClick = handleCardClick;
+
+// Expose rendering functions for live Supabase synchronization
+window.renderProducts = renderProducts;
+window.renderAccessories = renderAccessories;
+window.currentCatalogCategory = currentCatalogCategory;
+window.currentCatalogSearchQuery = currentCatalogSearchQuery;
+
+// Re-render when live Supabase catalogue is fetched
+window.addEventListener('voltedge:catalog-synced', () => {
+  try {
+    renderProducts(currentCatalogCategory, currentCatalogSearchQuery);
+    renderAccessories();
+  } catch (err) {
+    console.warn('[VoltEdge] Error re-rendering on catalog sync:', err);
+  }
+});
