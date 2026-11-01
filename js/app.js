@@ -1584,6 +1584,11 @@ window.openQuickView = function(productId) {
     : (product.image ? [product.image] : []);
   const activeImage = images[0] || product.image || 'assets/images/pb-black.jpg';
 
+  // Store for enlarged lightbox viewer
+  window.currentQuickViewProduct = product;
+  window.currentQuickViewImages = images;
+  window.currentQuickViewImageIndex = 0;
+
   const galleryHtml = `
     <div class="modal-gallery-wrap">
       ${images.length > 1 ? `
@@ -1591,16 +1596,20 @@ window.openQuickView = function(productId) {
           ${images.map((img, idx) => `
             <button type="button" 
               class="gallery-thumb-btn ${idx === 0 ? 'active' : ''}" 
-              onclick="window.switchQuickViewImage(this, '${img}')"
-              onmouseenter="window.switchQuickViewImage(this, '${img}')"
+              onclick="window.switchQuickViewImage(this, '${img}', ${idx})"
+              onmouseenter="window.switchQuickViewImage(this, '${img}', ${idx})"
               aria-label="View product image ${idx + 1}">
               <img src="${img}" alt="${product.name} view ${idx + 1}" loading="lazy">
             </button>
           `).join('')}
         </div>
       ` : ''}
-      <div class="modal-img-wrap">
+      <div class="modal-img-wrap" onclick="window.openImageLightbox()" title="Click to view enlarged image" tabindex="0" role="button" aria-label="Click to enlarge image">
         <img id="quickViewMainImg" src="${activeImage}" alt="${product.name}">
+        <span class="img-zoom-hint">
+          <i class="ph-bold ph-magnifying-glass-plus"></i>
+          <span>Click to enlarge</span>
+        </span>
       </div>
     </div>
   `;
@@ -1664,7 +1673,7 @@ window.openQuickView = function(productId) {
   modal.classList.add('active');
 };
 
-window.switchQuickViewImage = function(btnEl, imgUrl) {
+window.switchQuickViewImage = function(btnEl, imgUrl, idx) {
   const mainImg = document.getElementById('quickViewMainImg');
   if (mainImg && imgUrl) {
     if (mainImg.getAttribute('src') !== imgUrl) {
@@ -1675,6 +1684,9 @@ window.switchQuickViewImage = function(btnEl, imgUrl) {
       }, 70);
     }
   }
+  if (typeof idx === 'number') {
+    window.currentQuickViewImageIndex = idx;
+  }
   if (btnEl) {
     const parent = btnEl.closest('.modal-thumbnails-strip');
     if (parent) {
@@ -1683,6 +1695,160 @@ window.switchQuickViewImage = function(btnEl, imgUrl) {
     btnEl.classList.add('active');
   }
 };
+
+// ==========================================
+// ENLARGED IMAGE LIGHTBOX VIEWER
+// ==========================================
+
+window.openImageLightbox = function(initialIndex) {
+  let images = window.currentQuickViewImages || [];
+  if (!images.length) {
+    const mainImg = document.getElementById('quickViewMainImg');
+    if (mainImg && mainImg.src) {
+      images = [mainImg.src];
+      window.currentQuickViewImages = images;
+    }
+  }
+  if (!images.length) return;
+
+  const idx = (typeof initialIndex === 'number' && initialIndex >= 0 && initialIndex < images.length)
+    ? initialIndex
+    : (window.currentQuickViewImageIndex || 0);
+
+  window.currentLightboxIndex = idx;
+
+  const lightbox = document.getElementById('image-lightbox-modal');
+  if (!lightbox) return;
+
+  updateLightboxView();
+  lightbox.classList.add('active');
+  document.body.style.overflow = 'hidden';
+};
+
+window.closeImageLightbox = function(e) {
+  if (e && e.target && e.target.closest('.lightbox-content-inner') && !e.target.closest('.lightbox-close-btn')) {
+    return;
+  }
+  const lightbox = document.getElementById('image-lightbox-modal');
+  if (lightbox) {
+    lightbox.classList.remove('active');
+    document.body.style.overflow = '';
+  }
+};
+
+window.stepLightboxImage = function(direction) {
+  const images = window.currentQuickViewImages || [];
+  if (!images.length) return;
+
+  let newIndex = (window.currentLightboxIndex || 0) + direction;
+  if (newIndex < 0) newIndex = images.length - 1;
+  if (newIndex >= images.length) newIndex = 0;
+
+  window.currentLightboxIndex = newIndex;
+  window.currentQuickViewImageIndex = newIndex;
+  updateLightboxView();
+
+  // Also sync quick-view modal if open
+  const thumbs = document.querySelectorAll('.gallery-thumb-btn');
+  if (thumbs[newIndex]) {
+    thumbs.forEach(b => b.classList.remove('active'));
+    thumbs[newIndex].classList.add('active');
+  }
+  const mainImg = document.getElementById('quickViewMainImg');
+  if (mainImg && images[newIndex]) {
+    mainImg.src = images[newIndex];
+  }
+};
+
+window.setLightboxImage = function(index) {
+  const images = window.currentQuickViewImages || [];
+  if (index >= 0 && index < images.length) {
+    window.currentLightboxIndex = index;
+    window.currentQuickViewImageIndex = index;
+    updateLightboxView();
+
+    const thumbs = document.querySelectorAll('.gallery-thumb-btn');
+    if (thumbs[index]) {
+      thumbs.forEach(b => b.classList.remove('active'));
+      thumbs[index].classList.add('active');
+    }
+    const mainImg = document.getElementById('quickViewMainImg');
+    if (mainImg && images[index]) {
+      mainImg.src = images[index];
+    }
+  }
+};
+
+function updateLightboxView() {
+  const images = window.currentQuickViewImages || [];
+  const idx = window.currentLightboxIndex || 0;
+  const currentImgUrl = images[idx] || '';
+
+  const activeImgEl = document.getElementById('lightboxActiveImg');
+  const counterEl = document.getElementById('lightboxCounter');
+  const prevBtn = document.getElementById('lightboxPrevBtn');
+  const nextBtn = document.getElementById('lightboxNextBtn');
+  const thumbsBar = document.getElementById('lightboxThumbnailsBar');
+
+  if (activeImgEl) {
+    activeImgEl.style.opacity = '0.35';
+    activeImgEl.src = currentImgUrl;
+    activeImgEl.onload = () => { activeImgEl.style.opacity = '1'; };
+    setTimeout(() => { activeImgEl.style.opacity = '1'; }, 90);
+  }
+
+  if (counterEl) {
+    if (images.length > 1) {
+      counterEl.textContent = `${idx + 1} / ${images.length}`;
+      counterEl.style.display = 'block';
+    } else {
+      counterEl.style.display = 'none';
+    }
+  }
+
+  if (prevBtn && nextBtn) {
+    if (images.length > 1) {
+      prevBtn.style.display = 'flex';
+      nextBtn.style.display = 'flex';
+    } else {
+      prevBtn.style.display = 'none';
+      nextBtn.style.display = 'none';
+    }
+  }
+
+  if (thumbsBar) {
+    if (images.length > 1) {
+      thumbsBar.style.display = 'flex';
+      thumbsBar.innerHTML = images.map((img, i) => `
+        <button type="button" 
+          class="lightbox-thumb-btn ${i === idx ? 'active' : ''}" 
+          onclick="window.setLightboxImage(${i})" 
+          aria-label="View photo ${i + 1}">
+          <img src="${img}" alt="Thumbnail ${i + 1}">
+        </button>
+      `).join('');
+    } else {
+      thumbsBar.style.display = 'none';
+      thumbsBar.innerHTML = '';
+    }
+  }
+}
+
+// Global Keyboard Navigation for Enlarged Lightbox
+document.addEventListener('keydown', (e) => {
+  const lightbox = document.getElementById('image-lightbox-modal');
+  if (!lightbox || !lightbox.classList.contains('active')) return;
+
+  if (e.key === 'Escape') {
+    window.closeImageLightbox();
+  } else if (e.key === 'ArrowLeft') {
+    window.stepLightboxImage(-1);
+  } else if (e.key === 'ArrowRight') {
+    window.stepLightboxImage(1);
+  }
+});
+
+
 
 window.modalSelectOrder = function(productId) {
   const modal = document.getElementById('quick-view-modal');
