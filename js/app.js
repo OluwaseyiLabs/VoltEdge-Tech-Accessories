@@ -193,6 +193,21 @@ function matchesProduct(product, query) {
 }
 
 // 3. Render Product Catalog with Category Filtering & Real-Time Search
+// Format Warranty Statement for Card Badges and Details
+function formatWarrantyBadge(warranty) {
+  if (!warranty || typeof warranty !== 'string') return '1-Yr Warranty';
+  const trimmed = sanitizeInput(warranty, 80).trim();
+  if (!trimmed) return '1-Yr Warranty';
+
+  let w = trimmed.replace(/product\s+warranty/gi, 'Warranty').trim();
+  w = w.replace(/(\d+)\s*(?:-|–|\s)?(?:year|years)\b/gi, (m, n) => n + '-Yr');
+  w = w.replace(/(\d+)\s*(?:-|–|\s)?(?:months|month)\b/gi, (m, n) => n + '-Month');
+  if (!w.toLowerCase().includes('warranty')) {
+    w += ' Warranty';
+  }
+  return w;
+}
+
 function renderProducts(filter = currentCatalogCategory, searchQuery = currentCatalogSearchQuery) {
   currentCatalogCategory = filter;
   currentCatalogSearchQuery = searchQuery;
@@ -253,8 +268,8 @@ function renderProducts(filter = currentCatalogCategory, searchQuery = currentCa
             ${isOutOfStock ? `
               <span class="card-badge badge-out-of-stock">Out of Stock</span>
             ` : `
-              <span class="card-badge ${product.badgeType}">${product.badge}</span>
-              <span class="warranty-pill"><i class="ph ph-shield-check"></i> 1-Yr Warranty</span>
+              ${product.badge ? `<span class="card-badge ${product.badgeType || 'accent'}">${product.badge}</span>` : ''}
+              <span class="warranty-pill"><i class="ph ph-shield-check"></i> ${formatWarrantyBadge(product.warranty)}</span>
             `}
           </div>
           <button class="quick-view-btn" onclick="event.stopPropagation(); openQuickView('${product.id}')" aria-label="Quick view of ${product.name}">
@@ -1618,7 +1633,10 @@ window.openQuickView = function(productId) {
     <div class="quick-view-modal-grid">
       ${galleryHtml}
       <div class="modal-body-content">
-        <span class="product-sku">${product.sku}</span>
+        <div style="display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; margin-bottom: 0.35rem; flex-wrap: wrap;">
+          <span class="product-sku">${product.sku}</span>
+          <span class="warranty-pill" style="font-size: 0.72rem; padding: 0.2rem 0.55rem;"><i class="ph ph-shield-check"></i> ${formatWarrantyBadge(product.warranty)}</span>
+        </div>
         <h2 style="font-size: 1.5rem; color: var(--text-main); margin: 0.25rem 0 0.5rem; font-weight: 800;">${product.name}</h2>
         <div style="margin-bottom: 0.85rem;">
           <div class="price-container" style="align-items: baseline; gap: 0.65rem;">
