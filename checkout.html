@@ -37,6 +37,33 @@
   <script src="https://unpkg.com/@phosphor-icons/web" async></script>
 
   <style>
+    .btn-continue-payment {
+      background: #064E3B !important;
+      color: #ffffff !important;
+      padding: 1rem 1.75rem !important;
+      font-size: 1.05rem !important;
+      font-weight: 800 !important;
+      border-radius: var(--radius-full) !important;
+      border: none !important;
+      cursor: pointer;
+      display: inline-flex !important;
+      align-items: center;
+      justify-content: center;
+      gap: 0.6rem;
+      width: 100%;
+      box-shadow: 0 4px 14px rgba(6, 78, 59, 0.25);
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      text-decoration: none;
+    }
+    .btn-continue-payment:hover {
+      background: #043628 !important;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 22px rgba(6, 78, 59, 0.36);
+    }
+    .btn-continue-payment:active {
+      transform: translateY(0);
+    }
+
     .checkout-page-wrap {
       min-height: calc(100vh - 4.5rem);
       padding: 3rem 0 5rem;
@@ -736,7 +763,7 @@
   <!-- Top Announcement Bar -->
   <aside class="top-bar" aria-label="Announcement">
     <div class="container top-bar-content">
-      <span class="top-bar-text">Same-Day Dispatch for Orders Placed Before 2:00 PM | 1-Year Full Warranty on All Gear</span>
+      <span class="top-bar-text">Same-day delivery is available for orders placed and confirmed before 2:00 PM, strictly within selected locations in Lagos | Warranty on all products</span>
     </div>
   </aside>
 
@@ -844,22 +871,27 @@
         </div>
 
         <!-- Prominent Payment Link Notice -->
-        <div style="background: #f0fdf4; border: 2px solid #16a34a; border-radius: var(--radius-md); padding: 1.15rem 1.25rem; margin-bottom: 1.75rem; text-align: center; box-shadow: 0 4px 12px rgba(22, 163, 74, 0.1);">
+        <div id="chk-conf-notice-box" style="background: #f0fdf4; border: 2px solid #16a34a; border-radius: var(--radius-md); padding: 1.15rem 1.25rem; margin-bottom: 1.75rem; text-align: center; box-shadow: 0 4px 12px rgba(22, 163, 74, 0.1);">
           <div style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; margin-bottom: 0.35rem; color: #15803d;">
-            <i class="ph-bold ph-envelope-simple-open" style="font-size: 1.35rem;"></i>
+            <i class="ph-bold ph-envelope-simple-open" id="chk-conf-notice-icon" style="font-size: 1.35rem;"></i>
             <span style="font-size: 0.85rem; font-weight: 800; letter-spacing: 0.05em; text-transform: uppercase;">Notice</span>
           </div>
-          <p style="font-size: 1.02rem; font-weight: 800; color: #14532d; line-height: 1.45; margin: 0;">
-            Your order has been received. Please check your email for your payment link to complete your payment.
+          <p id="chk-conf-notice-text" style="font-size: 1.02rem; font-weight: 800; color: #14532d; line-height: 1.45; margin: 0;">
+            Your order has been received successfully. Please use the Continue to Payment button below to complete your payment. A copy of your payment link has also been sent to your email.
           </p>
         </div>
 
-        <!-- Buttons: View Full Order Status & Continue Shopping -->
-        <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
-          <a href="order-success.html" id="chk-btn-view-status" class="btn btn-primary" style="padding: 0.95rem 1.75rem; font-size: 1rem; font-weight: 700; border-radius: var(--radius-full); text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem;">
+        <!-- Buttons: Continue to Payment, View Full Order Status & Continue Shopping -->
+        <div style="display: flex; flex-direction: column; gap: 0.85rem; max-width: 440px; margin: 0 auto; width: 100%;">
+          <button type="button" id="chk-btn-continue-payment" class="btn btn-continue-payment">
+            <i class="ph-bold ph-credit-card" style="font-size: 1.25rem;"></i>
+            <span>Continue to Payment</span>
+            <i class="ph-bold ph-arrow-square-out" style="font-size: 1.15rem;"></i>
+          </button>
+          <a href="order-success.html" id="chk-btn-view-status" class="btn btn-primary" style="padding: 0.95rem 1.75rem; font-size: 1rem; font-weight: 700; border-radius: var(--radius-full); text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; width: 100%;">
             <i class="ph-bold ph-arrow-square-out"></i> <span>View Full Order Status</span>
           </a>
-          <a href="index.html#catalogue" class="btn" style="padding: 0.95rem 1.75rem; font-size: 1rem; font-weight: 700; border-radius: var(--radius-full); border: 1.5px solid var(--border); color: var(--text-main); text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem; background: #ffffff;">
+          <a href="index.html#catalogue" class="btn" style="padding: 0.95rem 1.75rem; font-size: 1rem; font-weight: 700; border-radius: var(--radius-full); border: 1.5px solid var(--border); color: var(--text-main); text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; background: #ffffff; width: 100%;">
             <i class="ph-bold ph-arrow-left"></i> <span>Continue Shopping</span>
           </a>
         </div>
@@ -1498,7 +1530,11 @@
         [statusMsgEl, sidebarStatusMsgEl].forEach(el => {
           if (!el) return;
           if (type === 'loading') {
-            el.style.display = 'none';
+            el.style.display = 'block';
+            el.innerHTML = msg;
+            el.style.background = '#f0fdf4';
+            el.style.color = '#166534';
+            el.style.border = '1.5px solid #86efac';
             return;
           }
           el.style.display = 'block';
@@ -1727,39 +1763,33 @@
         if (submitBtn) submitBtn.disabled = true;
         if (sidebarSubmitBtn) sidebarSubmitBtn.disabled = true;
 
-        const startTime = Date.now();
-        const MAX_WAIT_MS = 60000; // 1 minute
-        let attempt = 0;
-        let webhookConfirmed = false;
-        let lastErrorDetails = '';
-
-        // Submission loading state
-        const initialBtnHTML = `<i class="ph-bold ph-spinner spin-anim"></i> <span>Please wait a moment...</span>`;
+        const initialBtnHTML = `<i class="ph-bold ph-spinner spin-anim"></i> <span>Processing Order...</span>`;
         if (submitBtn) submitBtn.innerHTML = initialBtnHTML;
         if (sidebarSubmitBtn) sidebarSubmitBtn.innerHTML = initialBtnHTML;
-        setStatus('loading', '');
-
-        const countdownTimer = setInterval(() => {
-          const btnText = `<i class="ph-bold ph-spinner spin-anim"></i> <span>Please wait a moment...</span>`;
-          if (submitBtn) submitBtn.innerHTML = btnText;
-          if (sidebarSubmitBtn) sidebarSubmitBtn.innerHTML = btnText;
-        }, 1000);
+        setStatus('loading', `<i class="ph-bold ph-spinner spin-anim"></i> Processing your order and preparing your secure payment link. Please do not close this page.`);
 
         const targetWebhookUrl = getOrderWebhookUrl();
-        let confirmedBackendData = null;
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 60000);
 
-        // Wait loop: Polls/awaits webhook response for up to 1 minute with strict contract validation
-        while (Date.now() - startTime < MAX_WAIT_MS) {
-          attempt++;
-          const remainingTime = Math.max(1000, MAX_WAIT_MS - (Date.now() - startTime));
-          const controller = new AbortController();
-          const timeoutId = setTimeout(() => controller.abort(), Math.min(60000, remainingTime));
-
+        try {
+          console.log(`[VoltEdge Automation] Submitting order to ${targetWebhookUrl}...`);
+          let res;
           try {
-            console.log(`[VoltEdge Automation] Attempt ${attempt}: POST ${targetWebhookUrl}...`);
-            let res;
-            try {
-              res = await fetch(targetWebhookUrl, {
+            res = await fetch(targetWebhookUrl, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json, text/plain, */*'
+              },
+              body: JSON.stringify(orderDetails),
+              signal: controller.signal
+            });
+          } catch (fetchErr) {
+            const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+            if (isLocalhost && targetWebhookUrl !== '/api/voltedge-order') {
+              console.log('[VoltEdge Automation] Retrying via local proxy /api/voltedge-order...');
+              res = await fetch('/api/voltedge-order', {
                 method: 'POST',
                 headers: {
                   'Content-Type': 'application/json',
@@ -1768,167 +1798,190 @@
                 body: JSON.stringify(orderDetails),
                 signal: controller.signal
               });
-            } catch (fetchErr) {
-              const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-              if (isLocalhost) {
-                console.log('[VoltEdge Automation] Direct POST blocked or failed, retrying via local proxy /api/voltedge-order...');
-                res = await fetch('/api/voltedge-order', {
-                  method: 'POST',
-                  headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json, text/plain, */*'
-                  },
-                  body: JSON.stringify(orderDetails),
-                  signal: controller.signal
-                });
-              } else {
-                throw fetchErr;
-              }
-            }
-            clearTimeout(timeoutId);
-
-            console.log(`[VoltEdge Automation] Webhook response status: ${res.status}`);
-
-            let resData = null;
-            let rawBody = '';
-            try {
-              rawBody = await res.text();
-              if (rawBody && rawBody.trim()) {
-                resData = JSON.parse(rawBody);
-              }
-            } catch (parseErr) {
-              lastErrorDetails = `Server returned non-JSON body (HTTP ${res.status}): ${rawBody.slice(0, 120)}`;
-            }
-
-            // Strictly validate response against agreed contract
-            const validation = validateBackendOrderResponse(res.status, resData, trackingCode);
-
-            if (validation.valid) {
-              console.log('[VoltEdge Automation] Order verified by backend:', validation);
-              confirmedBackendData = validation.data;
-              webhookConfirmed = true;
-              break;
             } else {
-              console.warn(`[VoltEdge Automation] Attempt ${attempt} contract validation failed (${validation.reason}):`, validation.error);
-              lastErrorDetails = validation.error || `Server returned HTTP ${res.status}`;
-              
-              // If rate-limited, immediately stop retrying and present 429 message
-              if (validation.reason === 'rate_limited') {
-                break;
-              }
-
-              // Wait 3 seconds before next retry if within 60s window
-              const timeLeft = MAX_WAIT_MS - (Date.now() - startTime);
-              if (timeLeft > 3000) {
-                await new Promise(resolve => setTimeout(resolve, 3000));
-              } else {
-                break;
-              }
-            }
-
-          } catch (err) {
-            clearTimeout(timeoutId);
-            console.warn(`[VoltEdge Automation] Attempt ${attempt} network error:`, err);
-            lastErrorDetails = err.name === 'AbortError' 
-              ? 'Request timed out waiting for fulfillment server.'
-              : (err.message || 'Connection to fulfillment server failed.');
-            const timeLeft = MAX_WAIT_MS - (Date.now() - startTime);
-            if (timeLeft > 3000) {
-              await new Promise(resolve => setTimeout(resolve, 3000));
-            } else {
-              break;
+              throw fetchErr;
             }
           }
-        }
+          clearTimeout(timeoutId);
 
-        clearInterval(countdownTimer);
-
-        // Strictly require verified backend response before displaying success state
-        if (webhookConfirmed) {
-          const finalOrderId = (confirmedBackendData && (confirmedBackendData.order_id || confirmedBackendData.orderId)) || trackingCode;
-
-          // Cache verified backend response in localStorage
+          let responseData = null;
           try {
-            const finalSaved = {
-              ...orderDetails,
-              order_id: finalOrderId,
-              orderId: finalOrderId,
-              payment_link: (confirmedBackendData && (confirmedBackendData.payment_link || confirmedBackendData.paymentLink)) || '',
-              payment_link_sent: true,
-              order_status: 'PENDING_PAYMENT'
-            };
-            localStorage.setItem('voltedge_last_order', JSON.stringify(finalSaved));
-          } catch {}
-
-          // Display Experience A: Order Submission Success State
-          const successView = document.getElementById('checkout-success-view');
-          const mainGrid = document.getElementById('checkout-main-grid');
-          const headerEl = document.querySelector('.checkout-header');
-
-          const confCodeEl = document.getElementById('chk-conf-order-code');
-          const confProdEl = document.getElementById('chk-conf-product');
-          const confRecipEl = document.getElementById('chk-conf-recipient');
-          const confEmailEl = document.getElementById('chk-conf-email');
-          const confPhoneEl = document.getElementById('chk-conf-phone');
-          const confDestEl = document.getElementById('chk-conf-destination');
-          const btnViewStatus = document.getElementById('chk-btn-view-status');
-          const btnCopyCode = document.getElementById('chk-btn-copy-code');
-          const copyCodeText = document.getElementById('chk-copy-code-text');
-
-          // Clear cart on successful order confirmation
-          try { VoltEdgeCart.clearCart(); } catch(e) {}
-
-          if (confCodeEl) confCodeEl.textContent = finalOrderId;
-          if (confProdEl) confProdEl.textContent = `${payloadData.product_name} (${formatNaira(totalAmount)})`;
-          if (confRecipEl) confRecipEl.textContent = name;
-          if (confEmailEl) confEmailEl.textContent = email;
-          if (confPhoneEl) confPhoneEl.textContent = fullPhone;
-          if (confDestEl) confDestEl.textContent = `${address}, ${stateSelect ? stateSelect.value : ''}`;
-          if (btnViewStatus) {
-            btnViewStatus.href = `order-success.html?orderId=${encodeURIComponent(finalOrderId)}&token=${encodeURIComponent(lookupToken)}`;
+            const rawBody = await res.text();
+            if (rawBody && rawBody.trim()) {
+              responseData = JSON.parse(rawBody);
+            }
+          } catch (parseErr) {
+            throw new Error('The order service returned an invalid response.');
           }
 
-          if (btnCopyCode) {
-            btnCopyCode.onclick = function() {
-              navigator.clipboard.writeText(finalOrderId).then(() => {
-                if (copyCodeText) copyCodeText.textContent = 'Copied!';
-                btnCopyCode.style.color = '#15803d';
-                btnCopyCode.style.borderColor = '#15803d';
-                setTimeout(() => {
-                  if (copyCodeText) copyCodeText.textContent = 'Copy Code';
-                  btnCopyCode.style.color = '';
-                  btnCopyCode.style.borderColor = '';
-                }, 2500);
-              });
-            };
+          if (!responseData || typeof responseData !== 'object') {
+            throw new Error('The order service returned an empty response.');
           }
 
-          if (mainGrid) mainGrid.style.display = 'none';
-          if (headerEl) headerEl.style.display = 'none';
-          if (successView) {
-            successView.style.display = 'block';
-            successView.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          const checkoutUrl = responseData.checkout_url;
+          let validCheckoutUrl = false;
+          if (typeof checkoutUrl === 'string' && checkoutUrl.trim()) {
+            try {
+              const parsedUrl = new URL(checkoutUrl);
+              validCheckoutUrl = (parsedUrl.protocol === 'https:' && parsedUrl.hostname.length > 0);
+            } catch {
+              validCheckoutUrl = false;
+            }
           }
-        } else {
-          // Webhook failed or 1 minute expired without successful validation
-          isCheckoutSubmitting = false;
-          console.error('[VoltEdge Automation] Order submission could not be verified by backend:', lastErrorDetails);
-          
-          const isRateLimited = lastErrorDetails && (lastErrorDetails.toLowerCase().includes('too quickly') || lastErrorDetails.toLowerCase().includes('rate limit'));
-          const errorMsg = isRateLimited
-            ? `<i class="ph-bold ph-warning-circle"></i> <strong>Please slow down.</strong> ${lastErrorDetails}`
-            : '<i class="ph-bold ph-warning-circle"></i> <strong>An error occurred.</strong> Please try again later or <a href="https://wa.me/2347047922403" target="_blank" rel="noopener noreferrer" style="color: inherit; text-decoration: underline; font-weight: 700;">contact us on WhatsApp</a>.';
-          
-          setStatus('error', errorMsg);
-          
+
+          const paymentReady =
+            responseData.order_received === true &&
+            responseData.order_saved === true &&
+            responseData.payment_link_generated === true &&
+            validCheckoutUrl;
+
+          if (paymentReady) {
+            // Scenario A (email sent) or Scenario B (email failed)
+            const finalOrderId = responseData.order_id || trackingCode;
+            const finalLookupToken = responseData.lookup_token || lookupToken;
+
+            // Cache order in localStorage
+            try {
+              const finalSaved = {
+                ...orderDetails,
+                order_id: finalOrderId,
+                orderId: finalOrderId,
+                checkout_url: checkoutUrl,
+                payment_link: checkoutUrl,
+                payment_link_sent: responseData.email_sent !== false,
+                order_status: responseData.order_status || 'PENDING_PAYMENT'
+              };
+              localStorage.setItem('voltedge_last_order', JSON.stringify(finalSaved));
+            } catch (e) {}
+
+            // Display Order Submission Success State
+            const successView = document.getElementById('checkout-success-view');
+            const mainGrid = document.getElementById('checkout-main-grid');
+            const headerEl = document.querySelector('.checkout-header');
+
+            const confCodeEl = document.getElementById('chk-conf-order-code');
+            const confProdEl = document.getElementById('chk-conf-product');
+            const confRecipEl = document.getElementById('chk-conf-recipient');
+            const confEmailEl = document.getElementById('chk-conf-email');
+            const confPhoneEl = document.getElementById('chk-conf-phone');
+            const confDestEl = document.getElementById('chk-conf-destination');
+            const btnViewStatus = document.getElementById('chk-btn-view-status');
+            const btnCopyCode = document.getElementById('chk-btn-copy-code');
+            const copyCodeText = document.getElementById('chk-copy-code-text');
+            const continuePayBtn = document.getElementById('chk-btn-continue-payment');
+            const noticeTextEl = document.getElementById('chk-conf-notice-text');
+
+            // Clear cart
+            try { VoltEdgeCart.clearCart(); } catch (e) {}
+
+            if (confCodeEl) confCodeEl.textContent = finalOrderId;
+            if (confProdEl) confProdEl.textContent = `${payloadData.product_name} (${formatNaira(totalAmount)})`;
+            if (confRecipEl) confRecipEl.textContent = name;
+            if (confEmailEl) confEmailEl.textContent = email;
+            if (confPhoneEl) confPhoneEl.textContent = fullPhone;
+            if (confDestEl) confDestEl.textContent = `${address}, ${stateSelect ? stateSelect.value : ''}`;
+
+            const isSubDir = window.location.pathname.includes('/checkout/') || window.location.pathname.endsWith('/checkout');
+            const statusHref = (isSubDir ? '../' : '') + `order-success.html?orderId=${encodeURIComponent(finalOrderId)}&token=${encodeURIComponent(finalLookupToken)}&checkout_url=${encodeURIComponent(checkoutUrl)}`;
+            if (btnViewStatus) {
+              btnViewStatus.href = statusHref;
+            }
+
+            // Notice text for Scenario A vs Scenario B
+            if (noticeTextEl) {
+              if (responseData.email_sent === false) {
+                // Scenario B
+                noticeTextEl.textContent = 'Your order has been saved and your payment link is ready. We could not send the payment email, so please use the Continue to Payment button below.';
+              } else {
+                // Scenario A
+                noticeTextEl.textContent = 'Your order has been received successfully. Please use the Continue to Payment button below to complete your payment. A copy of your payment link has also been sent to your email.';
+              }
+            }
+
+            // Wire Continue to Payment Button (Section 11)
+            if (continuePayBtn) {
+              continuePayBtn.style.display = 'inline-flex';
+              continuePayBtn.onclick = function () {
+                if (!checkoutUrl) {
+                  alert('Payment link is unavailable. Please check your order status or contact support.');
+                  return;
+                }
+                try {
+                  const checkParsed = new URL(checkoutUrl);
+                  if (checkParsed.protocol !== 'https:') {
+                    alert('Invalid payment link format. Please contact support.');
+                    return;
+                  }
+                } catch {
+                  alert('Invalid payment link format. Please contact support.');
+                  return;
+                }
+                window.open(checkoutUrl, '_blank', 'noopener,noreferrer');
+              };
+            }
+
+            if (btnCopyCode) {
+              btnCopyCode.onclick = function () {
+                navigator.clipboard.writeText(finalOrderId).then(() => {
+                  if (copyCodeText) copyCodeText.textContent = 'Copied!';
+                  btnCopyCode.style.color = '#15803d';
+                  btnCopyCode.style.borderColor = '#15803d';
+                  setTimeout(() => {
+                    if (copyCodeText) copyCodeText.textContent = 'Copy Code';
+                    btnCopyCode.style.color = '';
+                    btnCopyCode.style.borderColor = '';
+                  }, 2500);
+                });
+              };
+            }
+
+            if (mainGrid) mainGrid.style.display = 'none';
+            if (headerEl) headerEl.style.display = 'none';
+            if (successView) {
+              successView.style.display = 'block';
+              successView.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+            return;
+          }
+
+          // Non-payment ready responses
+          if (res.status === 400 || responseData.status === 400) {
+            // Scenario D: Invalid order
+            throw new Error(responseData.message || 'The order details are invalid. Please review your cart and try again.');
+          }
+
+          if (responseData.payment_link_generated === false) {
+            // Scenario C: Payment link generation failed
+            throw new Error('We could not generate your secure payment link. Your order has not been confirmed. Please try again or contact VoltEdge support.');
+          }
+
+          if (res.status === 429) {
+            throw new Error(responseData.message || "You're making requests too quickly. Please wait a moment and try again.");
+          }
+
+          throw new Error(responseData.message || 'We could not complete your order. Please contact support.');
+
+        } catch (err) {
+          clearTimeout(timeoutId);
+          console.error('[VoltEdge Automation] Order submission error:', err);
+          let errorMsg = err.message || 'We could not complete your order. Please contact support.';
+          if (err.name === 'AbortError' || (err.message && (err.message.toLowerCase().includes('failed to fetch') || err.message.toLowerCase().includes('network')))) {
+            // Scenario E: Network timeout or unknown response
+            errorMsg = `We could not confirm the status of your order. Please do not submit the order again immediately. Contact our support team with your order reference (${trackingCode}) so we can verify it.`;
+          }
+          setStatus('error', `<i class="ph-bold ph-warning-circle"></i> ${errorMsg}`);
+
+          // Re-enable submit buttons
           if (submitBtn) {
             submitBtn.disabled = false;
-            submitBtn.innerHTML = '<i class="ph-bold ph-arrows-clockwise"></i> <span>Complete Order & Request Dispatch</span>';
+            submitBtn.innerHTML = `<span>Place Order & Pay with Bachs</span> <i class="ph-bold ph-arrow-right"></i>`;
           }
           if (sidebarSubmitBtn) {
             sidebarSubmitBtn.disabled = false;
-            sidebarSubmitBtn.innerHTML = '<i class="ph-bold ph-arrows-clockwise"></i> <span>Complete Order & Request Dispatch</span>';
+            sidebarSubmitBtn.innerHTML = `<span>Place Order & Pay with Bachs</span> <i class="ph-bold ph-arrow-right"></i>`;
           }
+        } finally {
+          isCheckoutSubmitting = false;
         }
       }
 

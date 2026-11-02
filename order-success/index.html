@@ -1,1931 +1,1987 @@
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Order Confirmed | VoltEdge Tech & Accessories</title>
-
-  <meta name="description"
-    content="Your VoltEdge order has been logged successfully and queued for fulfillment. Track your order status and warranty details.">
-  <meta name="theme-color" content="#064e3b">
-
-  <!-- Canonical URL -->
-  <link rel="canonical" href="https://voltedge-tech-accessories.vercel.app/order-success">
-
-  <!-- Open Graph / Social Sharing Meta -->
-  <meta property="og:type" content="website">
-  <meta property="og:site_name" content="VoltEdge Tech & Accessories">
-  <meta property="og:locale" content="en_NG">
-  <meta property="og:url" content="https://voltedge-tech-accessories.vercel.app/order-success">
-  <meta property="og:title" content="Order Confirmed | VoltEdge Tech & Accessories">
-  <meta property="og:description" content="Your VoltEdge order has been logged successfully and queued for fulfillment. Track your order status and warranty details.">
-  <meta property="og:image" content="https://voltedge-tech-accessories.vercel.app/assets/images/voltedge-social-preview.png">
-
-  <!-- Twitter/X Card Meta -->
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Order Confirmed | VoltEdge Tech & Accessories">
-  <meta name="twitter:description" content="Your VoltEdge order has been logged successfully and queued for fulfillment. Track your order status and warranty details.">
-  <meta name="twitter:image" content="https://voltedge-tech-accessories.vercel.app/assets/images/voltedge-social-preview.png">
-
-  <!-- Favicon -->
-  <link rel="icon"
-    href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220%200%2032%2032%22><rect width=%2232%22 height=%2232%22 rx=%228%22 fill=%22%2300e599%22/><path d=%22M18 4L10 17h5l-2 11 10-14h-6l3-10z%22 fill=%22%23090d16%22/></svg>">
-
-  <!-- Stylesheet -->
-  <link rel="stylesheet" href="../css/style.css">
-
-  <!-- Phosphor Icons -->
-  <script src="https://unpkg.com/@phosphor-icons/web" async></script>
-
-  <style>
-    .success-page-wrap {
-      min-height: calc(100vh - 4.5rem);
-      padding: 3rem 0 5rem;
-      background: radial-gradient(circle at 50% 0%, rgba(6, 78, 59, 0.05) 0%, rgba(248, 250, 249, 1) 100%);
-    }
-
-    .success-breadcrumb {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      font-size: 0.85rem;
-      color: var(--text-muted);
-      margin-bottom: 1.5rem;
-    }
-
-    .success-breadcrumb a {
-      color: var(--primary);
-      font-weight: 600;
-      display: inline-flex;
-      align-items: center;
-      gap: 0.35rem;
-    }
-
-    .success-breadcrumb a:hover {
-      text-decoration: underline;
-    }
-
-    /* Main Container Card */
-    .success-card {
-      background: #ffffff;
-      border: 1px solid var(--border);
-      border-radius: var(--radius-xl);
-      padding: 3rem;
-      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.05);
-      max-width: 920px;
-      margin: 0 auto;
-      position: relative;
-    }
-
-    .success-hero-header {
-      text-align: center;
-      padding-bottom: 2.25rem;
-      border-bottom: 1px solid var(--border-subtle);
-      margin-bottom: 2.25rem;
-    }
-
-    .success-anim-icon {
-      width: 5rem;
-      height: 5rem;
-      background: #d1fae5;
-      color: var(--brand-emerald);
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 2.6rem;
-      margin: 0 auto 1.25rem;
-      box-shadow: 0 0 0 10px rgba(209, 250, 229, 0.45);
-      animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    }
-
-    @keyframes popIn {
-      0% {
-        transform: scale(0.5);
-        opacity: 0;
-      }
-
-      100% {
-        transform: scale(1);
-        opacity: 1;
-      }
-    }
-
-    .spin-anim {
-      animation: voltSpin 1s linear infinite;
-    }
-
-    @keyframes voltSpin {
-      100% {
-        transform: rotate(360deg);
-      }
-    }
-
-    .success-status-pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.45rem;
-      padding: 0.35rem 1rem;
-      background: #dcfce7;
-      color: #15803d;
-      border: 1px solid #bbf7d0;
-      border-radius: var(--radius-full);
-      font-size: 0.8rem;
-      font-weight: 800;
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-      margin-bottom: 0.85rem;
-    }
-
-    .success-status-pill.status-dispatched {
-      background: #dbeafe;
-      color: #1d4ed8;
-      border-color: #bfdbfe;
-    }
-
-    .success-status-pill.status-delivered,
-    .success-status-pill.status-paid {
-      background: #dcfce7;
-      color: #15803d;
-      border-color: #86efac;
-    }
-
-    .success-status-pill.status-pending {
-      background: #fef3c7;
-      color: #b45309;
-      border-color: #fde68a;
-    }
-
-    .success-main-title {
-      font-size: clamp(1.8rem, 4vw, 2.4rem);
-      font-weight: 800;
-      color: var(--text-main);
-      line-height: 1.2;
-      margin-bottom: 0.75rem;
-    }
-
-    .success-main-desc {
-      color: var(--text-muted);
-      font-size: 1.05rem;
-      max-width: 600px;
-      margin: 0 auto 1.5rem;
-      line-height: 1.5;
-    }
-
-    /* Tracking Box */
-    .tracking-code-banner {
-      background: var(--bg-subtle);
-      border: 1.5px dashed var(--primary);
-      border-radius: var(--radius-lg);
-      padding: 1.25rem 1.75rem;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 1.5rem;
-      flex-wrap: wrap;
-    }
-
-    .tracking-label-wrap {
-      text-align: left;
-    }
-
-    .tracking-sub {
-      font-size: 0.76rem;
-      font-weight: 700;
-      color: var(--text-dim);
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-
-    .tracking-code-value {
-      font-size: 1.5rem;
-      font-weight: 900;
-      color: var(--primary);
-      letter-spacing: 0.02em;
-      font-family: monospace, var(--font-sans);
-    }
-
-    .btn-copy-code {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.45rem;
-      padding: 0.55rem 1rem;
-      background: #ffffff;
-      border: 1px solid var(--border);
-      border-radius: var(--radius-full);
-      color: var(--text-main);
-      font-size: 0.84rem;
-      font-weight: 700;
-      cursor: pointer;
-      transition: all var(--transition-fast);
-      box-shadow: var(--shadow-sm);
-    }
-
-    .btn-copy-code:hover {
-      border-color: var(--primary);
-      color: var(--primary);
-      transform: translateY(-1px);
-    }
-
-    /* Timeline Stepper */
-    .fulfillment-timeline {
-      margin-bottom: 2.5rem;
-      padding: 1.5rem;
-      background: var(--bg-subtle);
-      border-radius: var(--radius-lg);
-      border: 1px solid var(--border);
-    }
-
-    .timeline-title {
-      font-size: 0.82rem;
-      font-weight: 800;
-      color: var(--text-dim);
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-      margin-bottom: 1.25rem;
-      text-align: center;
-    }
-
-    .timeline-steps {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 0.75rem;
-      position: relative;
-    }
-
-    .timeline-step {
-      text-align: center;
-      position: relative;
-    }
-
-    .step-marker {
-      width: 2.25rem;
-      height: 2.25rem;
-      margin: 0 auto 0.6rem;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1rem;
-      font-weight: 800;
-      background: #e2e8f0;
-      color: #64748b;
-      position: relative;
-      z-index: 2;
-      transition: all var(--transition-fast);
-    }
-
-    .timeline-step.completed .step-marker {
-      background: var(--brand-emerald);
-      color: #ffffff;
-    }
-
-    .timeline-step.active .step-marker {
-      background: var(--primary);
-      color: #ffffff;
-      box-shadow: 0 0 0 5px rgba(6, 78, 59, 0.2);
-    }
-
-    .step-name {
-      font-size: 0.82rem;
-      font-weight: 700;
-      color: var(--text-main);
-      line-height: 1.25;
-      display: block;
-      margin-bottom: 0.2rem;
-    }
-
-    .step-status-tag {
-      font-size: 0.7rem;
-      color: var(--text-muted);
-    }
-
-    /* Order Details Grid */
-    .order-details-grid {
-      display: grid;
-      grid-template-columns: 1.15fr 1fr;
-      gap: 1.75rem;
-      margin-bottom: 2.25rem;
-    }
-
-    .detail-card-panel {
-      border: 1px solid var(--border);
-      border-radius: var(--radius-lg);
-      padding: 1.5rem;
-      background: #ffffff;
-    }
-
-    .detail-card-title {
-      font-size: 1rem;
-      font-weight: 800;
-      color: var(--text-main);
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      margin-bottom: 1.25rem;
-      padding-bottom: 0.75rem;
-      border-bottom: 1px solid var(--border-subtle);
-    }
-
-    .item-row {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-      margin-bottom: 1.25rem;
-    }
-
-    .item-row img {
-      width: 68px;
-      height: 68px;
-      object-fit: cover;
-      border-radius: var(--radius-md);
-      border: 1px solid var(--border);
-      flex-shrink: 0;
-      background: var(--bg-subtle);
-    }
-
-    .item-meta {
-      flex: 1;
-      min-width: 0;
-    }
-
-    .item-title {
-      font-weight: 700;
-      font-size: 0.95rem;
-      color: var(--text-main);
-      margin-bottom: 0.2rem;
-    }
-
-    .item-sku-qty {
-      font-size: 0.8rem;
-      color: var(--text-muted);
-    }
-
-    .item-price {
-      font-size: 1.05rem;
-      font-weight: 800;
-      color: var(--primary);
-    }
-
-    .receipt-lines {
-      display: flex;
-      flex-direction: column;
-      gap: 0.65rem;
-      padding-top: 1rem;
-      border-top: 1px solid var(--border-subtle);
-      font-size: 0.88rem;
-      color: var(--text-muted);
-    }
-
-    .receipt-lines .line {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .receipt-lines .line.total {
-      margin-top: 0.5rem;
-      padding-top: 0.75rem;
-      border-top: 2px dashed var(--border);
-      font-size: 1.15rem;
-      font-weight: 800;
-      color: var(--text-main);
-    }
-
-    .receipt-lines .line.total strong {
-      color: var(--primary);
-      font-size: 1.35rem;
-    }
-
-    .info-list {
-      display: flex;
-      flex-direction: column;
-      gap: 0.85rem;
-      font-size: 0.9rem;
-    }
-
-    .info-item {
-      display: flex;
-      flex-direction: column;
-      gap: 0.15rem;
-    }
-
-    .info-label {
-      font-size: 0.74rem;
-      font-weight: 700;
-      color: var(--text-dim);
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-
-    .info-val {
-      font-weight: 600;
-      color: var(--text-main);
-      word-break: break-word;
-    }
-
-    /* Highly Visible Email Receipt Notice Banner */
-    .email-receipt-banner {
-      background: #f0fdf4;
-      border: 2px solid #86efac;
-      border-radius: var(--radius-lg);
-      padding: 1.4rem 1.75rem;
-      display: flex;
-      align-items: center;
-      gap: 1.25rem;
-      margin-bottom: 2rem;
-      box-shadow: 0 4px 16px rgba(16, 185, 129, 0.08);
-    }
-
-    .email-receipt-icon {
-      width: 3.5rem;
-      height: 3.5rem;
-      background: #059669;
-      color: #ffffff;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.75rem;
-      flex-shrink: 0;
-    }
-
-    .email-receipt-title {
-      font-size: 1.2rem;
-      font-weight: 800;
-      color: #064e3b;
-      margin: 0 0 0.35rem 0;
-    }
-
-    .email-receipt-desc {
-      color: #047857;
-      font-size: 0.95rem;
-      margin: 0;
-      line-height: 1.55;
-    }
-
-    /* Notice Box */
-    .dispatch-notice-box {
-      background: #eff6ff;
-      border: 1px solid #bfdbfe;
-      border-radius: var(--radius-lg);
-      padding: 1.25rem 1.5rem;
-      display: flex;
-      gap: 1rem;
-      margin-bottom: 2.25rem;
-    }
-
-    .dispatch-notice-box i {
-      font-size: 1.45rem;
-      color: #2563eb;
-      flex-shrink: 0;
-      margin-top: 0.15rem;
-    }
-
-    .dispatch-notice-box strong {
-      display: block;
-      color: #1e3a8a;
-      font-size: 0.95rem;
-      margin-bottom: 0.35rem;
-    }
-
-    .dispatch-notice-box p {
-      color: #3b82f6;
-      font-size: 0.86rem;
-      margin: 0;
-      line-height: 1.5;
-    }
-
-    /* Action Buttons */
-    .success-actions {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 1rem;
-      flex-wrap: wrap;
-    }
-
-    .btn-wa-action {
-      background: var(--whatsapp);
-      color: #ffffff;
-      padding: 0.95rem 1.6rem;
-      border-radius: var(--radius-full);
-      font-weight: 800;
-      font-size: 0.95rem;
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      transition: all var(--transition-fast);
-      box-shadow: 0 4px 12px rgba(37, 211, 102, 0.25);
-      text-decoration: none;
-    }
-
-    .btn-wa-action:hover {
-      background: var(--whatsapp-hover);
-      transform: translateY(-2px);
-      box-shadow: 0 6px 18px rgba(37, 211, 102, 0.35);
-    }
-
-    .btn-print-action {
-      background: #ffffff;
-      border: 1.5px solid var(--border);
-      color: var(--text-main);
-      padding: 0.95rem 1.5rem;
-      border-radius: var(--radius-full);
-      font-weight: 700;
-      font-size: 0.95rem;
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      cursor: pointer;
-      transition: all var(--transition-fast);
-    }
-
-    .btn-print-action:hover {
-      border-color: var(--primary);
-      color: var(--primary);
-    }
-
-    .btn-shop-action {
-      background: var(--primary);
-      color: #ffffff;
-      padding: 0.95rem 1.6rem;
-      border-radius: var(--radius-full);
-      font-weight: 800;
-      font-size: 0.95rem;
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      transition: all var(--transition-fast);
-      text-decoration: none;
-    }
-
-    .btn-shop-action:hover {
-      background: var(--primary-hover);
-      transform: translateY(-2px);
-    }
-
-    /* Loading, Error & Not Found States */
-    .state-view {
-      text-align: center;
-      padding: 3rem 1.5rem;
-    }
-
-    .state-icon-wrap {
-      width: 4.8rem;
-      height: 4.8rem;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 2.3rem;
-      margin: 0 auto 1.25rem;
-    }
-
-    .state-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.4rem;
-      padding: 0.35rem 0.95rem;
-      border-radius: var(--radius-full);
-      font-size: 0.78rem;
-      font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      margin-bottom: 0.85rem;
-    }
-
-    .state-title {
-      font-size: 1.65rem;
-      font-weight: 800;
-      color: var(--text-main);
-      margin-bottom: 0.5rem;
-    }
-
-    .state-desc {
-      color: var(--text-muted);
-      font-size: 0.98rem;
-      max-width: 520px;
-      margin: 0 auto 1.75rem;
-      line-height: 1.55;
-    }
-
-    .state-lookup-form {
-      max-width: 440px;
-      margin: 0 auto 1.75rem;
-      display: flex;
-      gap: 0.5rem;
-      flex-wrap: wrap;
-    }
-
-    .state-lookup-input {
-      flex: 1;
-      min-width: 200px;
-    }
-
-    /* Print Stylesheet */
-    @media print {
-
-      .top-bar,
-      .site-header,
-      .site-footer,
-      .success-breadcrumb,
-      .success-actions,
-      .fulfillment-timeline,
-      .state-view {
-        display: none !important;
-      }
-
-      .success-page-wrap {
-        padding: 0;
-        background: none;
-      }
-
-      .success-card {
-        border: none;
-        box-shadow: none;
-        padding: 0;
-      }
-
-      body {
-        background: #ffffff;
-        color: #000000;
-      }
-    }
-
-    @media (max-width: 768px) {
-      .success-page-wrap {
-        padding: 1.5rem 0 3rem;
-      }
-
-      .success-card {
-        padding: 1.75rem 1.15rem;
-      }
-
-      .success-main-title {
-        font-size: clamp(1.45rem, 5.5vw, 1.95rem);
-      }
-
-      .success-main-desc {
-        font-size: 0.92rem;
-        margin-bottom: 1.25rem;
-      }
-
-      .tracking-code-banner {
-        flex-direction: column;
-        gap: 0.85rem;
-        width: 100%;
-        padding: 1.15rem 1rem;
-        text-align: center;
-        box-sizing: border-box;
-      }
-
-      .tracking-label-wrap {
-        text-align: center;
-        width: 100%;
-      }
-
-      .tracking-code-value {
-        font-size: clamp(1.15rem, 5vw, 1.45rem);
-        word-break: break-all;
-      }
-
-      .btn-copy-code {
-        width: 100%;
-        justify-content: center;
-        padding: 0.65rem 1rem;
-      }
-
-      .fulfillment-timeline {
-        padding: 1.25rem 0.85rem;
-        margin-bottom: 1.85rem;
-      }
-
-      .timeline-steps {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 1.15rem 0.5rem;
-      }
-
-      .order-details-grid {
-        grid-template-columns: 1fr;
-        gap: 1.25rem;
-        margin-bottom: 1.75rem;
-      }
-
-      .detail-card-panel {
-        padding: 1.25rem 1rem;
-      }
-
-      .email-receipt-banner {
-        flex-direction: column;
-        text-align: center;
-        padding: 1.25rem 1rem;
-        gap: 0.85rem;
-      }
-
-      .dispatch-notice-box {
-        flex-direction: column;
-        gap: 0.65rem;
-        padding: 1rem 1.15rem;
-        margin-bottom: 1.75rem;
-      }
-
-      .success-actions {
-        flex-direction: column;
-        width: 100%;
-        gap: 0.75rem;
-      }
-
-      .btn-wa-action,
-      .btn-print-action,
-      .btn-shop-action {
-        width: 100%;
-        justify-content: center;
-        box-sizing: border-box;
-        text-align: center;
-        padding: 0.85rem 1.25rem;
-        font-size: 0.9rem;
-      }
-
-      .state-view {
-        padding: 2rem 0.75rem;
-      }
-
-      .state-title {
-        font-size: 1.35rem;
-      }
-
-      .state-desc {
-        font-size: 0.88rem;
-      }
-
-      .state-lookup-form {
-        flex-direction: column;
-        width: 100%;
-      }
-
-      .state-lookup-input {
-        width: 100%;
-      }
-
-      .state-lookup-form button {
-        width: 100%;
-        justify-content: center;
-      }
-
-      #error-technical-box {
-        font-size: 0.72rem;
-        padding: 0.75rem;
-        max-width: 100%;
-        box-sizing: border-box;
-      }
-    }
-
-    @media (max-width: 480px) {
-      .success-card {
-        padding: 1.25rem 0.85rem;
-        border-radius: var(--radius-md);
-      }
-
-      .timeline-title {
-        font-size: 0.75rem;
-        margin-bottom: 0.85rem;
-      }
-
-      .timeline-steps {
-        gap: 0.85rem 0.35rem;
-      }
-
-      .step-marker {
-        width: 2rem;
-        height: 2rem;
-        font-size: 0.88rem;
-        margin-bottom: 0.4rem;
-      }
-
-      .step-name {
-        font-size: 0.74rem;
-      }
-
-      .step-status-tag {
-        font-size: 0.64rem;
-      }
-
-      .item-row {
-        gap: 0.75rem;
-      }
-
-      .item-row img {
-        width: 56px;
-        height: 56px;
-      }
-
-      .item-title {
-        font-size: 0.88rem;
-      }
-
-      .item-price {
-        font-size: 0.98rem;
-      }
-
-      .receipt-lines {
-        font-size: 0.82rem;
-      }
-
-      .receipt-lines .line.total strong {
-        font-size: 1.18rem;
-      }
-
-      .info-label {
-        font-size: 0.68rem;
-      }
-
-      .info-val {
-        font-size: 0.84rem;
-      }
-    }
-  </style>
-</head>
-
-<body>
-
-  <!-- Top Announcement Bar -->
-  <aside class="top-bar" aria-label="Announcement">
-    <div class="container top-bar-content">
-      <span class="top-bar-text">Same-Day Dispatch for Orders Placed Before 2:00 PM | 1-Year Full Warranty on All
-        Gear</span>
-    </div>
-  </aside>
-
-  <!-- Sticky Header -->
-  <header class="site-header" id="site-header">
-    <div class="container nav-wrap">
-      <a href="../index.html" class="brand-logo" aria-label="VoltEdge Home">
-        <div class="logo-icon">
-          <i class="ph-fill ph-lightning"></i>
-        </div>
-        <div class="logo-text">
-          VoltEdge
-          <span class="logo-subtitle">TECH & ACCESSORIES</span>
-        </div>
-      </a>
-
-      <!-- Desktop Nav Links -->
-      <nav aria-label="Primary Navigation">
-        <ul class="nav-links">
-          <li><a href="../index.html#catalogue" class="nav-link">Products</a></li>
-          <li><a href="../index.html#how-it-works" class="nav-link">How Fulfillment Works</a></li>
-          <li><a href="../index.html#feedback" class="nav-link">Feedback</a></li>
-        </ul>
-      </nav>
-
-      <!-- Nav Actions -->
-      <div class="nav-actions">
-        <a href="../checkout.html" class="btn btn-primary" style="padding: 0.65rem 1.25rem; font-size: 0.88rem;">
-          <i class="ph ph-shopping-cart-simple"></i> Order Now
-        </a>
-      </div>
-    </div>
-  </header>
-
-  <!-- Main Order Success Section -->
-  <main class="success-page-wrap">
-    <div class="container">
-
-      <!-- Breadcrumb -->
-      <nav class="success-breadcrumb" aria-label="Breadcrumb">
-        <a href="../index.html"><i class="ph-bold ph-house"></i> Home</a>
-        <span>/</span>
-        <a href="../checkout.html">Checkout</a>
-        <span>/</span>
-        <span id="breadcrumb-current">Order Status</span>
-      </nav>
-
-      <div class="success-card">
-
-        <!-- 1. LOADING STATE -->
-        <div class="state-view" id="state-loading">
-          <div class="state-icon-wrap" style="background: rgba(6, 78, 59, 0.08); color: var(--primary);">
-            <i class="ph-bold ph-spinner spin-anim"></i>
-          </div>
-          <div class="state-badge" style="background: var(--accent); color: var(--accent-foreground);">
-            <i class="ph-bold ph-shield-check"></i> Verifying Order Details
-          </div>
-          <h2 class="state-title" id="loading-title">Retrieving Order Record...</h2>
-          <p class="state-desc" id="loading-desc">
-            Please wait a moment. Verifying order details...
-          </p>
-          <div id="loading-timer-pill"
-            style="display: inline-flex; align-items: center; gap: 0.5rem; background: #f0fdf4; border: 1px solid #bbf7d0; color: #166534; padding: 0.5rem 1.15rem; border-radius: var(--radius-full); font-size: 0.88rem; font-weight: 700; margin-top: 0.5rem; max-width: 100%; box-sizing: border-box; flex-wrap: wrap; justify-content: center;">
-            <i class="ph-bold ph-hourglass-medium spin-anim" style="color: var(--primary); font-size: 1.05rem;"></i>
-            <span>Please wait a moment (<span id="loading-countdown-text">60s</span> remaining)...</span>
-          </div>
-        </div>
-
-        <!-- 2. ORDER NOT FOUND / MISSING PARAMETERS STATE -->
-        <div class="state-view" id="state-not-found" style="display: none;">
-          <div class="state-icon-wrap" style="background: #fef2f2; color: #dc2626;">
-            <i class="ph-bold ph-magnifying-glass"></i>
-          </div>
-          <div class="state-badge" style="background: #fee2e2; color: #991b1b;">
-            Order Record Not Found
-          </div>
-          <h2 class="state-title">No Matching Order Located</h2>
-          <p class="state-desc" id="not-found-msg">
-            We could not locate an active order matching the provided reference ID or security token. Please verify your
-            link or enter your tracking code below.
-          </p>
-
-          <form class="state-lookup-form" id="manual-lookup-form">
-            <input type="text" id="manual-order-id" class="form-control state-lookup-input"
-              placeholder="e.g. VE-20261028-1234" required>
-            <button type="submit" class="btn btn-primary" style="padding: 0.75rem 1.4rem;">
-              <i class="ph-bold ph-magnifying-glass"></i> Track
-            </button>
-          </form>
-
-          <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
-            <a href="https://wa.me/2347047922403?text=Hello%20VoltEdge%20Team%2C%20I%20need%20help%20locating%20my%20order."
-              target="_blank" rel="noopener noreferrer" class="btn-wa-action">
-              <i class="ph-fill ph-whatsapp-logo"></i> Help on WhatsApp
-            </a>
-            <a href="../index.html" class="btn-shop-action">
-              <i class="ph-bold ph-arrow-left"></i> Return to Store
-            </a>
-          </div>
-        </div>
-
-        <!-- 3. ERROR / SERVICE UNAVAILABLE STATE -->
-        <div class="state-view" id="state-error" style="display: none;">
-          <div class="state-icon-wrap" style="background: #fffbeb; color: #d97706;" id="error-icon-wrap">
-            <i class="ph-bold ph-warning-circle"></i>
-          </div>
-          <div class="state-badge" style="background: #fef3c7; color: #92400e;" id="error-badge">
-            Verification Temporarily Unavailable
-          </div>
-          <h2 class="state-title" id="error-title">Could Not Verify Order</h2>
-          <p class="state-desc" id="error-msg-text">
-            An error occurred, please try again later or contact us on WhatsApp.
-          </p>
-          <div id="error-technical-box"
-            style="display: none; max-width: 580px; margin: 0 auto 1.5rem; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: var(--radius-md); padding: 0.85rem 1.15rem; font-size: 0.82rem; color: #475569; text-align: left; font-family: monospace; white-space: pre-wrap; word-break: break-all;">
-          </div>
-          <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
-            <button type="button" class="btn btn-primary" id="btn-retry-fetch"
-              style="padding: 0.85rem 1.6rem; border-radius: var(--radius-full);">
-              <i class="ph-bold ph-arrows-clockwise"></i> Retry Verification
-            </button>
-            <a href="https://wa.me/2347047922403" id="error-wa-link" target="_blank" rel="noopener noreferrer"
-              class="btn-wa-action">
-              <i class="ph-fill ph-whatsapp-logo"></i> Chat with us
-            </a>
-          </div>
-        </div>
-
-        <!-- 4. VERIFIED ORDER DETAILS VIEW (Rendered dynamically) -->
-        <div id="state-success-content" style="display: none;">
-
-          <!-- Hero Confirmation Header -->
-          <div class="success-hero-header">
-            <div class="success-anim-icon">
-              <i class="ph-bold ph-check"></i>
-            </div>
-
-            <div class="success-status-pill" id="disp-status-pill">
-              <i class="ph-bold ph-sparkle"></i> <span id="disp-status-text">ORDER LOGGED & IN FULFILLMENT WAVE</span>
-            </div>
-
-            <h1 class="success-main-title" id="disp-hero-title">Thank You for Your Order!</h1>
-
-            <p class="success-main-desc" id="disp-hero-desc">
-              We have registered your order in our fulfillment wave. Our dispatch logistics team is now packing your
-              hardware and verifying logistics.
-            </p>
-
-            <!-- Tracking Code Banner -->
-            <div class="tracking-code-banner">
-              <div class="tracking-label-wrap">
-                <span class="tracking-sub">REFERENCE TRACKING CODE</span>
-                <div class="tracking-code-value" id="disp-tracking-code">—</div>
-              </div>
-              <button type="button" class="btn-copy-code" id="btn-copy-tracking">
-                <i class="ph-bold ph-copy"></i>
-                <span id="copy-btn-text">Copy Code</span>
-              </button>
-            </div>
-          </div>
-
-          <!-- Fulfillment Progress Pipeline -->
-          <section class="fulfillment-timeline" aria-label="Order Progress">
-            <div class="timeline-title">Fulfillment Progress Wave</div>
-            <div class="timeline-steps">
-
-              <div class="timeline-step completed" id="step-placed">
-                <div class="step-marker"><i class="ph-bold ph-check"></i></div>
-                <span class="step-name">Order Placed</span>
-                <span class="step-status-tag" id="step-placed-tag">Logged</span>
-              </div>
-
-              <div class="timeline-step active" id="step-warehouse">
-                <div class="step-marker"><i class="ph-bold ph-package"></i></div>
-                <span class="step-name">Warehouse Wave</span>
-                <span class="step-status-tag" id="step-warehouse-tag">Packaging</span>
-              </div>
-
-              <div class="timeline-step" id="step-dispatch">
-                <div class="step-marker"><i class="ph-bold ph-phone-call"></i></div>
-                <span class="step-name">Dispatch Call</span>
-                <span class="step-status-tag" id="step-dispatch-tag">Scheduling</span>
-              </div>
-
-              <div class="timeline-step" id="step-delivery">
-                <div class="step-marker"><i class="ph-bold ph-house-line"></i></div>
-                <span class="step-name">Handover & 1Yr Warranty</span>
-                <span class="step-status-tag" id="step-delivery-tag">Doorstep Delivery</span>
-              </div>
-
-            </div>
-          </section>
-
-          <!-- Order Summary & Shipping Details -->
-          <div class="order-details-grid" id="order-details-grid">
-
-            <!-- Item & Invoice Details -->
-            <div class="detail-card-panel">
-              <h3 class="detail-card-title">
-                <i class="ph-bold ph-receipt"></i> Purchased Equipment
-              </h3>
-
-              <div id="disp-items-container">
-              <div class="item-row">
-                <img src="../assets/images/pb-black.jpg" alt="Hardware Ordered" id="disp-item-img">
-                <div class="item-meta">
-                  <div class="item-title" id="disp-item-name">—</div>
-                  <div class="item-sku-qty" id="disp-item-sku-qty">—</div>
-                  <div class="item-price" id="disp-item-price">—</div>
-                </div>
-              
-              </div></div>
-
-              <div class="receipt-lines">
-                <div class="line">
-                  <span>Subtotal Value:</span>
-                  <strong id="disp-subtotal">—</strong>
-                </div>
-                <div class="line">
-                  <span>Logistics Delivery Charge:</span>
-                  <span id="disp-delivery-fee" style="color: var(--primary); font-weight: 700;">Confirmed upon dispatch</span>
-                </div>
-                <div class="line">
-                  <span>Payment Verification:</span>
-                  <span id="disp-payment-status" style="color: var(--text-main); font-weight: 700;">Verification upon dispatch</span>
-                </div>
-                <div class="line">
-                  <span>Hardware Warranty:</span>
-                  <span style="color: var(--brand-emerald); font-weight: 700;">1-Year Official Warranty Active</span>
-                </div>
-                <div class="line total">
-                  <span>Total Amount:</span>
-                  <strong id="disp-total-amount">—</strong>
-                </div>
-              </div>
-            </div>
-
-            <!-- Customer & Delivery Destination -->
-            <div class="detail-card-panel">
-              <h3 class="detail-card-title">
-                <i class="ph-bold ph-truck"></i> Delivery Information
-              </h3>
-
-              <div class="info-list">
-                <div class="info-item">
-                  <span class="info-label">Customer Name</span>
-                  <span class="info-val" id="disp-customer-name">—</span>
-                </div>
-
-                <div class="info-item">
-                  <span class="info-label">Contact Phone / WhatsApp</span>
-                  <span class="info-val" id="disp-customer-phone">—</span>
-                </div>
-
-                <div class="info-item">
-                  <span class="info-label">Email Address</span>
-                  <span class="info-val" id="disp-customer-email">—</span>
-                </div>
-
-                <div class="info-item">
-                  <span class="info-label">Delivery Address</span>
-                  <span class="info-val" id="disp-customer-address">—</span>
-                </div>
-
-                <div class="info-item">
-                  <span class="info-label">Special Delivery Notes</span>
-                  <span class="info-val" id="disp-customer-notes" style="font-style: italic;">None provided</span>
-                </div>
-
-                <div class="info-item">
-                  <span class="info-label">Order Submitted At</span>
-                  <span class="info-val" id="disp-order-date">—</span>
-                </div>
-              </div>
-            </div>
-
-          </div>
-
-          <!-- Highly Visible Email Receipt Notice -->
-          <div class="email-receipt-banner" id="email-receipt-banner">
-            <div class="email-receipt-icon">
-              <i class="ph-fill ph-envelope-open"></i>
-            </div>
-            <div class="email-receipt-content">
-              <h3 class="email-receipt-title">Check Your Email for Your Receipt</h3>
-              <p class="email-receipt-desc">
-                Your official payment receipt and complete order confirmation have been sent to your email address.
-                Please check your inbox (and your spam or promotions folder) for your full receipt and order records.
-              </p>
-            </div>
-          </div>
-
-          <!-- Next Steps Callout -->
-          <div class="dispatch-notice-box" id="disp-notice-box">
-            <i class="ph-fill ph-info"></i>
-            <div>
-              <strong id="disp-notice-title">What Happens Next?</strong>
-              <p id="disp-notice-desc">
-                Our dispatch officer will contact you via WhatsApp / phone call to confirm your delivery address and
-                schedule the delivery window. Orders placed before 2:00 PM are dispatched same-day in Lagos!
-              </p>
-            </div>
-          </div>
-
-          <!-- Action Buttons -->
-          <div class="success-actions">
-            <a href="#" id="btn-wa-followup" target="_blank" rel="noopener noreferrer" class="btn-wa-action">
-              <i class="ph-fill ph-whatsapp-logo" style="font-size: 1.25rem;"></i>
-              <span>Chat Dispatch Team on WhatsApp</span>
-            </a>
-
-            <a href="../index.html" class="btn-shop-action">
-              <i class="ph-bold ph-arrow-left"></i>
-              <span>Continue Shopping</span>
-            </a>
-          </div>
-
-        </div>
-
-      </div>
-    </div>
-  </main>
-
-  <!-- FOOTER -->
-  <footer class="site-footer">
-    <div class="container">
-      <div class="footer-top">
-        <div>
-          <a href="../index.html" class="brand-logo footer-brand-logo">
-            <div class="logo-icon"
-              style="background: rgba(255, 255, 255, 0.18); border: 1px solid rgba(255, 255, 255, 0.3);">
-              <i class="ph-fill ph-lightning" style="color: #ffffff;"></i>
-            </div>
-            <div class="logo-text" style="color: #ffffff; font-weight: 800;">
-              VoltEdge<span style="color: #34d399;">Tech</span>
-              <span class="logo-subtitle" style="color: #ffffff; font-weight: 800;">& Accessories</span>
-            </div>
-          </a>
-          <p class="footer-brand-desc" style="color: rgba(255, 255, 255, 0.88); font-weight: 500;">
-            Powering productive workspaces with reliable technology accessories. Laptop power banks, router UPS backups,
-            and ergonomic gear built for modern Nigerian professionals.
-          </p>
-        </div>
-
-        <div>
-          <h4 class="footer-col-title">Quick Links</h4>
-          <ul class="footer-links">
-            <li><a href="../index.html#catalogue" class="footer-link">Products</a></li>
-            <li><a href="../index.html#creator-gear" class="footer-link">Creator Accessories</a></li>
-            <li><a href="../index.html#how-it-works" class="footer-link">How Fulfillment Works</a></li>
-            <li><a href="../index.html#feedback" class="footer-link">Give Feedback</a></li>
-          </ul>
-        </div>
-
-        <div>
-          <h4 class="footer-col-title">Customer Support</h4>
-          <div class="footer-contact-item">
-            <i class="ph-fill ph-whatsapp-logo" style="color: #25D366; font-size: 1.25rem;"></i>
-            <a href="https://wa.me/2347047922403" target="_blank" rel="noopener noreferrer" class="footer-link"
-              style="color: #ffffff; font-weight: 700;">
-              Chat with us on WhatsApp
-            </a>
-          </div>
-          <div class="footer-contact-item">
-            <i class="ph-bold ph-phone" style="color: #ffffff; font-size: 1.15rem;"></i>
-            <span style="color: #ffffff; font-weight: 700;">+234 704 792 2403</span>
-          </div>
-          <div class="footer-contact-item">
-            <i class="ph-bold ph-shield-check" style="color: #ffffff; font-size: 1.15rem;"></i>
-            <span style="color: #ffffff; font-weight: 700;">1-Year Warranty Included</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="footer-bottom">
-        <div style="color: rgba(255, 255, 255, 0.85); font-weight: 600;">&copy; 2026 VoltEdge Tech & Accessories. All
-          rights reserved.</div>
-        <div style="display: flex; gap: 1.5rem;">
-          <a href="../index.html" class="footer-link" style="color: #ffffff; font-weight: 700;">Return to Home &uarr;</a>
-          <a href="../index.html#catalogue" class="footer-link" style="color: #ffffff; font-weight: 700;">Priced in ₦
-            Naira</a>
-        </div>
-      </div>
-    </div>
-  </footer>
-
-  <!-- Products Catalog Data -->
-  <script src="../js/products.js"></script>
-
-  <!-- Order Tracking & Confirmation Script -->
-  <script>
-    (function () {
-      const IS_SUBDIR = window.location.pathname.includes('/order-success/');
-
-      // UI State Elements
-      const stateLoading = document.getElementById('state-loading');
-      const stateNotFound = document.getElementById('state-not-found');
-      const stateError = document.getElementById('state-error');
-      const stateSuccess = document.getElementById('state-success-content');
-
-      const notFoundMsg = document.getElementById('not-found-msg');
-      const manualForm = document.getElementById('manual-lookup-form');
-      const manualInput = document.getElementById('manual-order-id');
-
-      function showView(viewName) {
-        if (stateLoading) stateLoading.style.display = viewName === 'loading' ? 'block' : 'none';
-        if (stateNotFound) stateNotFound.style.display = viewName === 'not-found' ? 'block' : 'none';
-        if (stateError) stateError.style.display = viewName === 'error' ? 'block' : 'none';
-        if (stateSuccess) stateSuccess.style.display = viewName === 'success' ? 'block' : 'none';
-      }
-
-      function formatNaira(amount) {
-        if (amount === undefined || amount === null || isNaN(amount)) return '₦0';
-        return '₦' + Number(amount).toLocaleString('en-NG');
-      }
-
-      // Detect dummy/placeholder values originating from mock webhook responses or uninitialized templates
-      function isDummyValue(v) {
-        if (v === undefined || v === null) return true;
-        const s = String(v).trim().toLowerCase();
-        return (
-          s === '' ||
-          s === '—' ||
-          s === '-' ||
-          s === 'null' ||
-          s === 'undefined' ||
-          s === 'customer' ||
-          s === 'actual customer' ||
-          s === 'customer@example.com' ||
-          s === 'example@example.com' ||
-          s === '+234 701 234 5678' ||
-          s === '+2347012345678' ||
-          s === '+234 7012345678' ||
-          s === 'delivery address, lagos' ||
-          s === 'delivery address' ||
-          s === 'call upon arrival'
-        );
-      }
-
-      function pick(...vals) {
-        // Pass 1: Prioritize genuine, non-dummy customer/order data
-        for (const v of vals) {
-          if (!isDummyValue(v)) {
-            return String(v).trim();
-          }
-        }
-        // Pass 2: Fallback to non-empty string if nothing else is available
-        for (const v of vals) {
-          if (v !== undefined && v !== null && String(v).trim() !== '' && String(v).trim() !== '—') {
-            return String(v).trim();
-          }
-        }
-        return '';
-      }
-
-      function pickNum(...vals) {
-        for (const v of vals) {
-          const n = Number(v);
-          if (!isNaN(n) && n > 0) {
-            return n;
-          }
-        }
-        return 0;
-      }
-
-      // Read query parameters with broad payment gateway support (Bachs, Paystack, etc.)
-      function getQueryParams() {
-        const params = new URLSearchParams(window.location.search);
-        let orderId = params.get('orderId') || params.get('order_id') || params.get('reference') || params.get('trxref') || params.get('checkout_id') || params.get('ref') || params.get('id') || '';
-        let token = params.get('token') || params.get('t') || '';
-
-        // Check hash parameters if present
-        if (!orderId && window.location.hash) {
-          const hashParams = new URLSearchParams(window.location.hash.replace(/^#\/?/, ''));
-          orderId = hashParams.get('orderId') || hashParams.get('order_id') || hashParams.get('reference') || hashParams.get('trxref') || hashParams.get('checkout_id') || hashParams.get('ref') || hashParams.get('id') || '';
-          if (!token) token = hashParams.get('token') || hashParams.get('t') || '';
-        }
-
-        // If not in URL, recover from cached last order in localStorage
-        if (!orderId) {
-          try {
-            const cached = JSON.parse(localStorage.getItem('voltedge_last_order') || '{}');
-            orderId = cached.order_id || cached.orderId || cached.trackingCode || '';
-            if (!token) token = cached.lookup_token || cached.token || '';
-          } catch { }
-        }
-
-        // Check if payment success flag is present from Bachs redirect or return page
-        const isPaidFromUrl = params.get('payment') === 'success' ||
-                              params.get('status') === 'successful' ||
-                              params.get('status') === 'paid' ||
-                              params.get('payment_status') === 'paid' ||
-                              params.get('paid') === 'true' ||
-                              Boolean(params.get('checkout_id') || params.get('checkoutId') || params.get('trxref'));
-
-        if (isPaidFromUrl) {
-          window._voltedge_is_paid_url = true;
-          try {
-            const cached = JSON.parse(localStorage.getItem('voltedge_last_order') || '{}');
-            if (cached && (cached.order_id === orderId || cached.orderId === orderId || !cached.order_id)) {
-              cached.payment_status = 'PAID';
-              cached.order_status = 'Payment Confirmed — Ready to Pack';
-              localStorage.setItem('voltedge_last_order', JSON.stringify(cached));
-            }
-          } catch {}
-        }
-
-        return { orderId: orderId.trim(), token: token.trim(), isPaidFromUrl };
-      }
-
-      // Find cached order matching orderId from localStorage
-      // STRICT: Must match orderId exactly. Never falls back to unrelated orders.
-      function findCachedOrder(orderId) {
-        try {
-          const cleanId = (orderId || '').trim().toLowerCase();
-          if (!cleanId || cleanId === 've-20261029-5826') return null;
-
-          // 1. Check voltedge_last_order ONLY if exact match
-          const last = JSON.parse(localStorage.getItem('voltedge_last_order') || '{}');
-          if (last && typeof last === 'object') {
-            const lId = String(last.order_id || last.orderId || last.trackingCode || '').trim().toLowerCase();
-            if (lId === cleanId && (last.customer_name || last.customerName || (last.customer && last.customer.fullName) || last.fullName)) {
-              return last;
-            }
-          }
-
-          // 2. Check voltedge_orders array ONLY if exact match
-          const list = JSON.parse(localStorage.getItem('voltedge_orders') || '[]');
-          if (Array.isArray(list)) {
-            const found = list.find(o => {
-              if (!o || typeof o !== 'object') return false;
-              const oId = String(o.order_id || o.orderId || o.trackingCode || '').trim().toLowerCase();
-              return oId === cleanId;
-            });
-            if (found && (found.customer_name || found.customerName || (found.customer && found.customer.fullName) || found.fullName)) {
-              return found;
-            }
-          }
-        } catch (e) {
-          console.warn('[VoltEdge] Error reading cached orders:', e);
-        }
-        return null;
-      }
-
-      // Populate full customer and order details in UI
-      function populateOrderUI(order, fallbackId) {
-        if (!order) order = {};
-        const cached = findCachedOrder(fallbackId) || {};
-        const cust = order.customer || cached.customer || {};
-
-        // 1. Order Code & Tracking
-        const orderCode = pick(order.order_id, order.orderId, order.trackingCode, cached.order_id, cached.orderId, fallbackId) || '—';
-        const dispTracking = document.getElementById('disp-tracking-code');
-        if (dispTracking) dispTracking.textContent = orderCode;
-
-        const breadcrumbCurrent = document.getElementById('breadcrumb-current');
-        if (breadcrumbCurrent) breadcrumbCurrent.textContent = `Order ${orderCode}`;
-
-        // Copy button setup
-        const copyBtn = document.getElementById('btn-copy-tracking');
-        const copyBtnText = document.getElementById('copy-btn-text');
-        if (copyBtn) {
-          copyBtn.onclick = function () {
-            navigator.clipboard.writeText(orderCode).then(() => {
-              if (copyBtnText) copyBtnText.textContent = 'Copied!';
-              copyBtn.style.color = '#15803d';
-              copyBtn.style.borderColor = '#15803d';
-              setTimeout(() => {
-                if (copyBtnText) copyBtnText.textContent = 'Copy Code';
-                copyBtn.style.color = '';
-                copyBtn.style.borderColor = '';
-              }, 2500);
-            }).catch(() => {
-              prompt('Copy order tracking reference:', orderCode);
-            });
-          };
-        }
-
-        // 2. Customer Information
-        const custName = pick(
-          order.customer_name,
-          order['Customer Name'],
-          order.customerName,
-          order.fullName,
-          cust.fullName,
-          cust.name,
-          cached.customer_name,
-          cached.customerName,
-          cached.fullName
-        ) || 'Customer';
-
-        const custPhone = pick(
-          order.customer_phone,
-          order['Customer Phone'],
-          order.customerPhone,
-          order.phone,
-          cust.fullPhone,
-          cust.phone,
-          cached.customer_phone,
-          cached.customerPhone
-        ) || '—';
-
-        const custEmail = pick(
-          order.customer_email,
-          order['Customer Email'],
-          order.customerEmail,
-          order.email,
-          cust.email,
-          cached.customer_email,
-          cached.customerEmail
-        ) || '—';
-
-        const custAddr = pick(
-          order.delivery_address,
-          order['Delivery Address'],
-          order.deliveryAddress,
-          order.address,
-          cust.address,
-          cached.delivery_address,
-          cached.deliveryAddress
-        ) || '—';
-
-        const custNotes = pick(
-          order.delivery_notes,
-          order['Delivery Notes'],
-          order.deliveryNotes,
-          order.notes,
-          cust.notes,
-          cached.delivery_notes
-        );
-
-        const elCustName = document.getElementById('disp-customer-name');
-        if (elCustName) elCustName.textContent = custName;
-
-        const elCustPhone = document.getElementById('disp-customer-phone');
-        if (elCustPhone) elCustPhone.textContent = custPhone;
-
-        const elCustEmail = document.getElementById('disp-customer-email');
-        if (elCustEmail) elCustEmail.textContent = custEmail;
-
-        const elCustAddr = document.getElementById('disp-customer-address');
-        if (elCustAddr) elCustAddr.textContent = custAddr;
-
-        const elCustNotes = document.getElementById('disp-customer-notes');
-        if (elCustNotes) elCustNotes.textContent = custNotes ? custNotes : 'None provided';
-
-        // 3. Product & Pricing
-        // If order from backend has mismatched ID or is mock data, prefer the user's cached order items!
-        const orderIdMatches = !order.order_id || !fallbackId || String(order.order_id).trim().toLowerCase() === String(fallbackId).trim().toLowerCase();
-        const isMockPayload = isDummyValue(order.customer_name) || isDummyValue(order.customer_email) || isDummyValue(order.customer_phone);
-        const preferCachedProduct = !orderIdMatches || (isMockPayload && (cached.product_name || cached.product || (cached.items && cached.items[0])));
-
-        const prod = preferCachedProduct
-          ? (cached.product || (cached.items && cached.items[0]) || order.product || {})
-          : (order.product || (order.items && order.items[0]) || cached.product || {});
-
-        let prodSku = preferCachedProduct
-          ? pick(cached.product_sku, cached.product_SKU, cached.sku, prod.sku, order.product_sku)
-          : pick(order.product_sku, order.product_SKU, order['Product SKU'], order.productSku, order.sku, prod.sku, cached.product_sku);
-
-        let prodName = preferCachedProduct
-          ? pick(cached.product_name, cached.productName, prod.name, prod.shortName, order.product_name)
-          : pick(order.product_name, order['Product Name'], order.productName, order.shortName, prod.name, prod.shortName, cached.product_name);
-
-        const prodQty = preferCachedProduct
-          ? (pickNum(cached.quantity, cached.qty, prod.quantity, order.quantity) || 1)
-          : (pickNum(order.quantity, order['Quantity'], order.qty, prod.quantity, cached.quantity) || 1);
-
-        let unitPrice = preferCachedProduct
-          ? pickNum(cached.unit_price, cached.unitPrice, prod.unitPrice, order.unit_price)
-          : pickNum(order.unit_price, order['Unit Price'], order.unitPrice, prod.unitPrice, cached.unit_price);
-
-        let totalPrice = preferCachedProduct
-          ? pickNum(cached.total_price, cached.totalPrice, cached.totalAmount, order.total_price)
-          : pickNum(order.total_price, order['Total Price'], order.totalPrice, order.totalAmount, cached.total_price);
-
-        // Catalog matching
-        let catalogMatch = null;
-        const catalogList = window.PRODUCTS_DATA || (typeof PRODUCTS_DATA !== 'undefined' ? PRODUCTS_DATA : []);
-        if (Array.isArray(catalogList) && catalogList.length) {
-          if (prodSku) {
-            catalogMatch = catalogList.find(p => p.sku && p.sku.toLowerCase() === prodSku.toLowerCase())
-              || catalogList.find(p => p.id && p.id.toLowerCase() === prodSku.toLowerCase());
-          }
-          if (!catalogMatch && prodName) {
-            catalogMatch = catalogList.find(p => p.name && p.name.toLowerCase() === prodName.toLowerCase())
-              || catalogList.find(p => p.shortName && p.shortName.toLowerCase() === prodName.toLowerCase());
-          }
-        }
-
-        if (catalogMatch) {
-          if (!prodName) prodName = catalogMatch.name;
-          if (!prodSku) prodSku = catalogMatch.sku;
-          if (!unitPrice) unitPrice = catalogMatch.price;
-          if (!totalPrice) totalPrice = unitPrice * prodQty;
-        }
-
-        if (!prodSku) prodSku = 'VE-EQUIPMENT';
-        if (!prodName) prodName = 'VoltEdge Hardware';
-
-        // Multi-Product Cart Support: parse products array or products_json if available
-        let orderProducts = [];
-        if (Array.isArray(order.products) && order.products.length > 0) {
-          orderProducts = order.products;
-        } else if (order.products_json && typeof order.products_json === 'string') {
-          try {
-            const parsed = JSON.parse(order.products_json);
-            if (Array.isArray(parsed) && parsed.length > 0) orderProducts = parsed;
-          } catch(e) {}
-        } else if (Array.isArray(cached.products) && cached.products.length > 0) {
-          orderProducts = cached.products;
-        }
-
-        if (orderProducts.length > 1 && (!totalPrice || totalPrice === 0)) {
-          totalPrice = orderProducts.reduce((sum, p) => {
-            const lTotal = pickNum(p.line_total, p.lineTotal);
-            if (lTotal) return sum + lTotal;
-            const uPrice = pickNum(p.unit_price, p.price, p.unitPrice) || 0;
-            const q = pickNum(p.quantity, p.qty) || 1;
-            return sum + (uPrice * q);
-          }, 0);
-        }
-
-        if (unitPrice === 0 && totalPrice > 0 && prodQty > 0) {
-          unitPrice = Math.round(totalPrice / prodQty);
-        }
-        if (totalPrice === 0 && unitPrice > 0 && prodQty > 0) {
-          totalPrice = unitPrice * prodQty;
-        }
-
-        const itemsContainer = document.getElementById('disp-items-container');
-        if (itemsContainer && orderProducts.length > 1) {
-          itemsContainer.innerHTML = orderProducts.map((p, idx) => {
-            const iSku = pickNonDummy(p.product_sku, p.sku, p.productSku) || 'VE-EQUIPMENT';
-            let iName = pickNonDummy(p.product_name, p.name, p.shortName) || 'VoltEdge Hardware';
-            const iQty = pickNum(p.quantity, p.qty) || 1;
-            let iPrice = pickNum(p.unit_price, p.unitPrice, p.price);
-            let iLineTotal = pickNum(p.line_total, p.lineTotal);
-
-            let catMatch = null;
-            if (Array.isArray(catalogList) && catalogList.length) {
-              catMatch = catalogList.find(c => (c.sku && c.sku.toLowerCase() === iSku.toLowerCase()) || (c.id && c.id.toLowerCase() === iSku.toLowerCase()))
-                      || catalogList.find(c => c.name && c.name.toLowerCase() === iName.toLowerCase())
-                      || catalogList.find(c => c.shortName && c.shortName.toLowerCase() === iName.toLowerCase());
-            }
-
-            if (catMatch) {
-              if (!iName || iName === 'VoltEdge Hardware' || isDummyValue(iName)) iName = catMatch.name;
-              if (!iPrice) iPrice = catMatch.price;
-            }
-            if (!iLineTotal) iLineTotal = (iPrice || 0) * iQty;
-            if (!iPrice && iLineTotal > 0 && iQty > 0) iPrice = Math.round(iLineTotal / iQty);
-
-            let iImg = p.image || (catMatch && catMatch.image) || '';
-            if (!iImg) {
-              iImg = IS_SUBDIR ? '../assets/images/pb-black.jpg' : 'assets/images/pb-black.jpg';
-            } else if (IS_SUBDIR && !iImg.startsWith('http') && !iImg.startsWith('../') && !iImg.startsWith('/')) {
-              iImg = '../' + iImg;
-            }
-
-            const isLast = idx === orderProducts.length - 1;
-            const borderStyle = isLast ? '' : 'border-bottom: 1px dashed rgba(0,0,0,0.09); margin-bottom: 0.85rem; padding-bottom: 0.85rem;';
-
-            return `
-              <div class="item-row" style="display: flex; align-items: center; gap: 0.85rem; ${borderStyle}">
-                <img src="${iImg}" alt="${iName}" style="width: 58px; height: 58px; border-radius: 8px; object-fit: cover; border: 1px solid #e2e8f0; flex-shrink: 0; background: #fff;">
-                <div class="item-meta" style="flex: 1; min-width: 0;">
-                  <div class="item-title" style="font-weight: 700; color: var(--text-main); font-size: 0.95rem; line-height: 1.35; margin-bottom: 0.2rem;">${iName}</div>
-                  <div class="item-sku-qty" style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.25rem;">SKU: ${iSku} • Qty: ${iQty} ${iQty > 1 ? 'units' : 'unit'}</div>
-                  <div class="item-price" style="font-weight: 700; color: var(--primary); font-size: 0.92rem;">${formatNaira(iLineTotal)} <span style="font-size: 0.75rem; font-weight: 400; color: var(--text-muted);">(${formatNaira(iPrice)} ea)</span></div>
-                </div>
-              </div>
-            `;
-          }).join('');
-        }
-
-        const elItemName = document.getElementById('disp-item-name');
-        if (elItemName) elItemName.textContent = prodName;
-
-        const elItemSkuQty = document.getElementById('disp-item-sku-qty');
-        if (elItemSkuQty) elItemSkuQty.textContent = `SKU: ${prodSku} • Qty: ${prodQty} ${prodQty > 1 ? 'units' : 'unit'}`;
-
-        const elItemPrice = document.getElementById('disp-item-price');
-        if (elItemPrice) elItemPrice.textContent = formatNaira(unitPrice);
-
-        const elSubtotal = document.getElementById('disp-subtotal');
-        if (elSubtotal) elSubtotal.textContent = formatNaira(totalPrice);
-
-        const elTotal = document.getElementById('disp-total-amount');
-        if (elTotal) elTotal.textContent = formatNaira(totalPrice);
-
-        // Product image
-        let prodImg = order.image || prod.image || (catalogMatch && catalogMatch.image) || cached.image || '';
-        if (!prodImg) {
-          prodImg = IS_SUBDIR ? '../assets/images/pb-black.jpg' : 'assets/images/pb-black.jpg';
-        } else if (IS_SUBDIR && !prodImg.startsWith('http') && !prodImg.startsWith('../') && !prodImg.startsWith('/')) {
-          prodImg = '../' + prodImg;
-        }
-        const imgEl = document.getElementById('disp-item-img');
-        if (imgEl) {
-          imgEl.src = prodImg;
-          imgEl.alt = prodName;
-        }
-
-        // 4. Order Date
-        const rawDate = pick(
-          order.timestamp,
-          order.TimeStamp,
-          order.Timestamp,
-          order.createdAt,
-          order.orderDate,
-          order.date,
-          cached.timestamp,
-          cached.createdAt
-        );
-
-        const elOrderDate = document.getElementById('disp-order-date');
-        if (elOrderDate) {
-          let dateStr = '';
-          if (rawDate) {
-            try {
-              const d = new Date(rawDate);
-              if (!isNaN(d.getTime())) {
-                dateStr = d.toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' });
-              }
-            } catch { }
-            if (!dateStr || dateStr.toLowerCase().includes('invalid')) {
-              dateStr = rawDate;
-            }
-          }
-          if (!dateStr || dateStr.toLowerCase().includes('invalid')) {
-            dateStr = new Date().toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' });
-          }
-          elOrderDate.textContent = dateStr;
-        }
-
-        // 5. Payment Verification Status (Strict separation: PENDING PAYMENT vs PAYMENT CONFIRMED — READY TO PACK)
-        const orderStatus = String(order.order_status || order.orderStatus || order.status || cached.order_status || '').trim().toLowerCase();
-        const paymentStatus = String(order.payment_status || order.paymentStatus || cached.payment_status || '').trim().toLowerCase();
-        const payStatusEl = document.getElementById('disp-payment-status');
-        const statusPill = document.getElementById('disp-status-pill');
-        const heroDesc = document.getElementById('disp-hero-desc');
-        const bannerTitle = document.querySelector('.email-receipt-title');
-        const bannerDesc = document.querySelector('.email-receipt-desc');
-        const isPaid = (window._voltedge_is_paid_url === true) ||
-                       orderStatus.includes('paid') ||
-                       paymentStatus.includes('paid') ||
-                       paymentStatus.includes('verified') ||
-                       orderStatus.includes('ready to pack') ||
-                       orderStatus.includes('pack');
-
-        if (statusPill) {
-          if (isPaid) {
-            statusPill.className = 'success-status-pill status-paid';
-            statusPill.innerHTML = '<i class="ph-bold ph-package"></i> <span id="disp-status-text">PAYMENT CONFIRMED — READY TO PACK</span>';
-          } else {
-            statusPill.className = 'success-status-pill status-pending';
-            statusPill.innerHTML = '<i class="ph-bold ph-clock"></i> <span id="disp-status-text">ORDER LOGGED — PAYMENT PENDING</span>';
-          }
-        }
-
-        if (heroDesc) {
-          if (isPaid) {
-            heroDesc.textContent = 'Payment received and verified. Our dispatch logistics team is now packing your hardware and verifying logistics.';
-          } else {
-            heroDesc.textContent = 'We have registered your order in our fulfillment wave. Our dispatch logistics team is now packing your hardware and verifying logistics.';
-          }
-        }
-
-        if (payStatusEl) {
-          if (isPaid) {
-            payStatusEl.textContent = 'Payment Confirmed — Ready to Pack';
-            payStatusEl.style.color = '#15803d';
-          } else {
-            payStatusEl.textContent = 'PENDING PAYMENT';
-            payStatusEl.style.color = '#d97706';
-          }
-        }
-
-        if (isPaid) {
-          if (bannerTitle) bannerTitle.textContent = 'Payment Confirmed — Ready to Pack';
-          if (bannerDesc) bannerDesc.textContent = 'Your payment has been successfully confirmed. Our logistics warehouse team is now packing your order for dispatch.';
-        } else {
-          if (bannerTitle) bannerTitle.textContent = 'Order Placed — Payment Pending';
-          if (bannerDesc) bannerDesc.textContent = 'Your order has been registered successfully. Payment status is PENDING PAYMENT. Please check your email for your payment link to complete your payment.';
-        }
-
-        // 6. Fulfillment Wave steps
-        const stepPlaced = document.getElementById('step-placed');
-        const stepWarehouse = document.getElementById('step-warehouse');
-        const stepWarehouseTag = document.getElementById('step-warehouse-tag');
-        const stepDispatch = document.getElementById('step-dispatch');
-        const stepDelivery = document.getElementById('step-delivery');
-
-        const isDelivered = (orderStatus.includes('deliver') && !orderStatus.includes('out for delivery')) || orderStatus.includes('completed');
-        const isDispatched = !isDelivered && (orderStatus.includes('dispatch') || orderStatus.includes('transit') || orderStatus.includes('out for delivery'));
-
-        [stepPlaced, stepWarehouse, stepDispatch, stepDelivery].forEach(s => s && (s.className = 'timeline-step'));
-
-        if (isDelivered) {
-          [stepPlaced, stepWarehouse, stepDispatch, stepDelivery].forEach(s => s && s.classList.add('completed'));
-        } else if (isDispatched) {
-          if (stepPlaced) stepPlaced.classList.add('completed');
-          if (stepWarehouse) stepWarehouse.classList.add('completed');
-          if (stepDispatch) stepDispatch.classList.add('active');
-        } else {
-          if (stepPlaced) stepPlaced.classList.add('completed');
-          if (stepWarehouse) {
-            stepWarehouse.classList.add('active');
-            if (isPaid && stepWarehouseTag) {
-              stepWarehouseTag.textContent = 'Ready to Pack';
-            }
-          }
-        }
-
-        // 7. WhatsApp Follow-up Button
-        const waBtn = document.getElementById('btn-wa-followup');
-        if (waBtn) {
-          const waMsg = encodeURIComponent(
-            `Hello VoltEdge Team, I am following up on my order ${orderCode} (${prodQty}x ${prodName}) for ${custName}.`
-          );
-          waBtn.href = `https://wa.me/2347047922403?text=${waMsg}`;
-        }
-      }
-
-      // Background non-blocking sync with secure backend API endpoint
-      async function syncWebhookInBackground(orderId, token) {
-        if (!orderId) return;
-        const endpoint = `/api/voltedge-order-details?orderId=${encodeURIComponent(orderId)}${token ? '&token=' + encodeURIComponent(token) : ''}`;
-
-        try {
-          const controller = new AbortController();
-          const timer = setTimeout(() => controller.abort(), 35000);
-          const res = await fetch(endpoint, { method: 'GET', headers: { 'Accept': 'application/json' }, signal: controller.signal });
-          clearTimeout(timer);
-
-          if (res.status === 429) {
-            console.warn('[VoltEdge] Order details query rate-limited (HTTP 429). Will retry after cooldown.');
-            return;
-          }
-
-          if (res.ok) {
-            const result = await res.json();
-            // Required: If webhook returns { success: true, order: { ... } }, read order properties from result.order
-            const orderData = (result && result.order) ? result.order : (result && result.success && result.data ? result.data : result);
-            if (orderData && typeof orderData === 'object') {
-              const returnedId = String(orderData.order_id || orderData.orderId || orderData.trackingCode || '').trim();
-              const currentId = String(orderId || '').trim();
-
-              // 1. Strict Order ID Matching: If the backend returned an order ID that doesn't match the current page,
-              // it is a mock/mismatched payload from the webhook. Do not corrupt the customer's page.
-              if (returnedId && currentId && returnedId.toLowerCase() !== currentId.toLowerCase()) {
-                console.warn(`[VoltEdge] Backend returned order ID "${returnedId}" which does not match requested "${currentId}". Ignoring mismatched payload.`);
-                return;
-              }
-
-              // 2. Safe merge with customer cache: Never let dummy/mock data overwrite real customer details
-              const cached = findCachedOrder(orderId) || {};
-              const isMock = isDummyValue(orderData.customer_name) || isDummyValue(orderData.customer_email) || isDummyValue(orderData.customer_phone);
-
-              const merged = { ...cached, ...orderData };
-              // If mock test data was returned, strictly preserve the user's actual customer and item info from cache
-              if (isMock && cached.customer_name) {
-                merged.customer_name = cached.customer_name;
-                merged.customer_phone = cached.customer_phone || cached.phone;
-                merged.customer_email = cached.customer_email || cached.email;
-                merged.delivery_address = cached.delivery_address || cached.address;
-                merged.delivery_notes = cached.delivery_notes || cached.notes;
-                merged.product_name = cached.product_name;
-                merged.product_sku = cached.product_sku;
-                merged.quantity = cached.quantity;
-                merged.total_price = cached.total_price || cached.totalAmount;
-                merged.unit_price = cached.unit_price;
-              }
-
-              console.log('[VoltEdge] Successfully synced order status from backend:', merged);
-              populateOrderUI(merged, orderId);
-              return;
-            }
-          }
-        } catch (e) {
-          // Silently continue or leave cached data intact
-        }
-      }
-
-      async function initializePage() {
-        const { orderId, token } = getQueryParams();
-
-        if (!orderId || orderId.toLowerCase() === 've-20261029-5826') {
-          if (notFoundMsg) {
-            notFoundMsg.textContent = 'No valid order reference ID was provided in the URL. Please verify your tracking link or search your order code below.';
-          }
-          showView('not-found');
-          return;
-        }
-
-        // 1. Show loading view while querying backend
-        showView('loading');
-
-        // 2. Query authoritative backend endpoint
-        try {
-          const endpoint = `/api/voltedge-order-details?orderId=${encodeURIComponent(orderId)}${token ? '&token=' + encodeURIComponent(token) : ''}`;
-          const controller = new AbortController();
-          const timer = setTimeout(() => controller.abort(), 35000);
-          const res = await fetch(endpoint, {
-            method: 'GET',
-            headers: { 'Accept': 'application/json' },
-            signal: controller.signal
-          });
-          clearTimeout(timer);
-
-          if (res.status === 403) {
-            if (notFoundMsg) {
-              notFoundMsg.textContent = 'Security token verification failed for this order. Please use the secure link provided in your order email.';
-            }
-            showView('not-found');
-            return;
-          }
-
-          if (res.ok) {
-            const result = await res.json();
-            const orderData = (result && result.order) ? result.order : (result && result.data ? result.data : result);
-            if (orderData && typeof orderData === 'object') {
-              const returnedId = String(orderData.order_id || orderData.orderId || orderData.trackingCode || '').trim();
-              if (returnedId && returnedId.toLowerCase() === orderId.toLowerCase() && returnedId.toLowerCase() !== 've-20261029-5826') {
-                populateOrderUI(orderData, orderId);
-                showView('success');
-                return;
-              }
-            }
-          }
-        } catch (err) {
-          console.warn('[VoltEdge Order Success] Backend lookup network error:', err.message);
-        }
-
-        // 3. Fallback ONLY to an exact match in local cache for offline/transient checkout flow
-        const cached = findCachedOrder(orderId);
-        if (cached && String(cached.order_id || cached.orderId || '').trim().toLowerCase() === orderId.toLowerCase()) {
-          populateOrderUI(cached, orderId);
-          showView('success');
-          return;
-        }
-
-        // 4. If neither backend nor local exact cache matches, display not found
-        if (notFoundMsg) {
-          notFoundMsg.textContent = `No order record matching reference "${orderId}" could be found. Please check your code or contact support.`;
-        }
-        showView('not-found');
-      }
-
-      // Event Handlers
-      if (manualForm && manualInput) {
-        manualForm.addEventListener('submit', function (e) {
-          e.preventDefault();
-          const enteredId = manualInput.value.trim();
-          if (enteredId) {
-            const newUrl = new URL(window.location.href);
-            newUrl.searchParams.set('orderId', enteredId);
-            window.location.href = newUrl.toString();
-          }
-        });
-      }
-
-      // Run on DOM ready
-      if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', initializePage);
-      } else {
-        initializePage();
-      }
-    })();
-  </script>
-</body>
-
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Order Confirmed | VoltEdge Tech & Accessories</title>
+
+  <meta name="description"
+    content="Your VoltEdge order has been logged successfully and queued for fulfillment. Track your order status and warranty details.">
+  <meta name="theme-color" content="#064e3b">
+
+  <!-- Canonical URL -->
+  <link rel="canonical" href="https://voltedge-tech-accessories.vercel.app/order-success">
+
+  <!-- Open Graph / Social Sharing Meta -->
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="VoltEdge Tech & Accessories">
+  <meta property="og:locale" content="en_NG">
+  <meta property="og:url" content="https://voltedge-tech-accessories.vercel.app/order-success">
+  <meta property="og:title" content="Order Confirmed | VoltEdge Tech & Accessories">
+  <meta property="og:description" content="Your VoltEdge order has been logged successfully and queued for fulfillment. Track your order status and warranty details.">
+  <meta property="og:image" content="https://voltedge-tech-accessories.vercel.app/assets/images/voltedge-social-preview.png">
+
+  <!-- Twitter/X Card Meta -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Order Confirmed | VoltEdge Tech & Accessories">
+  <meta name="twitter:description" content="Your VoltEdge order has been logged successfully and queued for fulfillment. Track your order status and warranty details.">
+  <meta name="twitter:image" content="https://voltedge-tech-accessories.vercel.app/assets/images/voltedge-social-preview.png">
+
+  <!-- Favicon -->
+  <link rel="icon"
+    href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220%200%2032%2032%22><rect width=%2232%22 height=%2232%22 rx=%228%22 fill=%22%2300e599%22/><path d=%22M18 4L10 17h5l-2 11 10-14h-6l3-10z%22 fill=%22%23090d16%22/></svg>">
+
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="../css/style.css">
+
+  <!-- Phosphor Icons -->
+  <script src="https://unpkg.com/@phosphor-icons/web" async></script>
+
+  <style>
+    .success-page-wrap {
+      min-height: calc(100vh - 4.5rem);
+      padding: 3rem 0 5rem;
+      background: radial-gradient(circle at 50% 0%, rgba(6, 78, 59, 0.05) 0%, rgba(248, 250, 249, 1) 100%);
+    }
+
+    .success-breadcrumb {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-bottom: 1.5rem;
+    }
+
+    .success-breadcrumb a {
+      color: var(--primary);
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
+    .success-breadcrumb a:hover {
+      text-decoration: underline;
+    }
+
+    /* Main Container Card */
+    .success-card {
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xl);
+      padding: 3rem;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.05);
+      max-width: 920px;
+      margin: 0 auto;
+      position: relative;
+    }
+
+    .success-hero-header {
+      text-align: center;
+      padding-bottom: 2.25rem;
+      border-bottom: 1px solid var(--border-subtle);
+      margin-bottom: 2.25rem;
+    }
+
+    .success-anim-icon {
+      width: 5rem;
+      height: 5rem;
+      background: #d1fae5;
+      color: var(--brand-emerald);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.6rem;
+      margin: 0 auto 1.25rem;
+      box-shadow: 0 0 0 10px rgba(209, 250, 229, 0.45);
+      animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    @keyframes popIn {
+      0% {
+        transform: scale(0.5);
+        opacity: 0;
+      }
+
+      100% {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+
+    .spin-anim {
+      animation: voltSpin 1s linear infinite;
+    }
+
+    @keyframes voltSpin {
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+
+    .success-status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      padding: 0.35rem 1rem;
+      background: #dcfce7;
+      color: #15803d;
+      border: 1px solid #bbf7d0;
+      border-radius: var(--radius-full);
+      font-size: 0.8rem;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      margin-bottom: 0.85rem;
+    }
+
+    .success-status-pill.status-dispatched {
+      background: #dbeafe;
+      color: #1d4ed8;
+      border-color: #bfdbfe;
+    }
+
+    .success-status-pill.status-delivered,
+    .success-status-pill.status-paid {
+      background: #dcfce7;
+      color: #15803d;
+      border-color: #86efac;
+    }
+
+    .success-status-pill.status-pending {
+      background: #fef3c7;
+      color: #b45309;
+      border-color: #fde68a;
+    }
+
+    .success-main-title {
+      font-size: clamp(1.8rem, 4vw, 2.4rem);
+      font-weight: 800;
+      color: var(--text-main);
+      line-height: 1.2;
+      margin-bottom: 0.75rem;
+    }
+
+    .success-main-desc {
+      color: var(--text-muted);
+      font-size: 1.05rem;
+      max-width: 600px;
+      margin: 0 auto 1.5rem;
+      line-height: 1.5;
+    }
+
+    /* Tracking Box */
+    .tracking-code-banner {
+      background: var(--bg-subtle);
+      border: 1.5px dashed var(--primary);
+      border-radius: var(--radius-lg);
+      padding: 1.25rem 1.75rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+    }
+
+    .tracking-label-wrap {
+      text-align: left;
+    }
+
+    .tracking-sub {
+      font-size: 0.76rem;
+      font-weight: 700;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .tracking-code-value {
+      font-size: 1.5rem;
+      font-weight: 900;
+      color: var(--primary);
+      letter-spacing: 0.02em;
+      font-family: monospace, var(--font-sans);
+    }
+
+    .btn-copy-code {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      padding: 0.55rem 1rem;
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-full);
+      color: var(--text-main);
+      font-size: 0.84rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all var(--transition-fast);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .btn-copy-code:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+      transform: translateY(-1px);
+    }
+
+    /* Timeline Stepper */
+    .fulfillment-timeline {
+      margin-bottom: 2.5rem;
+      padding: 1.5rem;
+      background: var(--bg-subtle);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border);
+    }
+
+    .timeline-title {
+      font-size: 0.82rem;
+      font-weight: 800;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 1.25rem;
+      text-align: center;
+    }
+
+    .timeline-steps {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0.75rem;
+      position: relative;
+    }
+
+    .timeline-step {
+      text-align: center;
+      position: relative;
+    }
+
+    .step-marker {
+      width: 2.25rem;
+      height: 2.25rem;
+      margin: 0 auto 0.6rem;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      font-weight: 800;
+      background: #e2e8f0;
+      color: #64748b;
+      position: relative;
+      z-index: 2;
+      transition: all var(--transition-fast);
+    }
+
+    .timeline-step.completed .step-marker {
+      background: var(--brand-emerald);
+      color: #ffffff;
+    }
+
+    .timeline-step.active .step-marker {
+      background: var(--primary);
+      color: #ffffff;
+      box-shadow: 0 0 0 5px rgba(6, 78, 59, 0.2);
+    }
+
+    .step-name {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--text-main);
+      line-height: 1.25;
+      display: block;
+      margin-bottom: 0.2rem;
+    }
+
+    .step-status-tag {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+    }
+
+    /* Order Details Grid */
+    .order-details-grid {
+      display: grid;
+      grid-template-columns: 1.15fr 1fr;
+      gap: 1.75rem;
+      margin-bottom: 2.25rem;
+    }
+
+    .detail-card-panel {
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 1.5rem;
+      background: #ffffff;
+    }
+
+    .detail-card-title {
+      font-size: 1rem;
+      font-weight: 800;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 1.25rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .item-row {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .item-row img {
+      width: 68px;
+      height: 68px;
+      object-fit: cover;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border);
+      flex-shrink: 0;
+      background: var(--bg-subtle);
+    }
+
+    .item-meta {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .item-title {
+      font-weight: 700;
+      font-size: 0.95rem;
+      color: var(--text-main);
+      margin-bottom: 0.2rem;
+    }
+
+    .item-sku-qty {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .item-price {
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: var(--primary);
+    }
+
+    .receipt-lines {
+      display: flex;
+      flex-direction: column;
+      gap: 0.65rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--border-subtle);
+      font-size: 0.88rem;
+      color: var(--text-muted);
+    }
+
+    .receipt-lines .line {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .receipt-lines .line.total {
+      margin-top: 0.5rem;
+      padding-top: 0.75rem;
+      border-top: 2px dashed var(--border);
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: var(--text-main);
+    }
+
+    .receipt-lines .line.total strong {
+      color: var(--primary);
+      font-size: 1.35rem;
+    }
+
+    .info-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.85rem;
+      font-size: 0.9rem;
+    }
+
+    .info-item {
+      display: flex;
+      flex-direction: column;
+      gap: 0.15rem;
+    }
+
+    .info-label {
+      font-size: 0.74rem;
+      font-weight: 700;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .info-val {
+      font-weight: 600;
+      color: var(--text-main);
+      word-break: break-word;
+    }
+
+    /* Highly Visible Email Receipt Notice Banner */
+    .email-receipt-banner {
+      background: #f0fdf4;
+      border: 2px solid #86efac;
+      border-radius: var(--radius-lg);
+      padding: 1.4rem 1.75rem;
+      display: flex;
+      align-items: center;
+      gap: 1.25rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 4px 16px rgba(16, 185, 129, 0.08);
+    }
+
+    .email-receipt-icon {
+      width: 3.5rem;
+      height: 3.5rem;
+      background: #059669;
+      color: #ffffff;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.75rem;
+      flex-shrink: 0;
+    }
+
+    .email-receipt-title {
+      font-size: 1.2rem;
+      font-weight: 800;
+      color: #064e3b;
+      margin: 0 0 0.35rem 0;
+    }
+
+    .email-receipt-desc {
+      color: #047857;
+      font-size: 0.95rem;
+      margin: 0;
+      line-height: 1.55;
+    }
+
+    /* Notice Box */
+    .dispatch-notice-box {
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      border-radius: var(--radius-lg);
+      padding: 1.25rem 1.5rem;
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 2.25rem;
+    }
+
+    .dispatch-notice-box i {
+      font-size: 1.45rem;
+      color: #2563eb;
+      flex-shrink: 0;
+      margin-top: 0.15rem;
+    }
+
+    .dispatch-notice-box strong {
+      display: block;
+      color: #1e3a8a;
+      font-size: 0.95rem;
+      margin-bottom: 0.35rem;
+    }
+
+    .dispatch-notice-box p {
+      color: #3b82f6;
+      font-size: 0.86rem;
+      margin: 0;
+      line-height: 1.5;
+    }
+
+    /* Action Buttons */
+    .success-actions {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .btn-wa-action {
+      background: var(--whatsapp);
+      color: #ffffff;
+      padding: 0.95rem 1.6rem;
+      border-radius: var(--radius-full);
+      font-weight: 800;
+      font-size: 0.95rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all var(--transition-fast);
+      box-shadow: 0 4px 12px rgba(37, 211, 102, 0.25);
+      text-decoration: none;
+    }
+
+    .btn-wa-action:hover {
+      background: var(--whatsapp-hover);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 18px rgba(37, 211, 102, 0.35);
+    }
+
+    .btn-print-action {
+      background: #ffffff;
+      border: 1.5px solid var(--border);
+      color: var(--text-main);
+      padding: 0.95rem 1.5rem;
+      border-radius: var(--radius-full);
+      font-weight: 700;
+      font-size: 0.95rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      cursor: pointer;
+      transition: all var(--transition-fast);
+    }
+
+    .btn-print-action:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+
+    .btn-shop-action {
+      background: var(--primary);
+      color: #ffffff;
+      padding: 0.95rem 1.6rem;
+      border-radius: var(--radius-full);
+      font-weight: 800;
+      font-size: 0.95rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all var(--transition-fast);
+      text-decoration: none;
+    }
+
+    .btn-shop-action:hover {
+      background: var(--primary-hover);
+      transform: translateY(-2px);
+    }
+
+    /* Loading, Error & Not Found States */
+    .state-view {
+      text-align: center;
+      padding: 3rem 1.5rem;
+    }
+
+    .state-icon-wrap {
+      width: 4.8rem;
+      height: 4.8rem;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.3rem;
+      margin: 0 auto 1.25rem;
+    }
+
+    .state-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.35rem 0.95rem;
+      border-radius: var(--radius-full);
+      font-size: 0.78rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.85rem;
+    }
+
+    .state-title {
+      font-size: 1.65rem;
+      font-weight: 800;
+      color: var(--text-main);
+      margin-bottom: 0.5rem;
+    }
+
+    .state-desc {
+      color: var(--text-muted);
+      font-size: 0.98rem;
+      max-width: 520px;
+      margin: 0 auto 1.75rem;
+      line-height: 1.55;
+    }
+
+    .state-lookup-form {
+      max-width: 440px;
+      margin: 0 auto 1.75rem;
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .state-lookup-input {
+      flex: 1;
+      min-width: 200px;
+    }
+
+    /* Print Stylesheet */
+    @media print {
+
+      .top-bar,
+      .site-header,
+      .site-footer,
+      .success-breadcrumb,
+      .success-actions,
+      .fulfillment-timeline,
+      .state-view {
+        display: none !important;
+      }
+
+      .success-page-wrap {
+        padding: 0;
+        background: none;
+      }
+
+      .success-card {
+        border: none;
+        box-shadow: none;
+        padding: 0;
+      }
+
+      body {
+        background: #ffffff;
+        color: #000000;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .success-page-wrap {
+        padding: 1.5rem 0 3rem;
+      }
+
+      .success-card {
+        padding: 1.75rem 1.15rem;
+      }
+
+      .success-main-title {
+        font-size: clamp(1.45rem, 5.5vw, 1.95rem);
+      }
+
+      .success-main-desc {
+        font-size: 0.92rem;
+        margin-bottom: 1.25rem;
+      }
+
+      .tracking-code-banner {
+        flex-direction: column;
+        gap: 0.85rem;
+        width: 100%;
+        padding: 1.15rem 1rem;
+        text-align: center;
+        box-sizing: border-box;
+      }
+
+      .tracking-label-wrap {
+        text-align: center;
+        width: 100%;
+      }
+
+      .tracking-code-value {
+        font-size: clamp(1.15rem, 5vw, 1.45rem);
+        word-break: break-all;
+      }
+
+      .btn-copy-code {
+        width: 100%;
+        justify-content: center;
+        padding: 0.65rem 1rem;
+      }
+
+      .fulfillment-timeline {
+        padding: 1.25rem 0.85rem;
+        margin-bottom: 1.85rem;
+      }
+
+      .timeline-steps {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1.15rem 0.5rem;
+      }
+
+      .order-details-grid {
+        grid-template-columns: 1fr;
+        gap: 1.25rem;
+        margin-bottom: 1.75rem;
+      }
+
+      .detail-card-panel {
+        padding: 1.25rem 1rem;
+      }
+
+      .email-receipt-banner {
+        flex-direction: column;
+        text-align: center;
+        padding: 1.25rem 1rem;
+        gap: 0.85rem;
+      }
+
+      .dispatch-notice-box {
+        flex-direction: column;
+        gap: 0.65rem;
+        padding: 1rem 1.15rem;
+        margin-bottom: 1.75rem;
+      }
+
+      .success-actions {
+        flex-direction: column;
+        width: 100%;
+        gap: 0.75rem;
+      }
+
+      .btn-wa-action,
+      .btn-print-action,
+      .btn-shop-action {
+        width: 100%;
+        justify-content: center;
+        box-sizing: border-box;
+        text-align: center;
+        padding: 0.85rem 1.25rem;
+        font-size: 0.9rem;
+      }
+
+      .state-view {
+        padding: 2rem 0.75rem;
+      }
+
+      .state-title {
+        font-size: 1.35rem;
+      }
+
+      .state-desc {
+        font-size: 0.88rem;
+      }
+
+      .state-lookup-form {
+        flex-direction: column;
+        width: 100%;
+      }
+
+      .state-lookup-input {
+        width: 100%;
+      }
+
+      .state-lookup-form button {
+        width: 100%;
+        justify-content: center;
+      }
+
+      #error-technical-box {
+        font-size: 0.72rem;
+        padding: 0.75rem;
+        max-width: 100%;
+        box-sizing: border-box;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .success-card {
+        padding: 1.25rem 0.85rem;
+        border-radius: var(--radius-md);
+      }
+
+      .timeline-title {
+        font-size: 0.75rem;
+        margin-bottom: 0.85rem;
+      }
+
+      .timeline-steps {
+        gap: 0.85rem 0.35rem;
+      }
+
+      .step-marker {
+        width: 2rem;
+        height: 2rem;
+        font-size: 0.88rem;
+        margin-bottom: 0.4rem;
+      }
+
+      .step-name {
+        font-size: 0.74rem;
+      }
+
+      .step-status-tag {
+        font-size: 0.64rem;
+      }
+
+      .item-row {
+        gap: 0.75rem;
+      }
+
+      .item-row img {
+        width: 56px;
+        height: 56px;
+      }
+
+      .item-title {
+        font-size: 0.88rem;
+      }
+
+      .item-price {
+        font-size: 0.98rem;
+      }
+
+      .receipt-lines {
+        font-size: 0.82rem;
+      }
+
+      .receipt-lines .line.total strong {
+        font-size: 1.18rem;
+      }
+
+      .info-label {
+        font-size: 0.68rem;
+      }
+
+      .info-val {
+        font-size: 0.84rem;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- Top Announcement Bar -->
+  <aside class="top-bar" aria-label="Announcement">
+    <div class="container top-bar-content">
+      <span class="top-bar-text">Same-day delivery is available for orders placed and confirmed before 2:00 PM, strictly within selected locations in Lagos | Warranty on all products</span>
+    </div>
+  </aside>
+
+  <!-- Sticky Header -->
+  <header class="site-header" id="site-header">
+    <div class="container nav-wrap">
+      <a href="../index.html" class="brand-logo" aria-label="VoltEdge Home">
+        <div class="logo-icon">
+          <i class="ph-fill ph-lightning"></i>
+        </div>
+        <div class="logo-text">
+          VoltEdge
+          <span class="logo-subtitle">TECH & ACCESSORIES</span>
+        </div>
+      </a>
+
+      <!-- Desktop Nav Links -->
+      <nav aria-label="Primary Navigation">
+        <ul class="nav-links">
+          <li><a href="../index.html#catalogue" class="nav-link">Products</a></li>
+          <li><a href="../index.html#how-it-works" class="nav-link">How Fulfillment Works</a></li>
+          <li><a href="../index.html#feedback" class="nav-link">Feedback</a></li>
+        </ul>
+      </nav>
+
+      <!-- Nav Actions -->
+      <div class="nav-actions">
+        <a href="../checkout.html" class="btn btn-primary" style="padding: 0.65rem 1.25rem; font-size: 0.88rem;">
+          <i class="ph ph-shopping-cart-simple"></i> Order Now
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Order Success Section -->
+  <main class="success-page-wrap">
+    <div class="container">
+
+      <!-- Breadcrumb -->
+      <nav class="success-breadcrumb" aria-label="Breadcrumb">
+        <a href="../index.html"><i class="ph-bold ph-house"></i> Home</a>
+        <span>/</span>
+        <a href="../checkout.html">Checkout</a>
+        <span>/</span>
+        <span id="breadcrumb-current">Order Status</span>
+      </nav>
+
+      <div class="success-card">
+
+        <!-- 1. LOADING STATE -->
+        <div class="state-view" id="state-loading">
+          <div class="state-icon-wrap" style="background: rgba(6, 78, 59, 0.08); color: var(--primary);">
+            <i class="ph-bold ph-spinner spin-anim"></i>
+          </div>
+          <div class="state-badge" style="background: var(--accent); color: var(--accent-foreground);">
+            <i class="ph-bold ph-shield-check"></i> Verifying Order Details
+          </div>
+          <h2 class="state-title" id="loading-title">Retrieving Order Record...</h2>
+          <p class="state-desc" id="loading-desc">
+            Please wait a moment. Verifying order details...
+          </p>
+          <div id="loading-timer-pill"
+            style="display: inline-flex; align-items: center; gap: 0.5rem; background: #f0fdf4; border: 1px solid #bbf7d0; color: #166534; padding: 0.5rem 1.15rem; border-radius: var(--radius-full); font-size: 0.88rem; font-weight: 700; margin-top: 0.5rem; max-width: 100%; box-sizing: border-box; flex-wrap: wrap; justify-content: center;">
+            <i class="ph-bold ph-hourglass-medium spin-anim" style="color: var(--primary); font-size: 1.05rem;"></i>
+            <span>Please wait a moment (<span id="loading-countdown-text">60s</span> remaining)...</span>
+          </div>
+        </div>
+
+        <!-- 2. ORDER NOT FOUND / MISSING PARAMETERS STATE -->
+        <div class="state-view" id="state-not-found" style="display: none;">
+          <div class="state-icon-wrap" style="background: #fef2f2; color: #dc2626;">
+            <i class="ph-bold ph-magnifying-glass"></i>
+          </div>
+          <div class="state-badge" style="background: #fee2e2; color: #991b1b;">
+            Order Record Not Found
+          </div>
+          <h2 class="state-title">No Matching Order Located</h2>
+          <p class="state-desc" id="not-found-msg">
+            We could not locate an active order matching the provided reference ID or security token. Please verify your
+            link or enter your tracking code below.
+          </p>
+
+          <form class="state-lookup-form" id="manual-lookup-form">
+            <input type="text" id="manual-order-id" class="form-control state-lookup-input"
+              placeholder="e.g. VE-20261028-1234" required>
+            <button type="submit" class="btn btn-primary" style="padding: 0.75rem 1.4rem;">
+              <i class="ph-bold ph-magnifying-glass"></i> Track
+            </button>
+          </form>
+
+          <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+            <a href="https://wa.me/2347047922403?text=Hello%20VoltEdge%20Team%2C%20I%20need%20help%20locating%20my%20order."
+              target="_blank" rel="noopener noreferrer" class="btn-wa-action">
+              <i class="ph-fill ph-whatsapp-logo"></i> Help on WhatsApp
+            </a>
+            <a href="../index.html" class="btn-shop-action">
+              <i class="ph-bold ph-arrow-left"></i> Return to Store
+            </a>
+          </div>
+        </div>
+
+        <!-- 3. ERROR / SERVICE UNAVAILABLE STATE -->
+        <div class="state-view" id="state-error" style="display: none;">
+          <div class="state-icon-wrap" style="background: #fffbeb; color: #d97706;" id="error-icon-wrap">
+            <i class="ph-bold ph-warning-circle"></i>
+          </div>
+          <div class="state-badge" style="background: #fef3c7; color: #92400e;" id="error-badge">
+            Verification Temporarily Unavailable
+          </div>
+          <h2 class="state-title" id="error-title">Could Not Verify Order</h2>
+          <p class="state-desc" id="error-msg-text">
+            An error occurred, please try again later or contact us on WhatsApp.
+          </p>
+          <div id="error-technical-box"
+            style="display: none; max-width: 580px; margin: 0 auto 1.5rem; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: var(--radius-md); padding: 0.85rem 1.15rem; font-size: 0.82rem; color: #475569; text-align: left; font-family: monospace; white-space: pre-wrap; word-break: break-all;">
+          </div>
+          <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+            <button type="button" class="btn btn-primary" id="btn-retry-fetch"
+              style="padding: 0.85rem 1.6rem; border-radius: var(--radius-full);">
+              <i class="ph-bold ph-arrows-clockwise"></i> Retry Verification
+            </button>
+            <a href="https://wa.me/2347047922403" id="error-wa-link" target="_blank" rel="noopener noreferrer"
+              class="btn-wa-action">
+              <i class="ph-fill ph-whatsapp-logo"></i> Chat with us
+            </a>
+          </div>
+        </div>
+
+        <!-- 4. VERIFIED ORDER DETAILS VIEW (Rendered dynamically) -->
+        <div id="state-success-content" style="display: none;">
+
+          <!-- Hero Confirmation Header -->
+          <div class="success-hero-header">
+            <div class="success-anim-icon">
+              <i class="ph-bold ph-check"></i>
+            </div>
+
+            <div class="success-status-pill" id="disp-status-pill">
+              <i class="ph-bold ph-sparkle"></i> <span id="disp-status-text">ORDER LOGGED & IN FULFILLMENT WAVE</span>
+            </div>
+
+            <h1 class="success-main-title" id="disp-hero-title">Thank You for Your Order!</h1>
+
+            <p class="success-main-desc" id="disp-hero-desc">
+              We have registered your order in our fulfillment wave. Our dispatch logistics team is now packing your
+              hardware and verifying logistics.
+            </p>
+
+            <!-- Tracking Code Banner -->
+            <div class="tracking-code-banner">
+              <div class="tracking-label-wrap">
+                <span class="tracking-sub">REFERENCE TRACKING CODE</span>
+                <div class="tracking-code-value" id="disp-tracking-code">—</div>
+              </div>
+              <button type="button" class="btn-copy-code" id="btn-copy-tracking">
+                <i class="ph-bold ph-copy"></i>
+                <span id="copy-btn-text">Copy Code</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Fulfillment Progress Pipeline -->
+          <section class="fulfillment-timeline" aria-label="Order Progress">
+            <div class="timeline-title">Fulfillment Progress Wave</div>
+            <div class="timeline-steps">
+
+              <div class="timeline-step completed" id="step-placed">
+                <div class="step-marker"><i class="ph-bold ph-check"></i></div>
+                <span class="step-name">Order Placed</span>
+                <span class="step-status-tag" id="step-placed-tag">Logged</span>
+              </div>
+
+              <div class="timeline-step active" id="step-warehouse">
+                <div class="step-marker"><i class="ph-bold ph-package"></i></div>
+                <span class="step-name">Warehouse Wave</span>
+                <span class="step-status-tag" id="step-warehouse-tag">Packaging</span>
+              </div>
+
+              <div class="timeline-step" id="step-dispatch">
+                <div class="step-marker"><i class="ph-bold ph-phone-call"></i></div>
+                <span class="step-name">Dispatch Call</span>
+                <span class="step-status-tag" id="step-dispatch-tag">Scheduling</span>
+              </div>
+
+              <div class="timeline-step" id="step-delivery">
+                <div class="step-marker"><i class="ph-bold ph-house-line"></i></div>
+                <span class="step-name">Handover & 1Yr Warranty</span>
+                <span class="step-status-tag" id="step-delivery-tag">Doorstep Delivery</span>
+              </div>
+
+            </div>
+          </section>
+
+          <!-- Order Summary & Shipping Details -->
+          <div class="order-details-grid" id="order-details-grid">
+
+            <!-- Item & Invoice Details -->
+            <div class="detail-card-panel">
+              <h3 class="detail-card-title">
+                <i class="ph-bold ph-receipt"></i> Purchased Equipment
+              </h3>
+
+              <div id="disp-items-container">
+              <div class="item-row">
+                <img src="../assets/images/pb-black.jpg" alt="Hardware Ordered" id="disp-item-img">
+                <div class="item-meta">
+                  <div class="item-title" id="disp-item-name">—</div>
+                  <div class="item-sku-qty" id="disp-item-sku-qty">—</div>
+                  <div class="item-price" id="disp-item-price">—</div>
+                </div>
+              
+              </div></div>
+
+              <div class="receipt-lines">
+                <div class="line">
+                  <span>Subtotal Value:</span>
+                  <strong id="disp-subtotal">—</strong>
+                </div>
+                <div class="line">
+                  <span>Logistics Delivery Charge:</span>
+                  <span id="disp-delivery-fee" style="color: var(--primary); font-weight: 700;">Confirmed upon dispatch</span>
+                </div>
+                <div class="line">
+                  <span>Payment Verification:</span>
+                  <span id="disp-payment-status" style="color: var(--text-main); font-weight: 700;">Verification upon dispatch</span>
+                </div>
+                <div class="line">
+                  <span>Hardware Warranty:</span>
+                  <span style="color: var(--brand-emerald); font-weight: 700;">1-Year Official Warranty Active</span>
+                </div>
+                <div class="line total">
+                  <span>Total Amount:</span>
+                  <strong id="disp-total-amount">—</strong>
+                </div>
+              </div>
+            </div>
+
+            <!-- Customer & Delivery Destination -->
+            <div class="detail-card-panel">
+              <h3 class="detail-card-title">
+                <i class="ph-bold ph-truck"></i> Delivery Information
+              </h3>
+
+              <div class="info-list">
+                <div class="info-item">
+                  <span class="info-label">Customer Name</span>
+                  <span class="info-val" id="disp-customer-name">—</span>
+                </div>
+
+                <div class="info-item">
+                  <span class="info-label">Contact Phone / WhatsApp</span>
+                  <span class="info-val" id="disp-customer-phone">—</span>
+                </div>
+
+                <div class="info-item">
+                  <span class="info-label">Email Address</span>
+                  <span class="info-val" id="disp-customer-email">—</span>
+                </div>
+
+                <div class="info-item">
+                  <span class="info-label">Delivery Address</span>
+                  <span class="info-val" id="disp-customer-address">—</span>
+                </div>
+
+                <div class="info-item">
+                  <span class="info-label">Special Delivery Notes</span>
+                  <span class="info-val" id="disp-customer-notes" style="font-style: italic;">None provided</span>
+                </div>
+
+                <div class="info-item">
+                  <span class="info-label">Order Submitted At</span>
+                  <span class="info-val" id="disp-order-date">—</span>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Highly Visible Email Receipt Notice -->
+          <div class="email-receipt-banner" id="email-receipt-banner">
+            <div class="email-receipt-icon">
+              <i class="ph-fill ph-envelope-open"></i>
+            </div>
+            <div class="email-receipt-content">
+              <h3 class="email-receipt-title">Check Your Email for Your Receipt</h3>
+              <p class="email-receipt-desc">
+                Your official payment receipt and complete order confirmation have been sent to your email address.
+                Please check your inbox (and your spam or promotions folder) for your full receipt and order records.
+              </p>
+            </div>
+          </div>
+
+          <!-- Next Steps Callout -->
+          <div class="dispatch-notice-box" id="disp-notice-box">
+            <i class="ph-fill ph-info"></i>
+            <div>
+              <strong id="disp-notice-title">What Happens Next?</strong>
+              <p id="disp-notice-desc">
+                Our dispatch officer will contact you via WhatsApp / phone call to confirm your delivery address and
+                schedule the delivery window. Orders placed before 2:00 PM are dispatched same-day in Lagos!
+              </p>
+            </div>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="success-actions">
+            <div id="order-continue-payment-wrap" style="display: none; width: 100%; margin-bottom: 0.75rem;">
+              <button type="button" id="btn-order-continue-payment" class="btn" style="background: #064E3B; color: #ffffff; padding: 1rem 1.75rem; font-size: 1.05rem; font-weight: 800; border-radius: var(--radius-full); width: 100%; border: none; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 0.6rem; box-shadow: 0 4px 14px rgba(6, 78, 59, 0.25); text-decoration: none; transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);">
+                <i class="ph-bold ph-credit-card" style="font-size: 1.25rem;"></i> <span>Continue to Payment</span> <i class="ph-bold ph-arrow-square-out" style="font-size: 1.15rem;"></i>
+              </button>
+            </div>
+            <a href="#" id="btn-wa-followup" target="_blank" rel="noopener noreferrer" class="btn-wa-action">
+              <i class="ph-fill ph-whatsapp-logo" style="font-size: 1.25rem;"></i>
+              <span>Chat Dispatch Team on WhatsApp</span>
+            </a>
+
+            <a href="../index.html" class="btn-shop-action">
+              <i class="ph-bold ph-arrow-left"></i>
+              <span>Continue Shopping</span>
+            </a>
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-top">
+        <div>
+          <a href="../index.html" class="brand-logo footer-brand-logo">
+            <div class="logo-icon"
+              style="background: rgba(255, 255, 255, 0.18); border: 1px solid rgba(255, 255, 255, 0.3);">
+              <i class="ph-fill ph-lightning" style="color: #ffffff;"></i>
+            </div>
+            <div class="logo-text" style="color: #ffffff; font-weight: 800;">
+              VoltEdge<span style="color: #34d399;">Tech</span>
+              <span class="logo-subtitle" style="color: #ffffff; font-weight: 800;">& Accessories</span>
+            </div>
+          </a>
+          <p class="footer-brand-desc" style="color: rgba(255, 255, 255, 0.88); font-weight: 500;">
+            Powering productive workspaces with reliable technology accessories. Laptop power banks, router UPS backups,
+            and ergonomic gear built for modern Nigerian professionals.
+          </p>
+        </div>
+
+        <div>
+          <h4 class="footer-col-title">Quick Links</h4>
+          <ul class="footer-links">
+            <li><a href="../index.html#catalogue" class="footer-link">Products</a></li>
+            <li><a href="../index.html#creator-gear" class="footer-link">Creator Accessories</a></li>
+            <li><a href="../index.html#how-it-works" class="footer-link">How Fulfillment Works</a></li>
+            <li><a href="../index.html#feedback" class="footer-link">Give Feedback</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <h4 class="footer-col-title">Customer Support</h4>
+          <div class="footer-contact-item">
+            <i class="ph-fill ph-whatsapp-logo" style="color: #25D366; font-size: 1.25rem;"></i>
+            <a href="https://wa.me/2347047922403" target="_blank" rel="noopener noreferrer" class="footer-link"
+              style="color: #ffffff; font-weight: 700;">
+              Chat with us on WhatsApp
+            </a>
+          </div>
+          <div class="footer-contact-item">
+            <i class="ph-bold ph-phone" style="color: #ffffff; font-size: 1.15rem;"></i>
+            <span style="color: #ffffff; font-weight: 700;">+234 704 792 2403</span>
+          </div>
+          <div class="footer-contact-item">
+            <i class="ph-bold ph-shield-check" style="color: #ffffff; font-size: 1.15rem;"></i>
+            <span style="color: #ffffff; font-weight: 700;">1-Year Warranty Included</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <div style="color: rgba(255, 255, 255, 0.85); font-weight: 600;">&copy; 2026 VoltEdge Tech & Accessories. All
+          rights reserved.</div>
+        <div style="display: flex; gap: 1.5rem;">
+          <a href="../index.html" class="footer-link" style="color: #ffffff; font-weight: 700;">Return to Home &uarr;</a>
+          <a href="../index.html#catalogue" class="footer-link" style="color: #ffffff; font-weight: 700;">Priced in ₦
+            Naira</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Products Catalog Data -->
+  <script src="../js/products.js"></script>
+
+  <!-- Order Tracking & Confirmation Script -->
+  <script>
+    (function () {
+      const IS_SUBDIR = window.location.pathname.includes('/order-success/');
+
+      // UI State Elements
+      const stateLoading = document.getElementById('state-loading');
+      const stateNotFound = document.getElementById('state-not-found');
+      const stateError = document.getElementById('state-error');
+      const stateSuccess = document.getElementById('state-success-content');
+
+      const notFoundMsg = document.getElementById('not-found-msg');
+      const manualForm = document.getElementById('manual-lookup-form');
+      const manualInput = document.getElementById('manual-order-id');
+
+      function showView(viewName) {
+        if (stateLoading) stateLoading.style.display = viewName === 'loading' ? 'block' : 'none';
+        if (stateNotFound) stateNotFound.style.display = viewName === 'not-found' ? 'block' : 'none';
+        if (stateError) stateError.style.display = viewName === 'error' ? 'block' : 'none';
+        if (stateSuccess) stateSuccess.style.display = viewName === 'success' ? 'block' : 'none';
+      }
+
+      function formatNaira(amount) {
+        if (amount === undefined || amount === null || isNaN(amount)) return '₦0';
+        return '₦' + Number(amount).toLocaleString('en-NG');
+      }
+
+      // Detect dummy/placeholder values originating from mock webhook responses or uninitialized templates
+      function isDummyValue(v) {
+        if (v === undefined || v === null) return true;
+        const s = String(v).trim().toLowerCase();
+        return (
+          s === '' ||
+          s === '—' ||
+          s === '-' ||
+          s === 'null' ||
+          s === 'undefined' ||
+          s === 'customer' ||
+          s === 'actual customer' ||
+          s === 'customer@example.com' ||
+          s === 'example@example.com' ||
+          s === '+234 701 234 5678' ||
+          s === '+2347012345678' ||
+          s === '+234 7012345678' ||
+          s === 'delivery address, lagos' ||
+          s === 'delivery address' ||
+          s === 'call upon arrival'
+        );
+      }
+
+      function pickNonDummy(...vals) {
+        for (const v of vals) {
+          if (v !== undefined && v !== null) {
+            const str = String(v).trim();
+            if (str && !isDummyValue(str)) {
+              return str;
+            }
+          }
+        }
+        return '';
+      }
+
+      function pick(...vals) {
+        // Pass 1: Prioritize genuine, non-dummy customer/order data
+        for (const v of vals) {
+          if (!isDummyValue(v)) {
+            return String(v).trim();
+          }
+        }
+        // Pass 2: Fallback to non-empty string if nothing else is available
+        for (const v of vals) {
+          if (v !== undefined && v !== null && String(v).trim() !== '' && String(v).trim() !== '—') {
+            return String(v).trim();
+          }
+        }
+        return '';
+      }
+
+      function pickNum(...vals) {
+        for (const v of vals) {
+          const n = Number(v);
+          if (!isNaN(n) && n > 0) {
+            return n;
+          }
+        }
+        return 0;
+      }
+
+      // Read query parameters with broad payment gateway support (Bachs, Paystack, etc.)
+      function getQueryParams() {
+        const params = new URLSearchParams(window.location.search);
+        let orderId = params.get('orderId') || params.get('order_id') || params.get('reference') || params.get('trxref') || params.get('checkout_id') || params.get('ref') || params.get('id') || '';
+        let token = params.get('token') || params.get('t') || '';
+
+        // Check hash parameters if present
+        if (!orderId && window.location.hash) {
+          const hashParams = new URLSearchParams(window.location.hash.replace(/^#\/?/, ''));
+          orderId = hashParams.get('orderId') || hashParams.get('order_id') || hashParams.get('reference') || hashParams.get('trxref') || hashParams.get('checkout_id') || hashParams.get('ref') || hashParams.get('id') || '';
+          if (!token) token = hashParams.get('token') || hashParams.get('t') || '';
+        }
+
+        // If not in URL, recover from cached last order in localStorage
+        if (!orderId) {
+          try {
+            const cached = JSON.parse(localStorage.getItem('voltedge_last_order') || '{}');
+            orderId = cached.order_id || cached.orderId || cached.trackingCode || '';
+            if (!token) token = cached.lookup_token || cached.token || '';
+          } catch { }
+        }
+
+        // Check if payment success flag is present from Bachs redirect or return page
+        const isPaidFromUrl = params.get('payment') === 'success' ||
+                              params.get('status') === 'successful' ||
+                              params.get('status') === 'paid' ||
+                              params.get('payment_status') === 'paid' ||
+                              params.get('paid') === 'true' ||
+                              Boolean(params.get('checkout_id') || params.get('checkoutId') || params.get('trxref'));
+
+        if (isPaidFromUrl) {
+          window._voltedge_is_paid_url = true;
+          try {
+            const cached = JSON.parse(localStorage.getItem('voltedge_last_order') || '{}');
+            if (cached && (cached.order_id === orderId || cached.orderId === orderId || !cached.order_id)) {
+              cached.payment_status = 'PAID';
+              cached.order_status = 'Payment Confirmed — Ready to Pack';
+              localStorage.setItem('voltedge_last_order', JSON.stringify(cached));
+            }
+          } catch {}
+        }
+
+        return { orderId: orderId.trim(), token: token.trim(), isPaidFromUrl };
+      }
+
+      // Find cached order matching orderId from localStorage
+      // STRICT: Must match orderId exactly. Never falls back to unrelated orders.
+      function findCachedOrder(orderId) {
+        try {
+          const cleanId = (orderId || '').trim().toLowerCase();
+          if (!cleanId || cleanId === 've-20261029-5826') return null;
+
+          // 1. Check voltedge_last_order ONLY if exact match
+          const last = JSON.parse(localStorage.getItem('voltedge_last_order') || '{}');
+          if (last && typeof last === 'object') {
+            const lId = String(last.order_id || last.orderId || last.trackingCode || '').trim().toLowerCase();
+            if (lId === cleanId && (last.customer_name || last.customerName || (last.customer && last.customer.fullName) || last.fullName)) {
+              return last;
+            }
+          }
+
+          // 2. Check voltedge_orders array ONLY if exact match
+          const list = JSON.parse(localStorage.getItem('voltedge_orders') || '[]');
+          if (Array.isArray(list)) {
+            const found = list.find(o => {
+              if (!o || typeof o !== 'object') return false;
+              const oId = String(o.order_id || o.orderId || o.trackingCode || '').trim().toLowerCase();
+              return oId === cleanId;
+            });
+            if (found && (found.customer_name || found.customerName || (found.customer && found.customer.fullName) || found.fullName)) {
+              return found;
+            }
+          }
+        } catch (e) {
+          console.warn('[VoltEdge] Error reading cached orders:', e);
+        }
+        return null;
+      }
+
+      // Populate full customer and order details in UI
+      function populateOrderUI(order, fallbackId) {
+        if (!order) order = {};
+        const cached = findCachedOrder(fallbackId) || {};
+        const cust = order.customer || cached.customer || {};
+
+        // 1. Order Code & Tracking
+        const orderCode = pick(order.order_id, order.orderId, order.trackingCode, cached.order_id, cached.orderId, fallbackId) || '—';
+        const dispTracking = document.getElementById('disp-tracking-code');
+        if (dispTracking) dispTracking.textContent = orderCode;
+
+        const breadcrumbCurrent = document.getElementById('breadcrumb-current');
+        if (breadcrumbCurrent) breadcrumbCurrent.textContent = `Order ${orderCode}`;
+
+        // Copy button setup
+        const copyBtn = document.getElementById('btn-copy-tracking');
+        const copyBtnText = document.getElementById('copy-btn-text');
+        if (copyBtn) {
+          copyBtn.onclick = function () {
+            navigator.clipboard.writeText(orderCode).then(() => {
+              if (copyBtnText) copyBtnText.textContent = 'Copied!';
+              copyBtn.style.color = '#15803d';
+              copyBtn.style.borderColor = '#15803d';
+              setTimeout(() => {
+                if (copyBtnText) copyBtnText.textContent = 'Copy Code';
+                copyBtn.style.color = '';
+                copyBtn.style.borderColor = '';
+              }, 2500);
+            }).catch(() => {
+              prompt('Copy order tracking reference:', orderCode);
+            });
+          };
+        }
+
+        // 2. Customer Information
+        const custName = pick(
+          order.customer_name,
+          order['Customer Name'],
+          order.customerName,
+          order.fullName,
+          cust.fullName,
+          cust.name,
+          cached.customer_name,
+          cached.customerName,
+          cached.fullName
+        ) || 'Customer';
+
+        const custPhone = pick(
+          order.customer_phone,
+          order['Customer Phone'],
+          order.customerPhone,
+          order.phone,
+          cust.fullPhone,
+          cust.phone,
+          cached.customer_phone,
+          cached.customerPhone
+        ) || '—';
+
+        const custEmail = pick(
+          order.customer_email,
+          order['Customer Email'],
+          order.customerEmail,
+          order.email,
+          cust.email,
+          cached.customer_email,
+          cached.customerEmail
+        ) || '—';
+
+        const custAddr = pick(
+          order.delivery_address,
+          order['Delivery Address'],
+          order.deliveryAddress,
+          order.address,
+          cust.address,
+          cached.delivery_address,
+          cached.deliveryAddress
+        ) || '—';
+
+        const custNotes = pick(
+          order.delivery_notes,
+          order['Delivery Notes'],
+          order.deliveryNotes,
+          order.notes,
+          cust.notes,
+          cached.delivery_notes
+        );
+
+        const elCustName = document.getElementById('disp-customer-name');
+        if (elCustName) elCustName.textContent = custName;
+
+        const elCustPhone = document.getElementById('disp-customer-phone');
+        if (elCustPhone) elCustPhone.textContent = custPhone;
+
+        const elCustEmail = document.getElementById('disp-customer-email');
+        if (elCustEmail) elCustEmail.textContent = custEmail;
+
+        const elCustAddr = document.getElementById('disp-customer-address');
+        if (elCustAddr) elCustAddr.textContent = custAddr;
+
+        const elCustNotes = document.getElementById('disp-customer-notes');
+        if (elCustNotes) elCustNotes.textContent = custNotes ? custNotes : 'None provided';
+
+        // 3. Product & Pricing
+        // If order from backend has mismatched ID or is mock data, prefer the user's cached order items!
+        const orderIdMatches = !order.order_id || !fallbackId || String(order.order_id).trim().toLowerCase() === String(fallbackId).trim().toLowerCase();
+        const isMockPayload = isDummyValue(order.customer_name) || isDummyValue(order.customer_email) || isDummyValue(order.customer_phone);
+        const preferCachedProduct = !orderIdMatches || (isMockPayload && (cached.product_name || cached.product || (cached.items && cached.items[0])));
+
+        const prod = preferCachedProduct
+          ? (cached.product || (cached.items && cached.items[0]) || order.product || {})
+          : (order.product || (order.items && order.items[0]) || cached.product || {});
+
+        let prodSku = preferCachedProduct
+          ? pick(cached.product_sku, cached.product_SKU, cached.sku, prod.sku, order.product_sku)
+          : pick(order.product_sku, order.product_SKU, order['Product SKU'], order.productSku, order.sku, prod.sku, cached.product_sku);
+
+        let prodName = preferCachedProduct
+          ? pick(cached.product_name, cached.productName, prod.name, prod.shortName, order.product_name)
+          : pick(order.product_name, order['Product Name'], order.productName, order.shortName, prod.name, prod.shortName, cached.product_name);
+
+        const prodQty = preferCachedProduct
+          ? (pickNum(cached.quantity, cached.qty, prod.quantity, order.quantity) || 1)
+          : (pickNum(order.quantity, order['Quantity'], order.qty, prod.quantity, cached.quantity) || 1);
+
+        let unitPrice = preferCachedProduct
+          ? pickNum(cached.unit_price, cached.unitPrice, prod.unitPrice, order.unit_price)
+          : pickNum(order.unit_price, order['Unit Price'], order.unitPrice, prod.unitPrice, cached.unit_price);
+
+        let totalPrice = preferCachedProduct
+          ? pickNum(cached.total_price, cached.totalPrice, cached.totalAmount, order.total_price)
+          : pickNum(order.total_price, order['Total Price'], order.totalPrice, order.totalAmount, cached.total_price);
+
+        // Catalog matching
+        let catalogMatch = null;
+        const catalogList = window.PRODUCTS_DATA || (typeof PRODUCTS_DATA !== 'undefined' ? PRODUCTS_DATA : []);
+        if (Array.isArray(catalogList) && catalogList.length) {
+          if (prodSku) {
+            catalogMatch = catalogList.find(p => p.sku && p.sku.toLowerCase() === prodSku.toLowerCase())
+              || catalogList.find(p => p.id && p.id.toLowerCase() === prodSku.toLowerCase());
+          }
+          if (!catalogMatch && prodName) {
+            catalogMatch = catalogList.find(p => p.name && p.name.toLowerCase() === prodName.toLowerCase())
+              || catalogList.find(p => p.shortName && p.shortName.toLowerCase() === prodName.toLowerCase());
+          }
+        }
+
+        if (catalogMatch) {
+          if (!prodName) prodName = catalogMatch.name;
+          if (!prodSku) prodSku = catalogMatch.sku;
+          if (!unitPrice) unitPrice = catalogMatch.price;
+          if (!totalPrice) totalPrice = unitPrice * prodQty;
+        }
+
+        if (!prodSku) prodSku = 'VE-EQUIPMENT';
+        if (!prodName) prodName = 'VoltEdge Hardware';
+
+        // Multi-Product Cart Support: parse products array or products_json if available
+        let orderProducts = [];
+        if (Array.isArray(order.products) && order.products.length > 0) {
+          orderProducts = order.products;
+        } else if (order.products_json && typeof order.products_json === 'string') {
+          try {
+            const parsed = JSON.parse(order.products_json);
+            if (Array.isArray(parsed) && parsed.length > 0) orderProducts = parsed;
+          } catch(e) {}
+        } else if (typeof order.unit_price === 'string' && order.unit_price.trim().startsWith('[')) {
+          try {
+            const parsed = JSON.parse(order.unit_price);
+            if (Array.isArray(parsed) && parsed.length > 0) orderProducts = parsed;
+          } catch(e) {}
+        } else if (Array.isArray(cached.products) && cached.products.length > 0) {
+          orderProducts = cached.products;
+        }
+
+        if (orderProducts.length > 1 && (!totalPrice || totalPrice === 0)) {
+          totalPrice = orderProducts.reduce((sum, p) => {
+            const lTotal = pickNum(p.line_total, p.lineTotal);
+            if (lTotal) return sum + lTotal;
+            const uPrice = pickNum(p.unit_price, p.price, p.unitPrice) || 0;
+            const q = pickNum(p.quantity, p.qty) || 1;
+            return sum + (uPrice * q);
+          }, 0);
+        }
+
+        if (unitPrice === 0 && totalPrice > 0 && prodQty > 0) {
+          unitPrice = Math.round(totalPrice / prodQty);
+        }
+        if (totalPrice === 0 && unitPrice > 0 && prodQty > 0) {
+          totalPrice = unitPrice * prodQty;
+        }
+
+        const itemsContainer = document.getElementById('disp-items-container');
+        if (itemsContainer && orderProducts.length > 1) {
+          itemsContainer.innerHTML = orderProducts.map((p, idx) => {
+            const iSku = pickNonDummy(p.product_sku, p.sku, p.productSku) || 'VE-EQUIPMENT';
+            let iName = pickNonDummy(p.product_name, p.name, p.shortName) || 'VoltEdge Hardware';
+            const iQty = pickNum(p.quantity, p.qty) || 1;
+            let iPrice = pickNum(p.unit_price, p.unitPrice, p.price);
+            let iLineTotal = pickNum(p.line_total, p.lineTotal);
+
+            let catMatch = null;
+            if (Array.isArray(catalogList) && catalogList.length) {
+              catMatch = catalogList.find(c => (c.sku && c.sku.toLowerCase() === iSku.toLowerCase()) || (c.id && c.id.toLowerCase() === iSku.toLowerCase()))
+                      || catalogList.find(c => c.name && c.name.toLowerCase() === iName.toLowerCase())
+                      || catalogList.find(c => c.shortName && c.shortName.toLowerCase() === iName.toLowerCase());
+            }
+
+            if (catMatch) {
+              if (!iName || iName === 'VoltEdge Hardware' || isDummyValue(iName)) iName = catMatch.name;
+              if (!iPrice) iPrice = catMatch.price;
+            }
+            if (!iLineTotal) iLineTotal = (iPrice || 0) * iQty;
+            if (!iPrice && iLineTotal > 0 && iQty > 0) iPrice = Math.round(iLineTotal / iQty);
+
+            let iImg = p.image || (catMatch && catMatch.image) || '';
+            if (!iImg) {
+              iImg = IS_SUBDIR ? '../assets/images/pb-black.jpg' : 'assets/images/pb-black.jpg';
+            } else if (IS_SUBDIR && !iImg.startsWith('http') && !iImg.startsWith('../') && !iImg.startsWith('/')) {
+              iImg = '../' + iImg;
+            }
+
+            const isLast = idx === orderProducts.length - 1;
+            const borderStyle = isLast ? '' : 'border-bottom: 1px dashed rgba(0,0,0,0.09); margin-bottom: 0.85rem; padding-bottom: 0.85rem;';
+
+            return `
+              <div class="item-row" style="display: flex; align-items: center; gap: 0.85rem; ${borderStyle}">
+                <img src="${iImg}" alt="${iName}" style="width: 58px; height: 58px; border-radius: 8px; object-fit: cover; border: 1px solid #e2e8f0; flex-shrink: 0; background: #fff;">
+                <div class="item-meta" style="flex: 1; min-width: 0;">
+                  <div class="item-title" style="font-weight: 700; color: var(--text-main); font-size: 0.95rem; line-height: 1.35; margin-bottom: 0.2rem;">${iName}</div>
+                  <div class="item-sku-qty" style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.25rem;">SKU: ${iSku} • Qty: ${iQty} ${iQty > 1 ? 'units' : 'unit'}</div>
+                  <div class="item-price" style="font-weight: 700; color: var(--primary); font-size: 0.92rem;">${formatNaira(iLineTotal)} <span style="font-size: 0.75rem; font-weight: 400; color: var(--text-muted);">(${formatNaira(iPrice)} ea)</span></div>
+                </div>
+              </div>
+            `;
+          }).join('');
+        }
+
+        const elItemName = document.getElementById('disp-item-name');
+        if (elItemName) elItemName.textContent = prodName;
+
+        const elItemSkuQty = document.getElementById('disp-item-sku-qty');
+        if (elItemSkuQty) elItemSkuQty.textContent = `SKU: ${prodSku} • Qty: ${prodQty} ${prodQty > 1 ? 'units' : 'unit'}`;
+
+        const elItemPrice = document.getElementById('disp-item-price');
+        if (elItemPrice) elItemPrice.textContent = formatNaira(unitPrice);
+
+        const elSubtotal = document.getElementById('disp-subtotal');
+        if (elSubtotal) elSubtotal.textContent = formatNaira(totalPrice);
+
+        const elTotal = document.getElementById('disp-total-amount');
+        if (elTotal) elTotal.textContent = formatNaira(totalPrice);
+
+        // Product image
+        let prodImg = order.image || prod.image || (catalogMatch && catalogMatch.image) || cached.image || '';
+        if (!prodImg) {
+          prodImg = IS_SUBDIR ? '../assets/images/pb-black.jpg' : 'assets/images/pb-black.jpg';
+        } else if (IS_SUBDIR && !prodImg.startsWith('http') && !prodImg.startsWith('../') && !prodImg.startsWith('/')) {
+          prodImg = '../' + prodImg;
+        }
+        const imgEl = document.getElementById('disp-item-img');
+        if (imgEl) {
+          imgEl.src = prodImg;
+          imgEl.alt = prodName;
+        }
+
+        // 4. Order Date
+        const rawDate = pick(
+          order.timestamp,
+          order.TimeStamp,
+          order.Timestamp,
+          order.createdAt,
+          order.orderDate,
+          order.date,
+          cached.timestamp,
+          cached.createdAt
+        );
+
+        const elOrderDate = document.getElementById('disp-order-date');
+        if (elOrderDate) {
+          let dateStr = '';
+          if (rawDate) {
+            try {
+              const d = new Date(rawDate);
+              if (!isNaN(d.getTime())) {
+                dateStr = d.toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' });
+              }
+            } catch { }
+            if (!dateStr || dateStr.toLowerCase().includes('invalid')) {
+              dateStr = rawDate;
+            }
+          }
+          if (!dateStr || dateStr.toLowerCase().includes('invalid')) {
+            dateStr = new Date().toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' });
+          }
+          elOrderDate.textContent = dateStr;
+        }
+
+        // 5. Payment Verification Status (Strict separation: PENDING PAYMENT vs PAYMENT CONFIRMED — READY TO PACK)
+        const orderStatus = String(order.order_status || order.orderStatus || order.status || cached.order_status || '').trim().toLowerCase();
+        const paymentStatus = String(order.payment_status || order.paymentStatus || cached.payment_status || '').trim().toLowerCase();
+        const payStatusEl = document.getElementById('disp-payment-status');
+        const statusPill = document.getElementById('disp-status-pill');
+        const heroDesc = document.getElementById('disp-hero-desc');
+        const bannerTitle = document.querySelector('.email-receipt-title');
+        const bannerDesc = document.querySelector('.email-receipt-desc');
+        const isPaid = (window._voltedge_is_paid_url === true) ||
+                       orderStatus.includes('paid') ||
+                       paymentStatus.includes('paid') ||
+                       paymentStatus.includes('verified') ||
+                       orderStatus.includes('ready to pack') ||
+                       orderStatus.includes('pack');
+
+        if (statusPill) {
+          if (isPaid) {
+            statusPill.className = 'success-status-pill status-paid';
+            statusPill.innerHTML = '<i class="ph-bold ph-package"></i> <span id="disp-status-text">PAYMENT CONFIRMED — READY TO PACK</span>';
+          } else {
+            statusPill.className = 'success-status-pill status-pending';
+            statusPill.innerHTML = '<i class="ph-bold ph-clock"></i> <span id="disp-status-text">ORDER LOGGED — PAYMENT PENDING</span>';
+          }
+        }
+
+        if (heroDesc) {
+          if (isPaid) {
+            heroDesc.textContent = 'Payment received and verified. Our dispatch logistics team is now packing your hardware and verifying logistics.';
+          } else {
+            heroDesc.textContent = 'We have registered your order in our fulfillment wave. Our dispatch logistics team is now packing your hardware and verifying logistics.';
+          }
+        }
+
+        if (payStatusEl) {
+          if (isPaid) {
+            payStatusEl.textContent = 'Payment Confirmed — Ready to Pack';
+            payStatusEl.style.color = '#15803d';
+          } else {
+            payStatusEl.textContent = 'PENDING PAYMENT';
+            payStatusEl.style.color = '#d97706';
+          }
+        }
+
+        if (isPaid) {
+          if (bannerTitle) bannerTitle.textContent = 'Payment Confirmed — Ready to Pack';
+          if (bannerDesc) bannerDesc.textContent = 'Your payment has been successfully confirmed. Our logistics warehouse team is now packing your order for dispatch.';
+        } else {
+          if (bannerTitle) bannerTitle.textContent = 'Order Placed — Payment Pending';
+          if (bannerDesc) bannerDesc.textContent = 'Your order has been registered successfully. Payment status is PENDING PAYMENT. Please check your email for your payment link to complete your payment.';
+        }
+
+        // 6. Fulfillment Wave steps
+        const stepPlaced = document.getElementById('step-placed');
+        const stepWarehouse = document.getElementById('step-warehouse');
+        const stepWarehouseTag = document.getElementById('step-warehouse-tag');
+        const stepDispatch = document.getElementById('step-dispatch');
+        const stepDelivery = document.getElementById('step-delivery');
+
+        const isDelivered = (orderStatus.includes('deliver') && !orderStatus.includes('out for delivery')) || orderStatus.includes('completed');
+        const isDispatched = !isDelivered && (orderStatus.includes('dispatch') || orderStatus.includes('transit') || orderStatus.includes('out for delivery'));
+
+        [stepPlaced, stepWarehouse, stepDispatch, stepDelivery].forEach(s => s && (s.className = 'timeline-step'));
+
+        if (isDelivered) {
+          [stepPlaced, stepWarehouse, stepDispatch, stepDelivery].forEach(s => s && s.classList.add('completed'));
+        } else if (isDispatched) {
+          if (stepPlaced) stepPlaced.classList.add('completed');
+          if (stepWarehouse) stepWarehouse.classList.add('completed');
+          if (stepDispatch) stepDispatch.classList.add('active');
+        } else {
+          if (stepPlaced) stepPlaced.classList.add('completed');
+          if (stepWarehouse) {
+            stepWarehouse.classList.add('active');
+            if (isPaid && stepWarehouseTag) {
+              stepWarehouseTag.textContent = 'Ready to Pack';
+            }
+          }
+        }
+
+        // Continue to Payment button wiring on order-success page
+        const continuePayWrap = document.getElementById('order-continue-payment-wrap');
+        const continuePayBtn = document.getElementById('btn-order-continue-payment');
+        const urlParams = new URLSearchParams(window.location.search);
+        const rawCheckoutUrl = urlParams.get('checkout_url') || order.checkout_url || cached.checkout_url || order.payment_link || cached.payment_link || order['payment Link'] || '';
+
+        let validCheckout = false;
+        if (typeof rawCheckoutUrl === 'string' && rawCheckoutUrl.trim()) {
+          try {
+            const pUrl = new URL(rawCheckoutUrl);
+            validCheckout = (pUrl.protocol === 'https:' && pUrl.hostname.length > 0);
+          } catch {
+            validCheckout = false;
+          }
+        }
+
+        if (continuePayWrap && continuePayBtn) {
+          if (validCheckout && !isPaid) {
+            continuePayWrap.style.display = 'block';
+            continuePayBtn.onclick = function() {
+              window.open(rawCheckoutUrl, '_blank', 'noopener,noreferrer');
+            };
+          } else {
+            continuePayWrap.style.display = 'none';
+          }
+        }
+
+        // 7. WhatsApp Follow-up Button
+        const waBtn = document.getElementById('btn-wa-followup');
+        if (waBtn) {
+          const waMsg = encodeURIComponent(
+            `Hello VoltEdge Team, I am following up on my order ${orderCode} (${prodQty}x ${prodName}) for ${custName}.`
+          );
+          waBtn.href = `https://wa.me/2347047922403?text=${waMsg}`;
+        }
+      }
+
+      // Background non-blocking sync with secure backend API endpoint
+      async function syncWebhookInBackground(orderId, token) {
+        if (!orderId) return;
+        const endpoint = `/api/voltedge-order-details?orderId=${encodeURIComponent(orderId)}${token ? '&token=' + encodeURIComponent(token) : ''}`;
+
+        try {
+          const controller = new AbortController();
+          const timer = setTimeout(() => controller.abort(), 35000);
+          const res = await fetch(endpoint, { method: 'GET', headers: { 'Accept': 'application/json' }, signal: controller.signal });
+          clearTimeout(timer);
+
+          if (res.status === 429) {
+            console.warn('[VoltEdge] Order details query rate-limited (HTTP 429). Will retry after cooldown.');
+            return;
+          }
+
+          if (res.ok) {
+            const result = await res.json();
+            // Required: If webhook returns { success: true, order: { ... } }, read order properties from result.order
+            const orderData = (result && result.order) ? result.order : (result && result.success && result.data ? result.data : result);
+            if (orderData && typeof orderData === 'object') {
+              const returnedId = String(orderData.order_id || orderData.orderId || orderData.trackingCode || '').trim();
+              const currentId = String(orderId || '').trim();
+
+              // 1. Strict Order ID Matching: If the backend returned an order ID that doesn't match the current page,
+              // it is a mock/mismatched payload from the webhook. Do not corrupt the customer's page.
+              if (returnedId && currentId && returnedId.toLowerCase() !== currentId.toLowerCase()) {
+                console.warn(`[VoltEdge] Backend returned order ID "${returnedId}" which does not match requested "${currentId}". Ignoring mismatched payload.`);
+                return;
+              }
+
+              // 2. Safe merge with customer cache: Never let dummy/mock data overwrite real customer details
+              const cached = findCachedOrder(orderId) || {};
+              const isMock = isDummyValue(orderData.customer_name) || isDummyValue(orderData.customer_email) || isDummyValue(orderData.customer_phone);
+
+              const merged = { ...cached, ...orderData };
+              // If mock test data was returned, strictly preserve the user's actual customer and item info from cache
+              if (isMock && cached.customer_name) {
+                merged.customer_name = cached.customer_name;
+                merged.customer_phone = cached.customer_phone || cached.phone;
+                merged.customer_email = cached.customer_email || cached.email;
+                merged.delivery_address = cached.delivery_address || cached.address;
+                merged.delivery_notes = cached.delivery_notes || cached.notes;
+                merged.product_name = cached.product_name;
+                merged.product_sku = cached.product_sku;
+                merged.quantity = cached.quantity;
+                merged.total_price = cached.total_price || cached.totalAmount;
+                merged.unit_price = cached.unit_price;
+              }
+
+              console.log('[VoltEdge] Successfully synced order status from backend:', merged);
+              populateOrderUI(merged, orderId);
+              return;
+            }
+          }
+        } catch (e) {
+          // Silently continue or leave cached data intact
+        }
+      }
+
+      async function initializePage() {
+        const { orderId, token } = getQueryParams();
+
+        if (!orderId || orderId.toLowerCase() === 've-20261029-5826') {
+          if (notFoundMsg) {
+            notFoundMsg.textContent = 'No valid order reference ID was provided in the URL. Please verify your tracking link or search your order code below.';
+          }
+          showView('not-found');
+          return;
+        }
+
+        // 1. Show loading view while querying backend
+        showView('loading');
+
+        // 2. Query authoritative backend endpoint
+        try {
+          const endpoint = `/api/voltedge-order-details?orderId=${encodeURIComponent(orderId)}${token ? '&token=' + encodeURIComponent(token) : ''}`;
+          const controller = new AbortController();
+          const timer = setTimeout(() => controller.abort(), 35000);
+          const res = await fetch(endpoint, {
+            method: 'GET',
+            headers: { 'Accept': 'application/json' },
+            signal: controller.signal
+          });
+          clearTimeout(timer);
+
+          if (res.status === 403) {
+            if (notFoundMsg) {
+              notFoundMsg.textContent = 'Security token verification failed for this order. Please use the secure link provided in your order email.';
+            }
+            showView('not-found');
+            return;
+          }
+
+          if (res.ok) {
+            const result = await res.json();
+            const orderData = (result && result.order) ? result.order : (result && result.data ? result.data : result);
+            if (orderData && typeof orderData === 'object') {
+              const returnedId = String(orderData.order_id || orderData.orderId || orderData.trackingCode || '').trim();
+              if (returnedId && returnedId.toLowerCase() === orderId.toLowerCase() && returnedId.toLowerCase() !== 've-20261029-5826') {
+                try {
+                  populateOrderUI(orderData, orderId);
+                } catch(renderErr) {
+                  console.error('[VoltEdge] Error rendering order UI:', renderErr);
+                }
+                showView('success');
+                return;
+              }
+            }
+          }
+        } catch (err) {
+          console.warn('[VoltEdge Order Success] Backend lookup network error:', err.message);
+        }
+
+        // 3. Fallback ONLY to an exact match in local cache for offline/transient checkout flow
+        const cached = findCachedOrder(orderId);
+        if (cached && String(cached.order_id || cached.orderId || '').trim().toLowerCase() === orderId.toLowerCase()) {
+          try {
+            populateOrderUI(cached, orderId);
+          } catch(renderErr) {
+            console.error('[VoltEdge] Error rendering cached order UI:', renderErr);
+          }
+          showView('success');
+          return;
+        }
+
+        // 4. If neither backend nor local exact cache matches, display not found
+        if (notFoundMsg) {
+          notFoundMsg.textContent = `No order record matching reference "${orderId}" could be found. Please check your code or contact support.`;
+        }
+        showView('not-found');
+      }
+
+      // Event Handlers
+      if (manualForm && manualInput) {
+        manualForm.addEventListener('submit', function (e) {
+          e.preventDefault();
+          const enteredId = manualInput.value.trim();
+          if (enteredId) {
+            const newUrl = new URL(window.location.href);
+            newUrl.searchParams.set('orderId', enteredId);
+            window.location.href = newUrl.toString();
+          }
+        });
+      }
+
+      // Run on DOM ready
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initializePage);
+      } else {
+        initializePage();
+      }
+    })();
+  </script>
+</body>
+
 </html>

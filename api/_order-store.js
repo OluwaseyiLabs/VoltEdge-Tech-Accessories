@@ -91,6 +91,24 @@ function normalizeOrderRecord(data) {
         });
       }
     } catch {}
+  } else if (typeof data.unit_price === 'string' && data.unit_price.trim().startsWith('[')) {
+    try {
+      const parsed = JSON.parse(data.unit_price);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        products = parsed.map(p => {
+          const uPrice = Number(p.unit_price || p.unitPrice || p.price || 0);
+          const qty = Number(p.quantity || p.qty || 1);
+          const lTotal = Number(p.line_total || p.lineTotal || (uPrice * qty));
+          return {
+            product_sku: String(p.product_sku || p.productSku || p.sku || 'VE-EQUIPMENT').trim(),
+            product_name: String(p.product_name || p.productName || p.name || 'VoltEdge Hardware').trim(),
+            unit_price: uPrice,
+            quantity: qty,
+            line_total: lTotal
+          };
+        });
+      }
+    } catch {}
   }
 
   if (products.length > 0) {
@@ -132,7 +150,8 @@ function normalizeOrderRecord(data) {
 
   const orderStatus = String(data.order_status || data.orderStatus || data.status || 'PENDING_PAYMENT').trim();
   const paymentStatus = String(data.payment_status || data.paymentStatus || 'PENDING').trim();
-  const paymentLink = String(data.payment_link || data.paymentLink || '').trim();
+  const checkoutUrl = String(data.checkout_url || data.payment_link || data.paymentLink || '').trim();
+  const paymentLink = checkoutUrl;
   const image = String(data.image || prod.image || '').trim();
   const createdAt = data.createdAt || data.timestamp || data.orderDate || new Date().toISOString();
 
@@ -156,6 +175,7 @@ function normalizeOrderRecord(data) {
     currency: 'NGN',
     order_status: orderStatus,
     payment_status: paymentStatus,
+    checkout_url: checkoutUrl,
     payment_link: paymentLink,
     image: image,
     created_at: createdAt,
@@ -298,7 +318,13 @@ async function updateOrderStatus(orderId, updateData) {
   if (updateData.payment_status) existing.payment_status = updateData.payment_status;
   if (updateData.order_status) existing.order_status = updateData.order_status;
   if (updateData.transaction_id) existing.transaction_id = updateData.transaction_id;
-  if (updateData.payment_link) existing.payment_link = updateData.payment_link;
+  if (updateData.checkout_url) {
+    existing.checkout_url = updateData.checkout_url;
+    existing.payment_link = updateData.checkout_url;
+  } else if (updateData.payment_link) {
+    existing.payment_link = updateData.payment_link;
+    if (!existing.checkout_url) existing.checkout_url = updateData.payment_link;
+  }
   existing.updated_at = new Date().toISOString();
 
   orderStore.set(key, existing);
@@ -315,6 +341,24 @@ async function updateOrderStatus(orderId, updateData) {
         },
         body: JSON.stringify(existing)
       });
+    } catch {}
+  } else if (typeof data.unit_price === 'string' && data.unit_price.trim().startsWith('[')) {
+    try {
+      const parsed = JSON.parse(data.unit_price);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        products = parsed.map(p => {
+          const uPrice = Number(p.unit_price || p.unitPrice || p.price || 0);
+          const qty = Number(p.quantity || p.qty || 1);
+          const lTotal = Number(p.line_total || p.lineTotal || (uPrice * qty));
+          return {
+            product_sku: String(p.product_sku || p.productSku || p.sku || 'VE-EQUIPMENT').trim(),
+            product_name: String(p.product_name || p.productName || p.name || 'VoltEdge Hardware').trim(),
+            unit_price: uPrice,
+            quantity: qty,
+            line_total: lTotal
+          };
+        });
+      }
     } catch {}
   }
 

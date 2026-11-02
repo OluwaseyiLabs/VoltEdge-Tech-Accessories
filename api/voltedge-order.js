@@ -334,10 +334,36 @@ module.exports = async function handler(req, res) {
       const msgStr = String((data && (data.message || data.error)) || '').toLowerCase();
       const isWorkflowError = msgStr.includes('workflow') || msgStr.includes('error in');
 
-      if (!response.ok || isWorkflowError) {
+      // Canonical check for payment-ready order (Scenario A: HTTP 200, Scenario B: HTTP 502 email-failure with order saved & valid checkout_url)
+      const hasValidCheckoutUrl = data &&
+        typeof data.checkout_url === 'string' &&
+        data.checkout_url.trim().startsWith('https://');
+
+      const isOrderSavedAndPaymentReady = data &&
+        data.order_saved === true &&
+        data.payment_link_generated === true &&
+        hasValidCheckoutUrl;
+
+      if (isOrderSavedAndPaymentReady) {
+        if (orderId) {
+          recordOrderResponse(orderId, data);
+          try {
+            await updateOrderStatus(orderId, {
+              checkout_url: data.checkout_url,
+              order_status: data.order_status || 'PENDING_PAYMENT'
+            });
+          } catch (updateErr) {
+            console.warn('[VoltEdge Order API] Could not update order status store:', updateErr.message);
+          }
+        }
+        // Preserve response status (200 for Scenario A, 502 for Scenario B) and deliver verified JSON to frontend
+        return res.status(response.status).json(data);
+      }
+
+      if (!response.ok || isWorkflowError || (data && data.success === false)) {
         if (orderId) {
           clearIdempotency(orderId);
-          // Release stock reservation on failed n8n processing
+          // Release stock reservation on failed n8n processing or payment-link generation failure
           if (supabaseUrl && supabaseKey) {
             fetch(`${supabaseUrl}/rest/v1/rpc/release_reservation`, {
               method: 'POST',
@@ -346,6 +372,12 @@ module.exports = async function handler(req, res) {
             }).catch(() => {});
           }
         }
+
+        // Pass through structured error from n8n (e.g. Scenario C payment link failure, Scenario D invalid order)
+        if (data && typeof data === 'object' && (data.message || data.payment_link_generated === false || data.error)) {
+          return res.status(response.ok ? 502 : response.status).json(data);
+        }
+
         return res.status(response.ok ? 502 : response.status).json({
           success: false,
           error: 'OrderProcessingError',
@@ -356,9 +388,9 @@ module.exports = async function handler(req, res) {
       if (response.ok && orderId) {
         recordOrderResponse(orderId, data);
         if (data && typeof data === 'object') {
-          const paymentLink = data.payment_link || data.paymentLink || data.checkout_url || data.url || '';
+          const paymentLink = data.checkout_url || data.payment_link || data.paymentLink || data.url || '';
           if (paymentLink) {
-            await updateOrderStatus(orderId, { payment_link: paymentLink });
+            await updateOrderStatus(orderId, { checkout_url: paymentLink, payment_link: paymentLink });
           }
         }
       }

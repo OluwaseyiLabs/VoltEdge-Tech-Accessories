@@ -734,15 +734,16 @@
 
         // Backend confirmed order!
         const finalOrderId = data.orderId || data.order_id || trackingCode;
-        const finalPaymentLink = data.payment_link || data.paymentLink || data.checkout_url || '';
+        const finalCheckoutUrl = data.checkout_url || data.payment_link || data.paymentLink || '';
 
         // Save order locally for quick lookup / confirmation
         const confirmedOrder = {
           ...orderDetails,
           order_id: finalOrderId,
           orderId: finalOrderId,
-          payment_link: finalPaymentLink,
-          payment_link_sent: true,
+          checkout_url: finalCheckoutUrl,
+          payment_link: finalCheckoutUrl,
+          payment_link_sent: data.email_sent !== false,
           order_status: 'PENDING_PAYMENT'
         };
         try {
@@ -778,15 +779,17 @@
           if (confCustomerPhone) confCustomerPhone.textContent = fullPhone;
           if (confCustomerAddress) confCustomerAddress.textContent = `${address}, ${state}`;
 
-          const statusUrl = `order-success.html?orderId=${encodeURIComponent(finalOrderId)}&token=${encodeURIComponent(lookupToken)}`;
+          const statusUrl = `order-success.html?orderId=${encodeURIComponent(finalOrderId)}&token=${encodeURIComponent(lookupToken)}&checkout_url=${encodeURIComponent(finalCheckoutUrl)}`;
           if (modalViewLink) {
             modalViewLink.href = statusUrl;
             modalViewLink.innerHTML = '<i class="ph-bold ph-arrow-square-out"></i> View Full Order Status';
           }
 
           if (directPayWrap && directPayBtn) {
-            if (finalPaymentLink) {
-              directPayBtn.href = finalPaymentLink;
+            if (finalCheckoutUrl && typeof finalCheckoutUrl === 'string' && finalCheckoutUrl.startsWith('https://')) {
+              directPayBtn.href = finalCheckoutUrl;
+              directPayBtn.innerHTML = '<i class="ph-bold ph-credit-card"></i> <span>Continue to Payment</span> <i class="ph-bold ph-arrow-square-out"></i>';
+              directPayBtn.style.background = '#064E3B';
               directPayWrap.style.display = 'block';
             } else {
               directPayWrap.style.display = 'none';
@@ -795,7 +798,7 @@
 
           successModal.classList.add('active');
         } else {
-          window.location.href = `order-success.html?orderId=${encodeURIComponent(finalOrderId)}&token=${encodeURIComponent(lookupToken)}`;
+          window.location.href = `order-success.html?orderId=${encodeURIComponent(finalOrderId)}&token=${encodeURIComponent(lookupToken)}&checkout_url=${encodeURIComponent(finalCheckoutUrl)}`;
         }
       } catch (err) {
         console.error('[VoltEdge Cart] Order submission error:', err);
